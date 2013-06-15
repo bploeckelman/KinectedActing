@@ -1,0 +1,16 @@
+Build/
+*.bsc
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exe
+*.suo
+*.user
+*.ncb
+*.aps
+*.tmp
+*.log
+*.sdf
+*.opensdf
+
