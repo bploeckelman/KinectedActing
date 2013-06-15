@@ -7,11 +7,31 @@
     <Filter Include="Kinect">
       <UniqueIdentifier>{cad5950a-16b1-4563-a045-bb1aa4586bfc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Windows">
+      <UniqueIdentifier>{495fb933-4676-4212-aa8a-597d2a553226}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Windows\GLWindow.cpp">
+      <Filter>Core\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Windows\GUIWindow.cpp">
+      <Filter>Core\Windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Windows\GLWindow.h">
+      <Filter>Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Windows\GUIWindow.h">
+      <Filter>Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Windows\Window.h">
+      <Filter>Core\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.md" />

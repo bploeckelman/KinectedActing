@@ -56,7 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GLM);$(SFML)\include;$(SFGUI)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GLM);$(SFML)\include;$(SFGUI)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -74,7 +74,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GLM);$(SFML)\include;$(SFGUI)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GLM);$(SFML)\include;$(SFGUI)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -87,6 +87,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="Core\Windows\GLWindow.cpp" />
+    <ClCompile Include="Core\Windows\GUIWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Windows\GLWindow.h" />
+    <ClInclude Include="Core\Windows\GUIWindow.h" />
+    <ClInclude Include="Core\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
