@@ -4,8 +4,6 @@
 
 #include <iostream>
 
-extern bool quit;
-
 
 GLWindow::GLWindow(const std::string& title)
 	: Window(title)
@@ -24,7 +22,7 @@ void GLWindow::update() {
 	sf::Event event;
 	while (window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed) {
-			quit = true;
+			window.close();
 			break;
 		}
 		if (event.type == sf::Event::MouseButtonPressed) {

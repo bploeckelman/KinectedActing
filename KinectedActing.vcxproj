@@ -86,11 +86,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\Main.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\App.h" />
     <ClInclude Include="Core\Windows\GLWindow.h" />
     <ClInclude Include="Core\Windows\GUIWindow.h" />
     <ClInclude Include="Core\Windows\Window.h" />

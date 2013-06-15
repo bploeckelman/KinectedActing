@@ -21,6 +21,9 @@
     <ClCompile Include="Core\Windows\GUIWindow.cpp">
       <Filter>Core\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="Core\App.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -31,6 +34,9 @@
     </ClInclude>
     <ClInclude Include="Core\Windows\Window.h">
       <Filter>Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\App.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
