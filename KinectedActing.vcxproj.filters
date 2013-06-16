@@ -13,6 +13,9 @@
     <Filter Include="Core\GUI">
       <UniqueIdentifier>{73f74f21-904d-4a3e-a181-8b16c849b06d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{13f4b320-9eee-448b-a91a-e3c8165d5f24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -30,6 +33,9 @@
     <ClCompile Include="Core\GUI\UserInterface.cpp">
       <Filter>Core\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Util\RenderUtils.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -46,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="Core\GUI\UserInterface.h">
       <Filter>Core\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\RenderUtils.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 #include "Window.h"
-#include "../GUI/UserInterface.h"
+#include "Core/GUI/UserInterface.h"
 
 #include <string>
 
