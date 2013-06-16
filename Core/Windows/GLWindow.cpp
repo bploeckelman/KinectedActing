@@ -10,16 +10,16 @@
 
 #include <iostream>
 
-const int color_bits      = 32;
-const int depth_bits      = 24;
-const int stencil_bits    = 8;
-const int antialias_level = 2;
-const int framerate_limit = 60;
-const int initial_pos_x   = 260;
-const int initial_pos_y   = 5;
+static const int color_bits      = 32;
+static const int depth_bits      = 24;
+static const int stencil_bits    = 8;
+static const int antialias_level = 2;
+static const int framerate_limit = 60;
+static const int initial_pos_x   = 260;
+static const int initial_pos_y   = 5;
 
-glm::mat4 projection_mat;
-glm::mat4 modelview_mat;
+static glm::mat4 projection_mat;
+static glm::mat4 modelview_mat;
 
 
 GLWindow::GLWindow(const std::string& title)

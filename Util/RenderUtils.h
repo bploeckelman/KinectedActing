@@ -9,8 +9,8 @@
 
 namespace Render
 {
-	// Initialize textures and such
-	//void init();
+	// Initialize buffers, textures, etc...
+	void init();
 
 	// Draw a basic cube at the specified position with the specified scale
 	void cube(const glm::vec3& position=glm::vec3(0,0,0)

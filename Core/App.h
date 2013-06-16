@@ -1,4 +1,6 @@
 #pragma once
+#include <GL/glew.h>
+
 #include "Windows/GLWindow.h"
 #include "Windows/GUIWindow.h"
 

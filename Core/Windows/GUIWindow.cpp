@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-const int window_width    = 256;
-const int height_offset   = 50;
-const int color_depth     = 32;
-const int framerate_limit = 30;
-const int initial_pos_x   = 2;
-const int initial_pos_y   = 5;
-const sf::Uint32 style    = sf::Style::None;
+static const int window_width    = 256;
+static const int height_offset   = 50;
+static const int color_depth     = 32;
+static const int framerate_limit = 30;
+static const int initial_pos_x   = 2;
+static const int initial_pos_y   = 5;
+static const sf::Uint32 style    = sf::Style::None;
 
 
 GUIWindow::GUIWindow(const std::string& title)

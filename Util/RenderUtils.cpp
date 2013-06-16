@@ -9,61 +9,53 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <GL/glew.h>
+
 #include <SFML/OpenGL.hpp>
-#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics.hpp>
+
 
 using glm::vec3;
 using glm::vec4;
 using glm::value_ptr;
 
 //sf::Texture texture;
+const float n = -0.5f;
+const float p =  0.5f;
+const float cube_verts[] = {
+	// vert1         vert2            vert3            vert4 
+	p, p, p, 1.f,    n, p, p, 1.f,    n, n, p, 1.f,    p, n, p, 1.f, // face 1
+	p, p, n, 1.f,    p, n, n, 1.f,    n, n, n, 1.f,    n, p, n, 1.f, // face 2
+	p, p, p, 1.f,    p, p, n, 1.f,    n, p, n, 1.f,    n, p, p, 1.f, // face 3
+
+	p, n, p, 1.f,    n, n, p, 1.f,    n, n, n, 1.f,    p, n, n, 1.f, // face 4
+	p, p, p, 1.f,    p, n, p, 1.f,    p, n, n, 1.f,    p, p, n, 1.f, // face 5
+	n, p, p, 1.f,    n, p, n, 1.f,    n, n, n, 1.f,    n, n, p, 1.f  // face 6
+};
+GLuint cube_buffer_obj;
 
 
-//void Render::init()
-//{
-//	texture.loadFromImage(GetImage("grid.png"));
-//}
+void Render::init()
+{
+	//texture.loadFromImage(GetImage("grid.png"));
+
+	glGenBuffers(1, &cube_buffer_obj);
+	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts), &cube_verts, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
 void Render::cube( const vec3& position, const float scale )
 {
 	glPushMatrix();
 	glTranslated(position.x, position.y, position.z);
+	glScalef(scale, scale, scale);
 
-	const float nl = -0.5f * scale;
-	const float pl =  0.5f * scale;
-
-	glBegin(GL_QUADS);
-		glNormal3d( 0,0,1);
-			glVertex3d(pl,pl,pl);
-			glVertex3d(nl,pl,pl);
-			glVertex3d(nl,nl,pl);
-			glVertex3d(pl,nl,pl);
-		glNormal3d( 0, 0, -1);
-			glVertex3d(pl,pl,nl);
-			glVertex3d(pl,nl,nl);
-			glVertex3d(nl,nl,nl);
-			glVertex3d(nl,pl,nl);
-		glNormal3d( 0, 1, 0);
-			glVertex3d(pl,pl,pl);
-			glVertex3d(pl,pl,nl);
-			glVertex3d(nl,pl,nl);
-			glVertex3d(nl,pl,pl);
-		glNormal3d( 0,-1,0);
-			glVertex3d(pl,nl,pl);
-			glVertex3d(nl,nl,pl);
-			glVertex3d(nl,nl,nl);
-			glVertex3d(pl,nl,nl);
-		glNormal3d( 1,0,0);
-			glVertex3d(pl,pl,pl);
-			glVertex3d(pl,nl,pl);
-			glVertex3d(pl,nl,nl);
-			glVertex3d(pl,pl,nl);
-		glNormal3d(-1,0,0);
-			glVertex3d(nl,pl,pl);
-			glVertex3d(nl,pl,nl);
-			glVertex3d(nl,nl,nl);
-			glVertex3d(nl,nl,pl);
-	glEnd();
+	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glDrawArrays(GL_QUADS, 0, 24);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 	glPopMatrix(); 
 

@@ -1,11 +1,26 @@
 #include "App.h"
+#include "Util/RenderUtils.h"
+
+#include <iostream>
 
 
 App::App()
 	: done(false)
 	, guiWindow("GUI")
 	, glWindow("OpenGL Window")
-{}
+{
+	// Initialize glew
+	GLenum result = glewInit();
+	if (GLEW_OK == result) {
+		std::cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
+	} else {
+		std::cerr << "Failed to initialize glew.\n"
+	              << "Reason: " << glewGetErrorString(result) << "\n";
+	}
+
+	// Initialize render utilities
+	Render::init();
+}
 
 App::~App()
 {}

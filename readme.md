@@ -10,4 +10,5 @@ Requires the following dependencies and associated environment variables to be s
 	<li>SFML 2.0   - $(SFML)</li> 
 	<li>SFGUI      - $(SFGUI)</li> 
 	<li>GLM        - $(GLM)</li> 
+	<li>GLEW       - $(GLEW)</li>
 </ul>
