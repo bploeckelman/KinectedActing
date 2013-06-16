@@ -23,7 +23,9 @@ App::App()
 }
 
 App::~App()
-{}
+{
+	Render::cleanup();
+}
 
 void App::run()
 {

@@ -45,6 +45,11 @@ void Render::init()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Render::cleanup()
+{
+	glDeleteBuffers(1, &cube_buffer_obj);
+}
+
 void Render::cube( const vec3& position, const float scale )
 {
 	glPushMatrix();
@@ -54,7 +59,10 @@ void Render::cube( const vec3& position, const float scale )
 	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glDrawArrays(GL_QUADS, 0, 24);
+
+	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 	glPopMatrix(); 
