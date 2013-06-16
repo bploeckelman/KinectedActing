@@ -10,6 +10,7 @@ public:
 	Window(const std::string& title) : title(title), videoMode(), window() {};
 	virtual ~Window() {};
 
+	virtual void init() = 0;
 	virtual void update() = 0;
 	virtual void render() = 0;
 

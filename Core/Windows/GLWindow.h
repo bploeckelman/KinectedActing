@@ -10,7 +10,8 @@ public:
 	GLWindow(const std::string& title);
 	virtual ~GLWindow();
 
+	void init();
 	void update();
 	void render();
-	
+
 };
