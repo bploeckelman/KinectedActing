@@ -16,6 +16,9 @@
     <Filter Include="Util">
       <UniqueIdentifier>{13f4b320-9eee-448b-a91a-e3c8165d5f24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{1908a58f-0073-458a-862e-c93908b5bf45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -34,6 +37,9 @@
       <Filter>Core\GUI</Filter>
     </ClCompile>
     <ClCompile Include="Util\RenderUtils.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\GLUtils.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,9 +62,18 @@
     <ClInclude Include="Util\RenderUtils.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Util\GLUtils.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.md" />
     <None Include=".gitignore" />
+    <None Include="Shaders\default.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\default.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

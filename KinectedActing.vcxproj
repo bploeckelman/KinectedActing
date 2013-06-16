@@ -91,6 +91,7 @@
     <ClCompile Include="Core\Main.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
+    <ClCompile Include="Util\GLUtils.cpp" />
     <ClCompile Include="Util\RenderUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -99,11 +100,14 @@
     <ClInclude Include="Core\Windows\GLWindow.h" />
     <ClInclude Include="Core\Windows\GUIWindow.h" />
     <ClInclude Include="Core\Windows\Window.h" />
+    <ClInclude Include="Util\GLUtils.h" />
     <ClInclude Include="Util\RenderUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="readme.md" />
+    <None Include="Shaders\default.frag" />
+    <None Include="Shaders\default.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

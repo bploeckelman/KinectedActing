@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Util/GLUtils.h"
 #include "Util/RenderUtils.h"
 
 #include <iostream>
@@ -18,12 +19,16 @@ App::App()
 	              << "Reason: " << glewGetErrorString(result) << "\n";
 	}
 
+	// Initialize OpenGL utilities
+	GLUtils::init();
+
 	// Initialize render utilities
 	Render::init();
 }
 
 App::~App()
 {
+	GLUtils::cleanup();
 	Render::cleanup();
 }
 

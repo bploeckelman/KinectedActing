@@ -4,6 +4,7 @@
 /* A namespace containing functions for rendering various things 
 /************************************************************************/
 #include "RenderUtils.h"
+#include "GLUtils.h"
 //#include "ImageManager.h"
 
 #include <glm/glm.hpp>
@@ -56,6 +57,8 @@ void Render::cube( const vec3& position, const float scale )
 	glTranslated(position.x, position.y, position.z);
 	glScalef(scale, scale, scale);
 
+	glUseProgram(GLUtils::defaultProgram);
+
 	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -64,6 +67,7 @@ void Render::cube( const vec3& position, const float scale )
 
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glUseProgram(0);
 	
 	glPopMatrix(); 
 
