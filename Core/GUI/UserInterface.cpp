@@ -9,7 +9,7 @@ GUI::GUI(sf::RenderWindow& renderWindow)
 	, desktop()
 	, window(sfg::Window::Create())
 	, fixed(sfg::Fixed::Create())
-	, button(sfg::Button::Create("Quit"))
+	, quitButton(sfg::Button::Create("Quit"))
 {}
 
 GUI::~GUI()
@@ -41,7 +41,7 @@ void GUI::handleEvent(const sf::Event& event)
 void GUI::layoutWidgets()
 {
 	fixed->SetRequisition(sf::Vector2f(renderWindow.getSize()));
-	fixed->Put(button, sf::Vector2f(0, 0));
+	fixed->Put(quitButton, sf::Vector2f(0, 0));
 	window->SetTitle("Kinected Acting");
 	window->Add(fixed);
 	desktop.Add(window);
@@ -49,11 +49,10 @@ void GUI::layoutWidgets()
 
 void GUI::connectSignals()
 {
-	button->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onButtonClick, this);
+	quitButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onQuitButtonClick, this);
 }
 
-void GUI::onButtonClick()
+void GUI::onQuitButtonClick()
 {
-	std::cout << "GUI button clicked\n";
 	renderWindow.close();
 }

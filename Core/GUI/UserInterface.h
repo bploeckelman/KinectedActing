@@ -21,7 +21,7 @@ private:
 	void connectSignals();
 
 	// Signal methods -----------------
-	void onButtonClick();
+	void onQuitButtonClick();
 
 private:
 	sf::RenderWindow& renderWindow;
@@ -31,6 +31,6 @@ private:
 	sfg::Window::Ptr window;
 
 	sfg::Fixed::Ptr fixed;
-	sfg::Button::Ptr button;
+	sfg::Button::Ptr quitButton;
 
 };
