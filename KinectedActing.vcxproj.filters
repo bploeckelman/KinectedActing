@@ -10,6 +10,9 @@
     <Filter Include="Core\Windows">
       <UniqueIdentifier>{495fb933-4676-4212-aa8a-597d2a553226}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\GUI">
+      <UniqueIdentifier>{73f74f21-904d-4a3e-a181-8b16c849b06d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -24,6 +27,9 @@
     <ClCompile Include="Core\App.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\GUI\UserInterface.cpp">
+      <Filter>Core\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -37,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="Core\App.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GUI\UserInterface.h">
+      <Filter>Core\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

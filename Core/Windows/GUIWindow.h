@@ -1,7 +1,6 @@
 #pragma once
 #include "Window.h"
-
-#include <SFGUI/SFGUI.hpp>
+#include "../GUI/UserInterface.h"
 
 #include <string>
 
@@ -16,16 +15,6 @@ public:
 	void render();
 
 private:
-	// TODO : extract to a gui class
-	void onButtonClick();
-
-private:
-	// TODO : extract to a gui class
-	sfg::SFGUI sfgui;
-	sfg::Desktop desktop;
-	sfg::Box::Ptr box;
-	sfg::Fixed::Ptr fixed;
-	sfg::Window::Ptr gui;
-	sfg::Button::Ptr button;
+	GUI gui;
 	
 };
