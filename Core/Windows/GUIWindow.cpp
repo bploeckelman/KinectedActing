@@ -2,15 +2,25 @@
 
 #include <iostream>
 
+const int window_width    = 256;
+const int height_offset   = 50;
+const int color_depth     = 32;
+const int framerate_limit = 30;
+const int initial_pos_x   = 2;
+const int initial_pos_y   = 5;
+const sf::Uint32 style    = sf::Style::None;
+
 
 GUIWindow::GUIWindow(const std::string& title)
 	: Window(title)
 	, gui(window)
 {
-	videoMode = sf::VideoMode(256, sf::VideoMode::getDesktopMode().height - 50, 32);
-	window.create(videoMode, title, sf::Style::None);
-	window.setFramerateLimit(30);
-	window.setPosition(sf::Vector2i(2, 5));
+	videoMode = sf::VideoMode(window_width
+	                        , sf::VideoMode::getDesktopMode().height - height_offset
+							, color_depth);
+	window.create(videoMode, title, style);
+	window.setFramerateLimit(framerate_limit);
+	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
 
 	gui.initialize();
 }
