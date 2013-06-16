@@ -17,7 +17,8 @@ using namespace std;
 
 
 GLuint GLUtils::defaultProgram;
-
+GLint GLUtils::projectionMatUniformLoc;
+GLint GLUtils::modelviewMatUniformLoc;
 
 void GLUtils::init()
 {
@@ -28,6 +29,10 @@ void GLUtils::init()
 
 	cout << "Creating shader program...\n";
 	defaultProgram = createProgram(shaderList);
+
+	cout << "Getting uniform locations...\n";
+	projectionMatUniformLoc = glGetUniformLocation(GLUtils::defaultProgram, "projection_mat");
+	modelviewMatUniformLoc  = glGetUniformLocation(GLUtils::defaultProgram, "modelview_mat");
 }
 
 void GLUtils::cleanup()

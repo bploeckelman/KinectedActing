@@ -21,15 +21,18 @@ GUIWindow::GUIWindow(const std::string& title)
 	window.create(videoMode, title, style);
 	window.setFramerateLimit(framerate_limit);
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
-
-	gui.initialize();
 }
 
 GUIWindow::~GUIWindow()
 {}
 
+void GUIWindow::init()
+{
+	gui.initialize();
+}
 
-void GUIWindow::update() {
+void GUIWindow::update()
+{
 	sf::Event event;
 	while (window.pollEvent(event)) {
 		gui.handleEvent(event);
@@ -37,7 +40,8 @@ void GUIWindow::update() {
 	gui.update();
 }
 
-void GUIWindow::render() {
+void GUIWindow::render()
+{
 	window.setActive();
 	window.clear(sf::Color::Black);
 	gui.render();

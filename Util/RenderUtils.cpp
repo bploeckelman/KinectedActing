@@ -57,8 +57,6 @@ void Render::cube( const vec3& position, const float scale )
 	glTranslated(position.x, position.y, position.z);
 	glScalef(scale, scale, scale);
 
-	glUseProgram(GLUtils::defaultProgram);
-
 	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);

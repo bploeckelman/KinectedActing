@@ -11,6 +11,7 @@ public:
 	GUIWindow(const std::string& title);
 	virtual ~GUIWindow();
 
+	void init();
 	void update();
 	void render();
 

@@ -18,6 +18,8 @@ namespace GLUtils
 	const std::string default_fragment_shader("Shaders/default.frag");
 
 	extern GLuint defaultProgram;
+	extern GLint projectionMatUniformLoc;
+	extern GLint modelviewMatUniformLoc;
 
 	void init();
 	void cleanup();

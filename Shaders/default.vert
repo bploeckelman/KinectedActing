@@ -1,12 +1,11 @@
-#version 330 compatibility
+#version 330
 
-// TODO setup uniforms and remove compatibility profile
-//uniform mat4 modelview_mat;
-//uniform mat4 projection_mat;
+uniform mat4 modelview_mat;
+uniform mat4 projection_mat;
 
 layout(location = 0) in vec4 position;
 
 void main()
 {
-	gl_Position = gl_ModelViewProjectionMatrix * position;
+	gl_Position = projection_mat * modelview_mat * position;
 }
