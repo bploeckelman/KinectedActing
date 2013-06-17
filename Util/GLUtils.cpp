@@ -22,6 +22,21 @@ GLint GLUtils::modelviewMatUniformLoc;
 
 void GLUtils::init()
 {
+	// Initialize glew
+	GLenum result = glewInit();
+	if (GLEW_OK == result) {
+		std::cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
+		if (!glewIsSupported("GL_VERSION_3_3")) {
+			std::cerr << "OpenGL 3.0 is not supported\n";
+			exit(1);
+		}
+	} else {
+		std::cerr << "Failed to initialize glew.\n"
+	              << "Reason: " << glewGetErrorString(result) << "\n";
+		exit(1);
+	}
+
+	// Initialize shaders
 	cout << "Creating shader objects...\n";
 	vector<GLuint> shaderList;
 	shaderList.push_back(createShader(GL_VERTEX_SHADER, default_vertex_shader));
@@ -33,6 +48,9 @@ void GLUtils::init()
 	cout << "Getting uniform locations...\n";
 	projectionMatUniformLoc = glGetUniformLocation(GLUtils::defaultProgram, "projection_mat");
 	modelviewMatUniformLoc  = glGetUniformLocation(GLUtils::defaultProgram, "modelview_mat");
+
+	cout << "Deleting shader objects...\n";
+	for_each(begin(shaderList), end(shaderList), glDeleteShader);
 }
 
 void GLUtils::cleanup()
@@ -127,9 +145,6 @@ GLuint GLUtils::createProgram(const vector<GLuint>& shaderList)
 	if (0 != program) {
 		cout << "\tShader program linked.\n";
 	}
-
-	cout << "\tDeleting shader objects...\n";
-	for_each(begin(shaderList), end(shaderList), glDeleteShader);
 
 	return program;
 }
