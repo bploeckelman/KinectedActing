@@ -42,6 +42,9 @@
     <ClCompile Include="Util\GLUtils.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Kinect\KinectDevice.cpp">
+      <Filter>Kinect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="Util\GLUtils.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Kinect\KinectDevice.h">
+      <Filter>Kinect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

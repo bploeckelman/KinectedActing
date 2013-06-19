@@ -3,11 +3,13 @@
 
 #include <string>
 
+class App;
+
 
 class Window 
 {
 public:
-	Window(const std::string& title) : title(title), videoMode(), window() {};
+	Window(const std::string& title, App& app) : title(title), app(app), videoMode(), window() {};
 	virtual ~Window() {};
 
 	virtual void init() = 0;
@@ -21,6 +23,7 @@ public:
 	const sf::RenderWindow& getWindow() const;
 
 protected:
+	App& app;
 	std::string title;
 	sf::VideoMode videoMode;
 	sf::RenderWindow window;

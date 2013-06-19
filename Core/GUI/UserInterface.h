@@ -16,6 +16,9 @@ public:
 	void render();
 	void handleEvent(const sf::Event& event);
 
+public: // External interface
+	void setKinectIdLabel(const std::string& label);
+
 private:
 	void layoutWidgets();
 	void connectSignals();
@@ -30,7 +33,12 @@ private:
 	sfg::Desktop desktop;
 	sfg::Window::Ptr window;
 
-	sfg::Fixed::Ptr fixed;
+	sfg::Box::Ptr box;
 	sfg::Button::Ptr quitButton;
+
+	sfg::Table::Ptr kinectTable;
+	sfg::ScrolledWindow::Ptr kinectScrolledWindow;
+	sfg::Box::Ptr kinectScrolledWindowBox;
+	sfg::Label::Ptr kinectIdLabel;
 
 };

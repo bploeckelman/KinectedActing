@@ -56,7 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -74,7 +74,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -91,6 +91,7 @@
     <ClCompile Include="Core\Main.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
+    <ClCompile Include="Kinect\KinectDevice.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
     <ClCompile Include="Util\RenderUtils.cpp" />
   </ItemGroup>
@@ -100,6 +101,7 @@
     <ClInclude Include="Core\Windows\GLWindow.h" />
     <ClInclude Include="Core\Windows\GUIWindow.h" />
     <ClInclude Include="Core\Windows\Window.h" />
+    <ClInclude Include="Kinect\KinectDevice.h" />
     <ClInclude Include="Util\GLUtils.h" />
     <ClInclude Include="Util\RenderUtils.h" />
   </ItemGroup>

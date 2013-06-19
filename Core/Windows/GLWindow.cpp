@@ -1,4 +1,6 @@
 #include "GLWindow.h"
+#include "Core/App.h"
+#include "Kinect/KinectDevice.h"
 #include "Util/GLUtils.h"
 #include "Util/RenderUtils.h"
 
@@ -23,8 +25,8 @@ static glm::mat4 projection_mat;
 static glm::mat4 cube_modelview_mat;
 
 
-GLWindow::GLWindow(const std::string& title)
-	: Window(title)
+GLWindow::GLWindow(const std::string& title, App& app)
+	: Window(title, app)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level);
@@ -48,6 +50,9 @@ void GLWindow::init()
 	const float zfar         = 100.f;
 	projection_mat = glm::perspective(fovy, aspect, znear, zfar);
 	cube_modelview_mat  = glm::mat4(1.f);
+
+	glEnable(GL_POINT_SMOOTH);
+	glPointSize(20.f);
 }
 
 void GLWindow::update()
@@ -75,8 +80,8 @@ void GLWindow::render()
 	glUniformMatrix4fv(GLUtils::projectionMatUniformLoc, 1, GL_FALSE, glm::value_ptr(projection_mat));
 
 	// Render ground
-	const glm::mat4 m = glm::translate(glm::mat4(), glm::vec3(0,-2,-10));
-	glUniformMatrix4fv(GLUtils::modelviewMatUniformLoc,  1, GL_FALSE, glm::value_ptr(m));
+	const glm::mat4 ground_mat = glm::translate(glm::mat4(), glm::vec3(0,-2,-10));
+	glUniformMatrix4fv(GLUtils::modelviewMatUniformLoc,  1, GL_FALSE, glm::value_ptr(ground_mat));
 	Render::ground();
 
 	// Render cube

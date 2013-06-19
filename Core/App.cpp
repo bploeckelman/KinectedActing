@@ -7,11 +7,14 @@
 
 App::App()
 	: done(false)
-	, guiWindow("GUI")
-	, glWindow("OpenGL Window")
+	, kinect()
+	, guiWindow("GUI", *this)
+	, glWindow("OpenGL Window", *this)
 {
 	GLUtils::init();
 	Render::init();
+
+	kinect.init();
 
 	guiWindow.init();
 	glWindow.init();
@@ -28,6 +31,8 @@ void App::run()
 	while (!done) {
 		guiWindow.update();
 		glWindow.update();
+
+		kinect.update();
 
 		guiWindow.render();
 		glWindow.render();
