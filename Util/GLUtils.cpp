@@ -25,11 +25,15 @@ void GLUtils::init()
 	// Initialize glew
 	GLenum result = glewInit();
 	if (GLEW_OK == result) {
-		std::cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
 		if (!glewIsSupported("GL_VERSION_3_3")) {
 			std::cerr << "OpenGL 3.0 is not supported\n";
 			exit(1);
 		}
+		std::cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
+		std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+		std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+		std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+		std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 	} else {
 		std::cerr << "Failed to initialize glew.\n"
 	              << "Reason: " << glewGetErrorString(result) << "\n";
