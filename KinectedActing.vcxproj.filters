@@ -19,6 +19,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{1908a58f-0073-458a-862e-c93908b5bf45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{1bb929f1-5278-46fb-8448-b94524bcb143}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -45,6 +48,9 @@
     <ClCompile Include="Kinect\KinectDevice.cpp">
       <Filter>Kinect</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\Camera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -70,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="Kinect\KinectDevice.h">
       <Filter>Kinect</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Camera.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

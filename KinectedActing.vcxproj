@@ -92,6 +92,7 @@
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
+    <ClCompile Include="Scene\Camera.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
     <ClCompile Include="Util\RenderUtils.cpp" />
   </ItemGroup>
@@ -102,6 +103,7 @@
     <ClInclude Include="Core\Windows\GUIWindow.h" />
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Kinect\KinectDevice.h" />
+    <ClInclude Include="Scene\Camera.h" />
     <ClInclude Include="Util\GLUtils.h" />
     <ClInclude Include="Util\RenderUtils.h" />
   </ItemGroup>
