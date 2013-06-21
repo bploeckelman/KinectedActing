@@ -1,11 +1,14 @@
 #version 330
 
-uniform mat4 modelview_mat;
-uniform mat4 projection_mat;
+uniform mat4 camera;
+uniform mat4 model;
 
-layout(location = 0) in vec4 position;
+layout(location = 0) in vec3 position;
+
+out vec3 vert;
 
 void main()
 {
-	gl_Position = projection_mat * modelview_mat * position;
+    vert = position;
+    gl_Position = camera * model * vec4(position, 1);
 }

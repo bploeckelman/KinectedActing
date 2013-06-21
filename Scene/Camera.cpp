@@ -21,6 +21,7 @@
 
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
 
+using namespace tdogl;
 
 Camera::Camera() :
     _position(0.0f, 0.0f, 1.0f),

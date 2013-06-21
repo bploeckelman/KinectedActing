@@ -2,6 +2,8 @@
 #include "Core/App.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
+#include "Shaders/Shader.h"
+#include "Shaders/Program.h"
 #include "Util/GLUtils.h"
 #include "Util/RenderUtils.h"
 
@@ -17,12 +19,11 @@
 static const int color_bits      = 32;
 static const int depth_bits      = 24;
 static const int stencil_bits    = 8;
-static const int antialias_level = 2;
+static const int antialias_level = 4;
 static const int framerate_limit = 60;
 static const int initial_pos_x   = 260;
-static const int initial_pos_y   = 5;
+static const int initial_pos_y   = 10;
 
-static glm::mat4 cube_modelview_mat;
 static glm::vec2 mouse_pos_current;
 
 
@@ -46,8 +47,6 @@ GLWindow::~GLWindow()
 
 void GLWindow::init()
 {
-	cube_modelview_mat  = glm::mat4(1.f);
-
 	SetForegroundWindow(window.getSystemHandle());
 }
 
@@ -78,32 +77,57 @@ void GLWindow::render()
 {
 	window.setActive();
 	window.pushGLStates();
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+	glDepthRange(0.0f, 1.0f);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // because swank
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // because swank
 
-	// Set projection matrix for default shader program
-	glUseProgram(GLUtils::defaultProgram);
+	GLUtils::defaultProgram->use();
+	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 
-	// Combined projection + camera transformation matrix
-	const glm::mat4& camera_mat(camera.matrix());
-	glUniformMatrix4fv(GLUtils::projectionMatUniformLoc, 1, GL_FALSE, glm::value_ptr(camera_mat));
-
-	// Render ground
-	const glm::mat4 ground_mat = glm::translate(glm::mat4(), glm::vec3(0,-2,-10));
-	glUniformMatrix4fv(GLUtils::modelviewMatUniformLoc,  1, GL_FALSE, glm::value_ptr(ground_mat));
-	Render::ground();
-
-	// Render cube
-	cube_modelview_mat = glm::translate(glm::mat4(), glm::vec3(0,0,-20));
-	cube_modelview_mat = glm::rotate(cube_modelview_mat, d, glm::vec3(0,1,0));
-	cube_modelview_mat = glm::rotate(cube_modelview_mat, d, glm::vec3(0,0,1));
-	glUniformMatrix4fv(GLUtils::modelviewMatUniformLoc,  1, GL_FALSE, glm::value_ptr(cube_modelview_mat));
+	// Draw a representation of the kinect
+	const NUI_SKELETON_FRAME& skeletonFrame = app.getKinect().getSkeletonFrame();
+	glm::mat4 kinect_model_matrix;
+	kinect_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, skeletonFrame.vFloorClipPlane.w, 0));
+	kinect_model_matrix = glm::scale(kinect_model_matrix, glm::vec3(0.5f, 0.1f, 0.1f));
+	GLUtils::defaultProgram->setUniform("model", kinect_model_matrix);
 	Render::cube();
 
-	// Update rotation amount
-	d += 1.f;
+	const NUI_SKELETON_DATA *skeleton = app.getKinect().getFirstTrackedSkeletonData(skeletonFrame);
+	if (nullptr != skeleton) {
+		glm::mat4 skel_model_matrix;
+		for (auto position : skeleton->SkeletonPositions) {
+			glm::vec3 pos = glm::vec3(position.x, position.y, position.z);
+			skel_model_matrix = glm::translate(glm::mat4(), pos);
+			skel_model_matrix = glm::scale(skel_model_matrix, glm::vec3(0.1f,0.1f,0.1f));
+			GLUtils::defaultProgram->setUniform("model", skel_model_matrix);
+			Render::cube();
+		}
+	}
 
-	glUseProgram(0);
+	glm::mat4 ground_model_matrix;
+	ground_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -2, 0));//-skeletonFrame.vFloorClipPlane.w, 0));
+	ground_model_matrix = glm::scale(ground_model_matrix, glm::vec3(5,1,5));
+	GLUtils::defaultProgram->setUniform("model", ground_model_matrix);
+	Render::ground();
+
+	glm::mat4 cube_model_matrix;
+	cube_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
+	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,1,0));
+	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,0,1));
+	GLUtils::defaultProgram->setUniform("model", cube_model_matrix);
+	Render::cube();
+	d += 5.f;
+
+
+	GLUtils::defaultProgram->stopUsing();
 
 	window.display();
 	window.popGLStates();

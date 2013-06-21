@@ -20,6 +20,6 @@ private:
 	void resetCamera();
 	void updateCamera();
 
-	Camera camera;
+	tdogl::Camera camera;
 
 };
