@@ -15,8 +15,7 @@ namespace Render
 	void cleanup();
 
 	// Draw a basic cube at the specified position with the specified scale
-	void cube(const glm::vec3& position=glm::vec3(0,0,0)
-	        , const float scale=1.f);
+	void cube();
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

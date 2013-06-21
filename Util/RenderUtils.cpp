@@ -51,25 +51,14 @@ void Render::cleanup()
 	glDeleteBuffers(1, &cube_buffer_obj);
 }
 
-void Render::cube( const vec3& position, const float scale )
+void Render::cube()
 {
-	glPushMatrix();
-	glTranslated(position.x, position.y, position.z);
-	glScalef(scale, scale, scale);
-
 	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
 	glDrawArrays(GL_QUADS, 0, 24);
-
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glUseProgram(0);
-	
-	glPopMatrix(); 
-
-	glColor3f(1,1,1);
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )
@@ -152,8 +141,7 @@ void Render::ground( const float alpha )
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	const float radius = 10.f;
-	glColor4f(1,1,1,alpha);
+	const float radius = 100.f;
 	glBegin(GL_TRIANGLE_STRIP);
 		glNormal3f(0, 1, 0); /*glTexCoord2f(   0.f,    0.f);*/ glVertex3f( R, Y,  R);
 		glNormal3f(0, 1, 0); /*glTexCoord2f(radius,    0.f);*/ glVertex3f( R, Y, -R);
