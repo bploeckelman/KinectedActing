@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <tchar.h>
 
@@ -67,7 +68,7 @@ bool KinectDevice::init()
 	int numSensors = -1;
 	HRESULT hr = NuiGetSensorCount(&numSensors);
 	if (FAILED(hr) || numSensors < 1) {
-		cerr << "Failed to find Kinect sensors.\n";
+		MessageBoxA(NULL, "Failed to find Kinect sensors.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -75,7 +76,7 @@ bool KinectDevice::init()
 	// NOTE : this class only supports a single Kinect device
 	hr = NuiCreateSensorByIndex(0, &sensor);
 	if (FAILED(hr) || nullptr == sensor) {
-		cerr << "Failed to create Kinect sensor.\n";
+		MessageBoxA(NULL, "Failed to create Kinect sensor.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -84,7 +85,7 @@ bool KinectDevice::init()
 							 | NUI_INITIALIZE_FLAG_USES_COLOR
 							 | NUI_INITIALIZE_FLAG_USES_SKELETON);
 	if (FAILED(hr)) {
-		cerr << "Failed to initialize Kinect sensor.\n";
+		MessageBoxA(NULL, "Failed to initialize Kinect sensor.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 	
@@ -96,7 +97,7 @@ bool KinectDevice::init()
 	                              , nextColorFrameEvent // Event handle
 	                              , &colorStream);
 	if (FAILED(hr)) {
-		cerr << "Failed to open color stream for Kinect sensor.\n";
+		MessageBoxA(NULL, "Failed to open color stream for Kinect sensor.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -108,21 +109,23 @@ bool KinectDevice::init()
 	                              , nextDepthFrameEvent // Event handle
 	                              , &depthStream);
 	if (FAILED(hr)) {
-		cerr << "Failed to open depth stream for Kinect sensor.\n";
+		MessageBoxA(NULL, "Failed to open depth stream for Kinect sensor.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
 	// Enable skeleton tracking to receive skeleton data
 	hr = sensor->NuiSkeletonTrackingEnable(nextSkeletonFrameEvent, skeletonTrackingFlags);
 	if (FAILED(hr)) {
-		cerr << "Failed to enable skeleton tracking for Kinect sensor.\n";
+		MessageBoxA(NULL, "Failed to enable skeleton tracking for Kinect sensor.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
 	// Get the device id for this sensor
 	deviceId = bstr_to_std_string(sensor->NuiDeviceConnectionId());
-	cout << "Initialized Kinect [" << deviceId << "] in "
-	     << timer.getElapsedTime().asSeconds() << " seconds.\n";
+	stringstream ss;
+	ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
+	   << "Connection id: [" << deviceId << "]";
+	MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
 
 	return true;
 }
@@ -144,7 +147,7 @@ void KinectDevice::toggleSeatedMode()
 
 	HRESULT hr = sensor->NuiSkeletonTrackingEnable(nextSkeletonFrameEvent, skeletonTrackingFlags);
 	if (FAILED(hr)) {
-		cerr << "Kinect failed to toggle skeleton tracking mode.\n";
+		MessageBoxA(NULL, "Kinect failed to toggle skeleton tracking mode.", "Kinect Error", MB_OK | MB_ICONINFORMATION);
 	}
 }
 
@@ -152,7 +155,7 @@ void KinectDevice::checkForColorFrame()
 {
 	if (WAIT_OBJECT_0 == WaitForSingleObject(nextColorFrameEvent, 0)) {
 		if (FAILED(processImageStreamData(COLOR_STREAM))) {
-			cerr << "Kinect failed to process color stream data.\n";			
+			MessageBoxA(NULL, "Kinect failed to process color stream data.", "Kinect Error", MB_OK | MB_ICONINFORMATION);
 		}
 	}
 }
@@ -161,7 +164,7 @@ void KinectDevice::checkForDepthFrame()
 {
 	if (WAIT_OBJECT_0 == WaitForSingleObject(nextDepthFrameEvent, 0)) {
 		if (FAILED(processImageStreamData(DEPTH_STREAM))) {
-			cerr << "Kinect failed to process depth stream data.\n";
+			MessageBoxA(NULL, "Kinect failed to process depth stream data.", "Kinect Error", MB_OK | MB_ICONINFORMATION);
 		}
 	}
 }
@@ -171,6 +174,7 @@ void KinectDevice::checkForSkeletonFrame()
 	if (WAIT_OBJECT_0 == WaitForSingleObject(nextSkeletonFrameEvent, 0)) {
 		if (FAILED(processSkeletonData())) {
 			//cerr << "Kinect failed to process skeleton data.\n";
+			//MessageBoxA(NULL, "Kinect failed to process skeleton data.", "Kinect Error", MB_OK | MB_ICONINFORMATION);
 		}
 	}
 }
@@ -231,7 +235,7 @@ HRESULT KinectDevice::processSkeletonData()
 
 	// Make sure the data is valid 
 	if (nullptr == skeletonData) {
-		//cerr << "Kinect failed to find tracked skeleton data.\n";
+		//MessageBoxA(NULL, "Failed to find tracked skeleton data.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return E_FAIL;
 	}
 
