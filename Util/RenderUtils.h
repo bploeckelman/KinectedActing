@@ -14,8 +14,8 @@ namespace Render
 	// Cleanup buffers, textures, etc...
 	void cleanup();
 
-	// Draw a basic cube at the specified position with the specified scale
-	void cube();
+	// Draw a basic quad
+	void quad();
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

@@ -22,6 +22,9 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{1bb929f1-5278-46fb-8448-b94524bcb143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Resources">
+      <UniqueIdentifier>{a9898055-a9cd-4bd6-840f-2dfafc34516e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -57,6 +60,12 @@
     <ClCompile Include="Shaders\Program.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Resources\ImageManager.cpp">
+      <Filter>Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resources\Texture.cpp">
+      <Filter>Core\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -91,6 +100,12 @@
     </ClInclude>
     <ClInclude Include="Shaders\Program.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resources\ImageManager.h">
+      <Filter>Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resources\Texture.h">
+      <Filter>Core\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

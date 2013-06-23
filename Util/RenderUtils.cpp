@@ -5,6 +5,7 @@
 /************************************************************************/
 #include "RenderUtils.h"
 #include "GLUtils.h"
+#include "Shaders/Program.h"
 //#include "ImageManager.h"
 
 #include <glm/glm.hpp>
@@ -15,49 +16,103 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
 
 using glm::vec3;
 using glm::vec4;
 using glm::value_ptr;
 
-//sf::Texture texture;
-const float n = -0.5f;
-const float p =  0.5f;
-const float cube_verts[] = {
-	// vert1         vert2            vert3            vert4 
-	p, p, p, 1.f,    n, p, p, 1.f,    n, n, p, 1.f,    p, n, p, 1.f, // face 1
-	p, p, n, 1.f,    p, n, n, 1.f,    n, n, n, 1.f,    n, p, n, 1.f, // face 2
-	p, p, p, 1.f,    p, p, n, 1.f,    n, p, n, 1.f,    n, p, p, 1.f, // face 3
-
-	p, n, p, 1.f,    n, n, p, 1.f,    n, n, n, 1.f,    p, n, n, 1.f, // face 4
-	p, p, p, 1.f,    p, n, p, 1.f,    p, n, n, 1.f,    p, p, n, 1.f, // face 5
-	n, p, p, 1.f,    n, p, n, 1.f,    n, n, n, 1.f,    n, n, p, 1.f  // face 6
+GLuint quad_vao;
+GLuint quad_vbo;
+const GLfloat buffer_data[] = {
+	// triangle strip quad
+	//  X     Y     Z       U     V        nX    nY    nZ
+	 -1.0f,  1.0f, 0.0f,   1.0f, 0.0f,//    0.0f, 0.0f, 1.0f,
+	 -1.0f, -1.0f, 0.0f,   1.0f, 1.0f,//    0.0f, 0.0f, 1.0f,
+	  1.0f,  1.0f, 0.0f,   0.0f, 0.0f,//    0.0f, 0.0f, 1.0f,
+	  1.0f, -1.0f, 0.0f,   0.0f, 1.0f //,    0.0f, 0.0f, 1.0f
 };
-GLuint cube_buffer_obj;
 
+
+void loadBufferObjects()
+{
+	// FIXME: quad_vbo becomes invalidated somewhere between here and first use... 
+	// Create and bind vao
+	glGenVertexArrays(1, &quad_vao);
+	glBindVertexArray(quad_vao);
+
+	// Create + bind vbo, upload buffer data
+	glGenBuffers(1, &quad_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
+
+	// Enable and set up vertex attributes
+	const GLuint vertexAttribLoc   = GLUtils::defaultProgram->attrib("vertex");
+	const GLuint texcoordAttribLoc = GLUtils::defaultProgram->attrib("texcoord");
+	//const GLuint normalAttribLoc = GLUtils::defaultProgram->attrib("normal");
+	glEnableVertexAttribArray(vertexAttribLoc);
+	glEnableVertexAttribArray(texcoordAttribLoc);
+	//glEnableVertexAttribArray(normalAttribLoc);
+
+	const GLsizei stride = 5 * sizeof(GLfloat);
+	//const GLsizei stride = 8 * sizeof(GLfloat);
+	const GLvoid *tex_coord_offset = (const GLvoid *) (3 * sizeof(GLfloat));
+	//const GLvoid *normal_offset = (const GLvoid *) (5 * sizeof(GLfloat));
+	glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	glVertexAttribPointer(texcoordAttribLoc, 2, GL_FLOAT, GL_TRUE, stride, tex_coord_offset);
+	//glVertexAttribPointer(normalAttribLoc, 3, GL_FLOAT, GL_TRUE, stride, normal_offset);
+
+	//glDisableVertexAttribArray(normalAttribLoc);
+	glDisableVertexAttribArray(texcoordAttribLoc);
+	glDisableVertexAttribArray(vertexAttribLoc);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
 void Render::init()
 {
-	//texture.loadFromImage(GetImage("grid.png"));
-
-	glGenBuffers(1, &cube_buffer_obj);
-	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts), &cube_verts, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	loadBufferObjects();
 }
 
 void Render::cleanup()
 {
-	glDeleteBuffers(1, &cube_buffer_obj);
+	glDeleteBuffers(1, &quad_vbo);
+	//glDeleteVertexArrays(1, &quad_vao);
 }
 
-void Render::cube()
+void Render::quad()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, cube_buffer_obj);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glDrawArrays(GL_QUADS, 0, 24);
-	glDisableVertexAttribArray(0);
+	// FIXME: tri_vao becomes invalidated between creation and here... 
+	// a call to glIsVertexArray(quad_vao) returns true in init() after glGenVertexArrays(),
+	// but checking it again here returns false, and I'm not sure where it gets broken
+	//glBindVertexArray(quad_vao);
+	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//glBindVertexArray(0);
+
+	// Have to do things the old fashioned way until I figure out whats up with the VAO
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+
+	const GLuint vertAttribLoc = GLUtils::defaultProgram->attrib("vertex");
+	const GLuint texcoordAttribLoc = GLUtils::defaultProgram->attrib("texcoord");
+	//const GLuint normalAttribLoc = GLUtils::defaultProgram->attrib("normal");
+	glEnableVertexAttribArray(vertAttribLoc);
+	glEnableVertexAttribArray(texcoordAttribLoc);
+	//glEnableVertexAttribArray(normalAttribLoc);
+
+	const GLsizei stride = 5 * sizeof(GLfloat);
+	//const GLsizei stride = 8 * sizeof(GLfloat);
+	const GLvoid *tex_coord_offset = (const GLvoid *) (3 * sizeof(GLfloat));
+	//const GLvoid *normal_offset = (const GLvoid *) (5 * sizeof(GLfloat));
+	glVertexAttribPointer(vertAttribLoc, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	glVertexAttribPointer(texcoordAttribLoc, 2, GL_FLOAT, GL_TRUE,  stride, tex_coord_offset);
+	//glVertexAttribPointer(normalAttribLoc, 3, GL_FLOAT, GL_TRUE,  stride, normal_offset);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	//glDisableVertexAttribArray(normalAttribLoc);
+	glDisableVertexAttribArray(texcoordAttribLoc);
+	glDisableVertexAttribArray(vertAttribLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -130,7 +185,7 @@ void Render::basis( const float scale/*=1.f */
 void Render::ground( const float alpha )
 {
 	static const float Y = 0.f;
-	static const float R = 3.f;
+	static const float R = 10.5f;
 
 	//glDisable(GL_LIGHTING);
 	//glDisable(GL_CULL_FACE);
@@ -138,19 +193,19 @@ void Render::ground( const float alpha )
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//texture.bind(&texture);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	const float radius = 100.f;
+	//const float radius = 100.f;
 	glBegin(GL_TRIANGLE_STRIP);
-		glNormal3f(0, 1, 0); /*glTexCoord2f(   0.f,    0.f);*/ glVertex3f( R, Y,  R);
-		glNormal3f(0, 1, 0); /*glTexCoord2f(radius,    0.f);*/ glVertex3f( R, Y, -R);
-		glNormal3f(0, 1, 0); /*glTexCoord2f(   0.f, radius);*/ glVertex3f(-R, Y,  R);
-		glNormal3f(0, 1, 0); /*glTexCoord2f(radius, radius);*/ glVertex3f(-R, Y, -R);
+		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(0.f, 0.f); glVertex3f( R, Y,  R);
+		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(100.f, 0.f); glVertex3f( R, Y, -R);
+		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(0.f, 100.f); glVertex3f(-R, Y,  R);
+		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(100.f, 100.f); glVertex3f(-R, Y, -R);
 	glEnd();
 
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	//glDisable(GL_BLEND);

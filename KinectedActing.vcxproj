@@ -89,6 +89,8 @@
     <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\GUI\UserInterface.cpp" />
     <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="Core\Resources\ImageManager.cpp" />
+    <ClCompile Include="Core\Resources\Texture.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
@@ -101,6 +103,8 @@
   <ItemGroup>
     <ClInclude Include="Core\App.h" />
     <ClInclude Include="Core\GUI\UserInterface.h" />
+    <ClInclude Include="Core\Resources\ImageManager.h" />
+    <ClInclude Include="Core\Resources\Texture.h" />
     <ClInclude Include="Core\Windows\GLWindow.h" />
     <ClInclude Include="Core\Windows\GUIWindow.h" />
     <ClInclude Include="Core\Windows\Window.h" />

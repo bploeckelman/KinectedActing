@@ -1,5 +1,7 @@
 #include "GLWindow.h"
 #include "Core/App.h"
+#include "Core/Resources/Texture.h"
+#include "Core/Resources/ImageManager.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
 #include "Shaders/Shader.h"
@@ -20,6 +22,8 @@ static const int color_bits      = 32;
 static const int depth_bits      = 24;
 static const int stencil_bits    = 8;
 static const int antialias_level = 4;
+static const int gl_major_version = 3;
+static const int gl_minor_version = 3;
 static const int framerate_limit = 60;
 static const int initial_pos_x   = 260;
 static const int initial_pos_y   = 10;
@@ -30,9 +34,11 @@ static glm::vec2 mouse_pos_current;
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, camera()
+	, colorTexture(nullptr)
+	, depthTexture(nullptr)
 {
 	const sf::Uint32 style = sf::Style::Default;
-	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level);
+	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
 	videoMode = sf::VideoMode(sf::VideoMode::getDesktopMode().width  - 300
 	                        , sf::VideoMode::getDesktopMode().height - 100, color_bits);
 	window.create(videoMode, title, style, contextSettings);
@@ -43,11 +49,24 @@ GLWindow::GLWindow(const std::string& title, App& app)
 }
 
 GLWindow::~GLWindow()
-{}
+{
+	delete colorTexture;
+	delete depthTexture;
+}
 
 void GLWindow::init()
 {
 	SetForegroundWindow(window.getSystemHandle());
+
+	colorTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
+	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+	                                , (unsigned char *) app.getKinect().getColorData()); 
+
+	sf::Image image;
+	image.loadFromFile("image.png");
+	depthTexture = new tdogl::Texture(tdogl::Texture::Format::RGBA
+	                                , image.getSize().x, image.getSize().y
+									, (unsigned char *) image.getPixelsPtr());
 }
 
 void GLWindow::update()
@@ -70,16 +89,18 @@ void GLWindow::update()
 	}
 
 	updateCamera();
+
+	// Update kinect image stream textures
+	colorTexture->subImage2D((unsigned char *) app.getKinect().getColorData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+	//depthTexture->subImage2D((unsigned char *) app.getKinect().getDepthData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 }
 
 float d = 0.f; // temporary, for rotating cube
 void GLWindow::render()
 {
 	window.setActive();
-	window.pushGLStates();
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -87,20 +108,30 @@ void GLWindow::render()
 	glDepthRange(0.0f, 1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // because swank
 
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	GLUtils::defaultProgram->setUniform("tex", 0);
 
-	// Draw a representation of the kinect
+	glm::mat4 ground_model_matrix;
+	ground_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -5, 0));
+	ground_model_matrix = glm::scale(ground_model_matrix, glm::vec3(5,1,5));
+	ground_model_matrix = glm::rotate(ground_model_matrix, -90.f, glm::vec3(1,0,0));
+	GLUtils::defaultProgram->setUniform("model", ground_model_matrix);
+	Render::quad();
+
+	glm::mat4 cube_model_matrix;
+	cube_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
+	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,1,0));
+	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,0,1));
+	GLUtils::defaultProgram->setUniform("model", cube_model_matrix);
+	Render::quad();
+	d += 5.f;
+
 	const NUI_SKELETON_FRAME& skeletonFrame = app.getKinect().getSkeletonFrame();
-	glm::mat4 kinect_model_matrix;
-	kinect_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, skeletonFrame.vFloorClipPlane.w, 0));
-	kinect_model_matrix = glm::scale(kinect_model_matrix, glm::vec3(0.5f, 0.1f, 0.1f));
-	GLUtils::defaultProgram->setUniform("model", kinect_model_matrix);
-	Render::cube();
-
-	const NUI_SKELETON_DATA *skeleton = app.getKinect().getFirstTrackedSkeletonData(skeletonFrame);
+	const NUI_SKELETON_DATA  *skeleton = app.getKinect().getFirstTrackedSkeletonData(skeletonFrame);
 	if (nullptr != skeleton) {
 		glm::mat4 skel_model_matrix;
 		for (auto position : skeleton->SkeletonPositions) {
@@ -108,29 +139,13 @@ void GLWindow::render()
 			skel_model_matrix = glm::translate(glm::mat4(), pos);
 			skel_model_matrix = glm::scale(skel_model_matrix, glm::vec3(0.1f,0.1f,0.1f));
 			GLUtils::defaultProgram->setUniform("model", skel_model_matrix);
-			Render::cube();
+			Render::quad();
 		}
 	}
-
-	glm::mat4 ground_model_matrix;
-	ground_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -2, 0));//-skeletonFrame.vFloorClipPlane.w, 0));
-	ground_model_matrix = glm::scale(ground_model_matrix, glm::vec3(5,1,5));
-	GLUtils::defaultProgram->setUniform("model", ground_model_matrix);
-	Render::ground();
-
-	glm::mat4 cube_model_matrix;
-	cube_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
-	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,1,0));
-	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,0,1));
-	GLUtils::defaultProgram->setUniform("model", cube_model_matrix);
-	Render::cube();
-	d += 5.f;
-
 
 	GLUtils::defaultProgram->stopUsing();
 
 	window.display();
-	window.popGLStates();
 }
 
 void GLWindow::resetCamera()
