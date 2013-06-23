@@ -26,14 +26,21 @@ void GLUtils::init()
 			cerr << "OpenGL 3.0 is not supported\n";
 			exit(EXIT_FAILURE);
 		}
-		cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
-		cout << "OpenGL version: " << glGetString(GL_VERSION) << endl;
-		cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-		cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
-		cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
+		cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n"
+		     << "OpenGL version: "   << glGetString(GL_VERSION) << "\n"
+		     << "GLSL version: "     << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
+		     << "Vendor: "           << glGetString(GL_VENDOR) << "\n"
+		     << "Renderer: "         << glGetString(GL_RENDERER) << "\n";
+		int numExtensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+		for(int i = 0; i < numExtensions; ++i)
+		{
+			const GLubyte *extension_name=glGetStringi(GL_EXTENSIONS, i);
+			cout << "Extension: " << extension_name << "\n";
+		}
 	} else {
 		cerr << "Failed to initialize glew.\n"
-	              << "Reason: " << glewGetErrorString(result) << "\n";
+		     << "Reason: " << glewGetErrorString(result) << "\n";
 		exit(EXIT_FAILURE);
 	}
 
