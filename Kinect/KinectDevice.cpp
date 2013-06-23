@@ -34,8 +34,8 @@ KinectDevice::KinectDevice()
 	, nextDepthFrameEvent(CreateEventA(NULL, TRUE, FALSE, "Next Depth Frame Event"))
 	, nextSkeletonFrameEvent(CreateEventA(NULL, TRUE, FALSE, "Next Skeleton Frame Event"))
 {
-	ZeroMemory(colorData, sizeof(colorData));
-	ZeroMemory(depthData, sizeof(depthData));
+	ZeroMemory(colorData, image_stream_width * image_stream_height * bytes_per_pixel);
+	ZeroMemory(depthData, image_stream_width * image_stream_height * bytes_per_pixel);
 }
 
 KinectDevice::~KinectDevice()
@@ -206,6 +206,7 @@ HRESULT KinectDevice::processImageStreamData( const EStreamType& eStreamType )
 	texture->LockRect(0, &lockedRect, NULL, 0);
 
 	if (lockedRect.Pitch != 0) {
+		// TODO : handle depth data differently
 		memcpy(imageData, lockedRect.pBits, lockedRect.size);
 	}
 

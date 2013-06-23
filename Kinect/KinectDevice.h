@@ -19,6 +19,7 @@ private:
 	static const NUI_IMAGE_RESOLUTION color_resolution = NUI_IMAGE_RESOLUTION_640x480;
 	static const NUI_IMAGE_RESOLUTION depth_resolution = NUI_IMAGE_RESOLUTION_640x480;
 
+public:
 	static const int image_stream_width  = 640;
 	static const int image_stream_height = 480;
 	static const int bytes_per_pixel     = 4;
