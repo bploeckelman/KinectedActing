@@ -61,12 +61,9 @@ void GLWindow::init()
 	colorTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
 	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 	                                , (unsigned char *) app.getKinect().getColorData()); 
-
-	sf::Image image;
-	image.loadFromFile("image.png");
-	depthTexture = new tdogl::Texture(tdogl::Texture::Format::RGBA
-	                                , image.getSize().x, image.getSize().y
-									, (unsigned char *) image.getPixelsPtr());
+	depthTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
+	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+	                                , (unsigned char *) app.getKinect().getColorData());
 }
 
 void GLWindow::update()
@@ -92,7 +89,7 @@ void GLWindow::update()
 
 	// Update kinect image stream textures
 	colorTexture->subImage2D((unsigned char *) app.getKinect().getColorData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
-	//depthTexture->subImage2D((unsigned char *) app.getKinect().getDepthData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+	depthTexture->subImage2D((unsigned char *) app.getKinect().getDepthData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 }
 
 float d = 0.f; // temporary, for rotating cube
@@ -112,7 +109,7 @@ void GLWindow::render()
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
 	GLUtils::defaultProgram->setUniform("tex", 0);
 
 	glm::mat4 ground_model_matrix;

@@ -202,14 +202,57 @@ HRESULT KinectDevice::processImageStreamData( const EStreamType& eStreamType )
 	}
 
 	// Lock the frame data, copy the image data if it is valid, then unlock the frame
-	INuiFrameTexture *texture = imageFrame.pFrameTexture;
-	texture->LockRect(0, &lockedRect, NULL, 0);
-
-	if (lockedRect.Pitch != 0) {
-		// TODO : handle depth data differently
-		memcpy(imageData, lockedRect.pBits, lockedRect.size);
+	INuiFrameTexture *texture = nullptr;
+	BOOL nearMode = false;
+	if (COLOR_STREAM == eStreamType) {
+		texture = imageFrame.pFrameTexture;
+	} else if (DEPTH_STREAM == eStreamType) {
+		hr = sensor->NuiImageFrameGetDepthImagePixelFrameTexture(depthStream, &imageFrame, &nearMode, &texture);
+		if (FAILED(hr)) {
+			return hr;
+		}
 	}
 
+	texture->LockRect(0, &lockedRect, NULL, 0);
+	if (lockedRect.Pitch != 0) {
+		// Color stream is a straight memcopy
+		if (COLOR_STREAM == eStreamType) {
+			memcpy(imageData, lockedRect.pBits, lockedRect.size);
+		}
+		// Depth stream is packed with player index, so depth bits must be unpacked
+		else if (DEPTH_STREAM == eStreamType) {
+			// Get the min and max reliable depth for the current frame
+			int minDepth = (nearMode ? NUI_IMAGE_DEPTH_MINIMUM_NEAR_MODE : NUI_IMAGE_DEPTH_MINIMUM) >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
+			int maxDepth = (nearMode ? NUI_IMAGE_DEPTH_MAXIMUM_NEAR_MODE : NUI_IMAGE_DEPTH_MAXIMUM) >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
+
+			const NUI_DEPTH_IMAGE_PIXEL *pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL *>(lockedRect.pBits);
+			const NUI_DEPTH_IMAGE_PIXEL *pBufferEnd = pBufferRun + (image_stream_width * image_stream_height);
+
+			// Write out depth pixel data to dest buffer
+			while (pBufferRun < pBufferEnd) {
+				// discard the portion of the depth that contains only the player index
+				USHORT depth = pBufferRun->depth;
+
+				// To convert to a byte, we're discarding the most-significant
+				// rather than least-significant bits.
+				// We're preserving detail, although the intensity will "wrap."
+				// Values outside the reliable depth range are mapped to 0 (black).
+
+				// Note: Using conditionals in this loop could degrade performance.
+				// Consider using a lookup table instead when writing production code.
+				BYTE intensity = static_cast<BYTE>(depth >= minDepth && depth <= maxDepth ? depth % 256 : 0);
+
+				// Write out color bytes...
+				*(imageData++) = intensity; // blue
+				*(imageData++) = intensity; // green
+				*(imageData++) = intensity; // red
+				*(imageData++) = 255;       // alpha
+
+				// Increment our index into the Kinect's depth buffer
+				++pBufferRun;
+			}
+		}
+	} // end if (lockedRect.pBits != 0)
 	texture->UnlockRect(0);
 
 	// Copied image stream data, so release data frame from image stream
