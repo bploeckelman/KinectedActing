@@ -29,10 +29,10 @@ App::~App()
 void App::run()
 {
 	while (!done) {
+		kinect.update();
+
 		guiWindow.update();
 		glWindow.update();
-
-		kinect.update();
 
 		guiWindow.render();
 		glWindow.render();
