@@ -14,7 +14,7 @@ static const sf::Uint32 style    = sf::Style::None;
 
 GUIWindow::GUIWindow(const std::string& title, App& app)
 	: Window(title, app)
-	, gui(window)
+	, gui(*this)
 {
 	videoMode = sf::VideoMode(window_width
 	                        , sf::VideoMode::getDesktopMode().height - height_offset

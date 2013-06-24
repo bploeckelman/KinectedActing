@@ -16,6 +16,9 @@ public:
 	virtual void update() = 0;
 	virtual void render() = 0;
 
+	App& getApp();
+	const App& getApp() const;
+
 	sf::VideoMode& getVideoMode();
 	const sf::VideoMode& getVideoMode() const;
 
@@ -30,6 +33,9 @@ protected:
 
 };
 
+
+inline App& Window::getApp() { return app; }
+inline const App& Window::getApp() const { return app; }
 
 inline sf::VideoMode& Window::getVideoMode() { return videoMode; }
 inline const sf::VideoMode& Window::getVideoMode() const { return videoMode; }

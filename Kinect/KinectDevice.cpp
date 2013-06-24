@@ -21,7 +21,7 @@ const DWORD skeleton_tracking_flags = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_S
 
 
 KinectDevice::KinectDevice()
-	: deviceId("?")
+	: deviceId("[ Kinect offline ]")
 	, sensor(nullptr)
 	, colorStream(INVALID_HANDLE_VALUE)
 	, depthStream(INVALID_HANDLE_VALUE)
@@ -37,8 +37,6 @@ KinectDevice::KinectDevice()
 
 KinectDevice::~KinectDevice()
 {
-	shutdown();
-
 	delete[] colorData;
 	delete[] depthData;
 }

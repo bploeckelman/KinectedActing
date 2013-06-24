@@ -4,11 +4,13 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include "Core/Windows/Window.h"
+
 
 class GUI
 {
 public:
-	GUI(sf::RenderWindow& renderWindow);
+	GUI(Window& parentWindow);
 	~GUI();
 
 	void initialize();
@@ -25,9 +27,11 @@ private:
 
 	// Signal methods -----------------
 	void onQuitButtonClick();
+	void onStartKinectButtonClick();
+	void onStopKinectButtonClick();
 
 private:
-	sf::RenderWindow& renderWindow;
+	Window& parentWindow;
 
 	sfg::SFGUI sfgui;
 	sfg::Desktop desktop;
@@ -39,6 +43,9 @@ private:
 	sfg::Table::Ptr kinectTable;
 	sfg::ScrolledWindow::Ptr kinectScrolledWindow;
 	sfg::Box::Ptr kinectScrolledWindowBox;
+	sfg::Label::Ptr kinectLabel;
 	sfg::Label::Ptr kinectIdLabel;
+	sfg::Button::Ptr startKinectButton;
+	sfg::Button::Ptr stopKinectButton;
 
 };
