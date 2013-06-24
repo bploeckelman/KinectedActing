@@ -160,11 +160,13 @@ void GLWindow::updateCamera()
 	const glm::vec2 mouse_pos_current(mousePos.x, mousePos.y);
 	const glm::vec2 mouse_pos_diff(mouse_pos_current - window_center);
 
-	const float threshold = 300.f; // central dead zone radius
-	const float rate = 2.f;
-	if (glm::length(mouse_pos_diff) > threshold) {
-		camera.offsetOrientation(rate * mouse_pos_diff.y / threshold   // up angle offset
-	                           , rate * mouse_pos_diff.x / threshold); // right angle offset
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)) {
+		const float threshold = 300.f; // central dead zone radius
+		const float rate = 2.f;
+		if (glm::length(mouse_pos_diff) > threshold) {
+			camera.offsetOrientation(rate * mouse_pos_diff.y / threshold   // up angle offset
+								   , rate * mouse_pos_diff.x / threshold); // right angle offset
+		}
 	}
 
 	// Apply keyboard movement to camera position
