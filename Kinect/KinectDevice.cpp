@@ -30,31 +30,14 @@ KinectDevice::KinectDevice()
 	, skeletonFrame()
 	, skeletonData(nullptr)
 	, skeletonTrackingFlags(skeleton_tracking_flags)
-	, nextColorFrameEvent(CreateEventA(NULL, TRUE, FALSE, "Next Color Frame Event"))
-	, nextDepthFrameEvent(CreateEventA(NULL, TRUE, FALSE, "Next Depth Frame Event"))
-	, nextSkeletonFrameEvent(CreateEventA(NULL, TRUE, FALSE, "Next Skeleton Frame Event"))
-{
-	ZeroMemory(colorData, image_stream_width * image_stream_height * bytes_per_pixel);
-	ZeroMemory(depthData, image_stream_width * image_stream_height * bytes_per_pixel);
-}
+	, nextColorFrameEvent()
+	, nextDepthFrameEvent()
+	, nextSkeletonFrameEvent()
+{}
 
 KinectDevice::~KinectDevice()
 {
-	if (nullptr != sensor) {
-		sensor->NuiShutdown();
-	}
-
-	if (INVALID_HANDLE_VALUE != nextColorFrameEvent) {
-		CloseHandle(nextColorFrameEvent);
-	}
-
-	if (INVALID_HANDLE_VALUE != nextDepthFrameEvent) {
-		CloseHandle(nextDepthFrameEvent);
-	}
-
-	if (INVALID_HANDLE_VALUE != nextSkeletonFrameEvent) {
-		CloseHandle(nextSkeletonFrameEvent);
-	}
+	shutdown();
 
 	delete[] colorData;
 	delete[] depthData;
@@ -62,6 +45,13 @@ KinectDevice::~KinectDevice()
 
 bool KinectDevice::init()
 {
+	nextColorFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Color Frame Event");
+	nextDepthFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Depth Frame Event");
+	nextSkeletonFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Skeleton Frame Event");
+
+	ZeroMemory(colorData, image_stream_width * image_stream_height * bytes_per_pixel);
+	ZeroMemory(depthData, image_stream_width * image_stream_height * bytes_per_pixel);
+
 	sf::Clock timer;
 
 	// Check whether there are any connected sensors
@@ -128,6 +118,26 @@ bool KinectDevice::init()
 	MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
 
 	return true;
+}
+
+void KinectDevice::shutdown()
+{
+	if (nullptr != sensor) {
+		sensor->NuiShutdown();
+		sensor = nullptr;
+	}
+
+	if (INVALID_HANDLE_VALUE != nextColorFrameEvent) {
+		CloseHandle(nextColorFrameEvent);
+	}
+
+	if (INVALID_HANDLE_VALUE != nextDepthFrameEvent) {
+		CloseHandle(nextDepthFrameEvent);
+	}
+
+	if (INVALID_HANDLE_VALUE != nextSkeletonFrameEvent) {
+		CloseHandle(nextSkeletonFrameEvent);
+	}
 }
 
 void KinectDevice::update()

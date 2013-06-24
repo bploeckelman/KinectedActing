@@ -28,6 +28,7 @@ public:
 	KinectDevice();
 	~KinectDevice();
 
+	void shutdown();
 	bool init();
 	void update();
 
