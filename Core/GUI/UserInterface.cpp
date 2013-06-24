@@ -19,7 +19,7 @@ GUI::GUI(Window& parentWindow)
 	, kinectTable(sfg::Table::Create())
 	, kinectScrolledWindow(sfg::ScrolledWindow::Create())
 	, kinectScrolledWindowBox(sfg::Box::Create(sfg::Box::HORIZONTAL))
-	, kinectLabel(sfg::Label::Create("Kinect"))
+	, kinectLabel(sfg::Label::Create("Kinect Sensor:"))
 	, kinectIdLabel(sfg::Label::Create())
 	, startKinectButton(sfg::Button::Create("Start Kinect"))
 	, stopKinectButton(sfg::Button::Create("Stop Kinect"))
@@ -58,8 +58,9 @@ void GUI::layoutWidgets()
 	box->SetRequisition(sf::Vector2f(winsize.x - 30.f, winsize.y - 50.f));
 	box->Pack(quitButton);
 
-	kinectLabel->SetText("Kinect          ");
-	kinectIdLabel->SetText("[ Kinect offline ]");
+	kinectLabel->SetText("Kinect Sensor:");
+	kinectLabel->SetAlignment(sf::Vector2f(0.f,0.75f));
+	kinectIdLabel->SetText("[ offline ]");
 	kinectScrolledWindowBox->SetRequisition(sf::Vector2f(winsize.x - 100.f, 0.f));
 	kinectScrolledWindowBox->Pack(kinectIdLabel, false, false);
 
@@ -74,7 +75,7 @@ void GUI::layoutWidgets()
 	kinectTable->SetRequisition(sf::Vector2f(winsize.x - 30.f, winsize.y - 50.f));
 	kinectTable->SetRowSpacings(1.f);
 	// Attach widget:  (widgetPtr, <col idx, row idx, col span, row span>, horizontal packing, vertical packing, padding)
-	kinectTable->Attach(kinectLabel, sf::Rect<sf::Uint32>(0, 0, 1, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(5.f, 5.f));
+	kinectTable->Attach(kinectLabel, sf::Rect<sf::Uint32>(0, 0, 1, 1), sfg::Table::FILL | sfg::Table::EXPAND, sfg::Table::FILL, sf::Vector2f(10.f, 10.f));
 	kinectTable->Attach(kinectScrolledWindow, sf::Rect<sf::Uint32>(0, 1, 1, 1), sfg::Table::FILL | sfg::Table::EXPAND, sfg::Table::FILL, sf::Vector2f(0.f, 0.f));
 	kinectTable->Attach(startKinectButton, sf::Rect<sf::Uint32>(0, 2, 1, 1), sfg::Table::FILL | sfg::Table::EXPAND, sfg::Table::FILL, sf::Vector2f(5.f, 5.f));
 	kinectTable->Attach(stopKinectButton, sf::Rect<sf::Uint32>(0, 3, 1, 1), sfg::Table::FILL | sfg::Table::EXPAND, sfg::Table::FILL, sf::Vector2f(5.f, 5.f));
@@ -108,7 +109,7 @@ void GUI::onStartKinectButtonClick()
 void GUI::onStopKinectButtonClick()
 {
 	parentWindow.getApp().getKinect().shutdown();
-	kinectIdLabel->SetText("[ Kinect offline ]");
+	kinectIdLabel->SetText("[ offline ]");
 }
 
 void GUI::setKinectIdLabel(const std::string& text)
