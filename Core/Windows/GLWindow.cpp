@@ -108,34 +108,32 @@ void GLWindow::render()
 
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
 	GLUtils::defaultProgram->setUniform("tex", 0);
+	glActiveTexture(GL_TEXTURE0);
 
-	glm::mat4 ground_model_matrix;
-	ground_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -5, 0));
-	ground_model_matrix = glm::scale(ground_model_matrix, glm::vec3(5,1,5));
-	ground_model_matrix = glm::rotate(ground_model_matrix, -90.f, glm::vec3(1,0,0));
-	GLUtils::defaultProgram->setUniform("model", ground_model_matrix);
+	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	glm::mat4 model_matrix;
+	model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -5, 0));
+	model_matrix = glm::scale(model_matrix, glm::vec3(5,1,5));
+	model_matrix = glm::rotate(model_matrix, -90.f, glm::vec3(1,0,0));
+	GLUtils::defaultProgram->setUniform("model", model_matrix);
 	Render::quad();
 
-	glm::mat4 cube_model_matrix;
-	cube_model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
-	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,1,0));
-	cube_model_matrix = glm::rotate(cube_model_matrix, d, glm::vec3(0,0,1));
-	GLUtils::defaultProgram->setUniform("model", cube_model_matrix);
+	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
+	model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
+	GLUtils::defaultProgram->setUniform("model", model_matrix);
 	Render::quad();
-	d += 5.f;
+	d += 2.5f;
 
 	const NUI_SKELETON_FRAME& skeletonFrame = app.getKinect().getSkeletonFrame();
 	const NUI_SKELETON_DATA  *skeleton = app.getKinect().getFirstTrackedSkeletonData(skeletonFrame);
 	if (nullptr != skeleton) {
-		glm::mat4 skel_model_matrix;
-		for (auto position : skeleton->SkeletonPositions) {
-			glm::vec3 pos = glm::vec3(position.x, position.y, position.z);
-			skel_model_matrix = glm::translate(glm::mat4(), pos);
-			skel_model_matrix = glm::scale(skel_model_matrix, glm::vec3(0.1f,0.1f,0.1f));
-			GLUtils::defaultProgram->setUniform("model", skel_model_matrix);
+		for (auto pos : skeleton->SkeletonPositions) {
+			model_matrix = glm::translate(glm::mat4(), glm::vec3(pos.x, pos.y, pos.z));
+			model_matrix = glm::scale(model_matrix, glm::vec3(0.1f,0.1f,0.1f));
+			GLUtils::defaultProgram->setUniform("model", model_matrix);
 			Render::quad();
 		}
 	}
