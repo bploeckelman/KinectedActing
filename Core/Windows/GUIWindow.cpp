@@ -1,3 +1,4 @@
+#include "Core/App.h"
 #include "GUIWindow.h"
 
 #include <iostream>
@@ -11,9 +12,9 @@ static const int initial_pos_y   = 5;
 static const sf::Uint32 style    = sf::Style::None;
 
 
-GUIWindow::GUIWindow(const std::string& title)
-	: Window(title)
-	, gui(window)
+GUIWindow::GUIWindow(const std::string& title, App& app)
+	: Window(title, app)
+	, gui(*this)
 {
 	videoMode = sf::VideoMode(window_width
 	                        , sf::VideoMode::getDesktopMode().height - height_offset
@@ -29,6 +30,7 @@ GUIWindow::~GUIWindow()
 void GUIWindow::init()
 {
 	gui.initialize();
+	gui.setKinectIdLabel(app.getKinect().getDeviceId());
 }
 
 void GUIWindow::update()

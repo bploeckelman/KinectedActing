@@ -7,8 +7,9 @@
 
 App::App()
 	: done(false)
-	, guiWindow("GUI")
-	, glWindow("OpenGL Window")
+	, kinect()
+	, guiWindow("GUI", *this)
+	, glWindow("OpenGL Window", *this)
 {
 	GLUtils::init();
 	Render::init();
@@ -26,14 +27,19 @@ App::~App()
 void App::run()
 {
 	while (!done) {
+		if (kinect.isInitialized()) {
+			kinect.update();
+		}
+
 		guiWindow.update();
 		glWindow.update();
 
-		guiWindow.render();
-		glWindow.render();
-
 		if (!guiWindow.getWindow().isOpen() || !glWindow.getWindow().isOpen()) {
 			done = true;
+			break;
 		}
+
+		guiWindow.render();
+		glWindow.render();
 	}
 }

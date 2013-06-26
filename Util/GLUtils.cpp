@@ -2,166 +2,67 @@
 /* GLUtils 
 /* -------
 /* A namespace containing functions for glsl shader manipulation
-/* Note: derived from framework @ http://www.arcsynthesis.org/gltut/
 /************************************************************************/
 #include "GLUtils.h"
+#include "Shaders/Program.h"
 
-#include <algorithm>
 #include <iostream>
-#include <sstream>
-#include <fstream>
 #include <string>
 #include <vector>
 
 using namespace std;
 
 
-GLuint GLUtils::defaultProgram;
-GLint GLUtils::projectionMatUniformLoc;
-GLint GLUtils::modelviewMatUniformLoc;
+tdogl::Program *GLUtils::defaultProgram = nullptr;
+
+tdogl::Program *createShaderProgram(const string& vertexShaderFilename, const string& fragmentShaderFilename);
 
 void GLUtils::init()
 {
 	// Initialize glew
 	GLenum result = glewInit();
 	if (GLEW_OK == result) {
-		std::cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n";
 		if (!glewIsSupported("GL_VERSION_3_3")) {
-			std::cerr << "OpenGL 3.0 is not supported\n";
-			exit(1);
+			cerr << "OpenGL 3.0 is not supported\n";
+			exit(EXIT_FAILURE);
+		}
+		cout << "GLEW initialized: " << glewGetString(GLEW_VERSION) << "\n"
+		     << "OpenGL version: "   << glGetString(GL_VERSION) << "\n"
+		     << "GLSL version: "     << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
+		     << "Vendor: "           << glGetString(GL_VENDOR) << "\n"
+		     << "Renderer: "         << glGetString(GL_RENDERER) << "\n";
+		int numExtensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+		for(int i = 0; i < numExtensions; ++i)
+		{
+			const GLubyte *extension_name=glGetStringi(GL_EXTENSIONS, i);
+			cout << "Extension: " << extension_name << "\n";
 		}
 	} else {
-		std::cerr << "Failed to initialize glew.\n"
-	              << "Reason: " << glewGetErrorString(result) << "\n";
-		exit(1);
+		cerr << "Failed to initialize glew.\n"
+		     << "Reason: " << glewGetErrorString(result) << "\n";
+		exit(EXIT_FAILURE);
 	}
 
-	// Initialize shaders
-	cout << "Creating shader objects...\n";
-	vector<GLuint> shaderList;
-	shaderList.push_back(createShader(GL_VERTEX_SHADER, default_vertex_shader));
-	shaderList.push_back(createShader(GL_FRAGMENT_SHADER, default_fragment_shader));
-
-	cout << "Creating shader program...\n";
-	defaultProgram = createProgram(shaderList);
-
-	cout << "Getting uniform locations...\n";
-	projectionMatUniformLoc = glGetUniformLocation(GLUtils::defaultProgram, "projection_mat");
-	modelviewMatUniformLoc  = glGetUniformLocation(GLUtils::defaultProgram, "modelview_mat");
-
-	cout << "Deleting shader objects...\n";
-	for_each(begin(shaderList), end(shaderList), glDeleteShader);
+	try {
+		cout << "Creating default shader program...\n";
+		defaultProgram = createShaderProgram(default_vertex_shader, default_fragment_shader);
+	} catch(const exception& e) {
+		cerr << "Failed to create shader program from '" << default_vertex_shader << "' and '" << default_fragment_shader << "'\n"
+	         << "Exception: " << e.what();
+		exit(EXIT_FAILURE);
+	}
 }
 
 void GLUtils::cleanup()
 {
-	cout << "Deleting shader program...\n";
-	glDeleteProgram(defaultProgram);
+	delete defaultProgram;
 }
 
-GLuint GLUtils::createShader(GLenum eShaderType, const string& shaderFileName)
+tdogl::Program *createShaderProgram(const string& vertexShaderFile, const string& fragmentShaderFile)
 {
-	// Read source from shader file
-	const string& shaderSource = getShaderSource(shaderFileName);
-	if (shaderSource.empty()) {
-		return 0;
-	}
-
-	// Get a string representation of the shader type
-	const char *shaderTypeStr = nullptr;
-	switch (eShaderType) {
-		case GL_VERTEX_SHADER:   shaderTypeStr = "vertex";   break;
-		case GL_FRAGMENT_SHADER: shaderTypeStr = "fragment"; break;
-		case GL_GEOMETRY_SHADER: shaderTypeStr = "geometry"; break;
-	}
-
-	// Create the shader object and compile the source code
-	GLuint shader = glCreateShader(eShaderType);
-	const char *source = shaderSource.c_str();
-	glShaderSource(shader, 1, &source, NULL);
-
-	glCompileShader(shader);
-
-	// Check for compilation errors
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (GL_FALSE == status) {
-		GLint infoLogLength;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-		GLchar *infoLog = new GLchar[infoLogLength + 1];
-		glGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
-
-		cerr << "Compile failed for " << shaderTypeStr << " shader "
-	         << "'" << shaderFileName << "'\n" << infoLog;
-		delete[] infoLog;
-
-		glDeleteShader(shader);
-		shader = 0;
-	}
-
-	if (0 != shader) {
-		cout << "\tShader source '" << shaderFileName << "' (" << shaderTypeStr << ") compiled.\n";
-	}
-
-	return shader;
-}
-
-GLuint GLUtils::createProgram(const vector<GLuint>& shaderList)
-{
-	// Create the program object, attach shader objects, and link it
-	GLuint program = glCreateProgram();
-	for (auto shader : shaderList) {
-		glAttachShader(program, shader);
-	}
-
-	glLinkProgram(program);
-
-	// Check for linker errors
-	GLint status;
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (GL_FALSE == status) {
-		GLint infoLogLength;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-		GLchar *infoLog = new GLchar[infoLogLength + 1];
-		glGetProgramInfoLog(program, infoLogLength, NULL, infoLog);
-
-		cerr << "Linker failed: \n" << infoLog;
-		delete[] infoLog;
-	}
-
-	// Detach shader objects from program 
-	for (auto shader : shaderList) {
-		glDetachShader(program, shader);
-	}
-
-	// If the link failed, clean up the program
-	if (GL_FALSE == status) {
-		glDeleteProgram(program);
-		program = 0;
-	}
-
-	if (0 != program) {
-		cout << "\tShader program linked.\n";
-	}
-
-	return program;
-}
-
-const string GLUtils::getShaderSource(const string& shaderFileName) {
-	ifstream infile(shaderFileName, ios::in);
-	if (!infile.is_open()) {
-		cerr << "Unable to open shader file: " << shaderFileName << "\n";
-		return "";
-	}
-
-	string line;
-	stringstream ss;
-	while (getline(infile, line)) {
-		ss << line << "\n";
-	}
-	infile.close();
-
-	return ss.str();
+	vector<tdogl::Shader> shaderList;
+	shaderList.push_back(tdogl::Shader::shaderFromFile(vertexShaderFile.c_str(), GL_VERTEX_SHADER));
+	shaderList.push_back(tdogl::Shader::shaderFromFile(fragmentShaderFile.c_str(), GL_FRAGMENT_SHADER));
+	return new tdogl::Program(shaderList);
 }

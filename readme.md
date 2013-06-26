@@ -12,3 +12,8 @@ Requires the following dependencies and associated environment variables to be s
 	<li>GLM        - $(GLM)</li> 
 	<li>GLEW       - $(GLEW)</li>
 </ul>
+
+Uses code from:
+<ul>
+	<li><a href="http://tomdalling.com/">Tom Dalling's Modern OpenGL Tutorials</a></li>
+</ul>

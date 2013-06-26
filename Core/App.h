@@ -1,6 +1,8 @@
 #pragma once
 #include <GL/glew.h>
 
+#include "Kinect/KinectDevice.h"
+
 #include "Windows/GLWindow.h"
 #include "Windows/GUIWindow.h"
 
@@ -13,10 +15,17 @@ public:
 
 	void run();
 
+	KinectDevice& getKinect();
+
 private:
 	bool done;
+
+	KinectDevice kinect;
 
 	GLWindow glWindow;
 	GUIWindow guiWindow;
 
 };
+
+
+inline KinectDevice& App::getKinect() { return kinect; }

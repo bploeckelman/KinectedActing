@@ -8,7 +8,7 @@
 class GUIWindow : public Window
 {
 public:
-	GUIWindow(const std::string& title);
+	GUIWindow(const std::string& title, App& app);
 	virtual ~GUIWindow();
 
 	void init();
