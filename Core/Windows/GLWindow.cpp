@@ -109,17 +109,19 @@ void GLWindow::update()
 	depthTexture->subImage2D(depthData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 
 	// Update skeleton data
-	//const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-	//if (nullptr == skeletonData) return;
-	//if (nullptr == animation)    return;
+	if (app.getGUIWindow().getGUI().isRecording()) {
+		const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+		if (nullptr == skeletonData) return;
 
-	//BoneAnimationTrack *hipTrack = animation->getBoneTrack(EBoneID::HIP_CENTER);
-	//KeyFrame           *kf       = hipTrack->createKeyFrame(timer.getElapsedTime().asSeconds());
-	//TransformKeyFrame  *keyFrame = dynamic_cast<TransformKeyFrame*>(kf);
-	//const Vector4&      pos      = skeletonData->Position;
-	//keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
-	//keyFrame->setRotation(glm::quat());
-	//keyFrame->setScale(glm::vec3(1,1,1));
+		BoneAnimationTrack *hipTrack = animation->getBoneTrack(EBoneID::HIP_CENTER);
+		KeyFrame           *kf       = hipTrack->createKeyFrame(timer.getElapsedTime().asSeconds());
+		TransformKeyFrame  *keyFrame = dynamic_cast<TransformKeyFrame*>(kf);
+		const Vector4&      pos      = skeletonData->Position;
+
+		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
+		keyFrame->setRotation(glm::quat());
+		keyFrame->setScale(glm::vec3(1,1,1));
+	}
 }
 
 float d = 0.f; // temporary, for rotating cube

@@ -15,7 +15,12 @@ public:
 	void update();
 	void render();
 
+	const GUI& getGUI() const;
+
 private:
 	GUI gui;
 	
 };
+
+
+inline const GUI& GUIWindow::getGUI() const { return gui; }
