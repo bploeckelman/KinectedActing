@@ -113,6 +113,7 @@ void GLWindow::update()
 		const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
 		if (nullptr == skeletonData) return;
 
+		// TODO : update all bone tracks
 		BoneAnimationTrack *hipTrack = animation->getBoneTrack(EBoneID::HIP_CENTER);
 		KeyFrame           *kf       = hipTrack->createKeyFrame(timer.getElapsedTime().asSeconds());
 		TransformKeyFrame  *keyFrame = dynamic_cast<TransformKeyFrame*>(kf);
@@ -121,6 +122,10 @@ void GLWindow::update()
 		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
 		keyFrame->setRotation(glm::quat());
 		keyFrame->setScale(glm::vec3(1,1,1));
+
+		std::stringstream ss;
+		ss << "Saved keyframes: " << animation->getBoneTrack(0)->getNumKeyFrames() << "\n";
+		app.getGUIWindow().getGUI().setInfoLabel(ss.str());
 	}
 }
 
