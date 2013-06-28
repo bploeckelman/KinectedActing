@@ -25,6 +25,8 @@ GUI::GUI(Window& parentWindow)
 	, stopKinectButton(sfg::Button::Create("Stop Kinect"))
 	, recordStartButton(sfg::Button::Create("Start Recording"))
 	, recordStopButton(sfg::Button::Create("Stop Recording"))
+	, infoLabel(sfg::Label::Create(""))
+	, recording(false)
 {}
 
 GUI::~GUI()
@@ -96,6 +98,9 @@ void GUI::layoutWidgets()
 	kinectTable->Attach(recordStartButton,    sf::Rect<sf::Uint32>(0, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
 	kinectTable->Attach(recordStopButton,     sf::Rect<sf::Uint32>(1, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
 
+	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
+	kinectTable->Attach(infoLabel,            sf::Rect<sf::Uint32>(0, 8, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+
 	box->Pack(kinectTable);
 
 	window->SetTitle("Kinected Acting");
@@ -135,9 +140,14 @@ void GUI::setKinectIdLabel(const std::string& text)
 	kinectIdLabel->SetText(text);
 }
 
+void GUI::setInfoLabel(const std::string& text)
+{
+	infoLabel->SetText(text);
+}
+
 void GUI::onRecordStartButtonClick()
 {
-	stopRecording();
+	startRecording();
 }
 
 void GUI::onRecordStopButtonClick()

@@ -19,7 +19,8 @@ public:
 	void handleEvent(const sf::Event& event);
 
 public: // External interface
-	void setKinectIdLabel(const std::string& label);
+	void setKinectIdLabel(const std::string& text);
+	void setInfoLabel(const std::string& text);
 
 	bool isRecording() const;
 	void startRecording();
@@ -57,6 +58,8 @@ private:
 
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
+
+	sfg::Label::Ptr infoLabel;
 
 	bool recording;
 
