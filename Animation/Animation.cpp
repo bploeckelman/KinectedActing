@@ -109,8 +109,17 @@ void Animation::computeAnimationBounds( float& minX, float& maxX, float& minY, f
 
 size_t Animation::_calcMemoryUsage() const
 {
-	// TODO ...
-	return 0;
+	size_t mem_usage = 0;
+
+	// Compute memory usage from animation tracks
+	for( BoneTrackConstIterator bti = begin(mBoneTracks); bti != end(mBoneTracks); ++bti)
+	{
+		const BoneAnimationTrack& boneTrack = *bti->second;
+		mem_usage += boneTrack.getNumKeyFrames()
+		          * (sizeof(float) + 2 * sizeof(glm::vec3) + sizeof(glm::quat));
+	}
+
+	return mem_usage;
 }
 
 void Animation::_clone( Animation* clonePtr ) const
