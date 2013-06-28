@@ -8,9 +8,13 @@
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
 #include "Util/RenderUtils.h"
+#include "Animation/Animation.h"
+#include "Animation/BoneAnimationTrack.h"
+#include "Animation/TransformKeyFrame.h"
 
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/System/Clock.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -30,12 +34,15 @@ static const int initial_pos_y   = 10;
 
 static glm::vec2 mouse_pos_current;
 
+static sf::Clock timer;
+
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, camera()
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
+	, animation(nullptr)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -50,6 +57,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 GLWindow::~GLWindow()
 {
+	delete animation;
 	delete colorTexture;
 	delete depthTexture;
 }
@@ -64,6 +72,10 @@ void GLWindow::init()
 	depthTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
 	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 	                                , (unsigned char *) app.getKinect().getColorData());
+
+	animation = new Animation(0, "test_anim");
+	animation->createBoneTrack(EBoneID::HIP_CENTER);
+	timer.restart();
 }
 
 void GLWindow::update()
@@ -87,9 +99,27 @@ void GLWindow::update()
 
 	updateCamera();
 
+	KinectDevice& kinect = app.getKinect();
+	unsigned char *colorData = (unsigned char*) kinect.getColorData();
+	unsigned char *depthData = (unsigned char*) kinect.getDepthData();
+	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
+
 	// Update kinect image stream textures
-	colorTexture->subImage2D((unsigned char *) app.getKinect().getColorData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
-	depthTexture->subImage2D((unsigned char *) app.getKinect().getDepthData(), KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+	colorTexture->subImage2D(colorData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+	depthTexture->subImage2D(depthData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+
+	// Update skeleton data
+	//const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+	//if (nullptr == skeletonData) return;
+	//if (nullptr == animation)    return;
+
+	//BoneAnimationTrack *hipTrack = animation->getBoneTrack(EBoneID::HIP_CENTER);
+	//KeyFrame           *kf       = hipTrack->createKeyFrame(timer.getElapsedTime().asSeconds());
+	//TransformKeyFrame  *keyFrame = dynamic_cast<TransformKeyFrame*>(kf);
+	//const Vector4&      pos      = skeletonData->Position;
+	//keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
+	//keyFrame->setRotation(glm::quat());
+	//keyFrame->setScale(glm::vec3(1,1,1));
 }
 
 float d = 0.f; // temporary, for rotating cube

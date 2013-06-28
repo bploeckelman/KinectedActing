@@ -7,6 +7,8 @@
 
 namespace tdogl { class Texture; }
 
+class Animation;
+
 
 class GLWindow : public Window
 {
@@ -26,5 +28,7 @@ private:
 
 	tdogl::Texture *colorTexture;
 	tdogl::Texture *depthTexture;
+
+	Animation *animation;
 
 };
