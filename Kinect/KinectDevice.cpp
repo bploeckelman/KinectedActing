@@ -110,10 +110,10 @@ bool KinectDevice::init()
 
 	// Get the device id for this sensor
 	deviceId = bstr_to_std_string(sensor->NuiDeviceConnectionId());
-	stringstream ss;
-	ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
-	   << "Connection id: [" << deviceId << "]";
-	MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
+	//stringstream ss;
+	//ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
+	//   << "Connection id: [" << deviceId << "]";
+	//MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
 
 	return true;
 }
