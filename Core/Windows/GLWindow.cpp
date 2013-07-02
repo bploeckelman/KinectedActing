@@ -43,6 +43,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
 	, animation(nullptr)
+	, skeleton(nullptr)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -57,6 +58,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 GLWindow::~GLWindow()
 {
+	delete skeleton;
 	delete animation;
 	delete colorTexture;
 	delete depthTexture;
@@ -74,7 +76,12 @@ void GLWindow::init()
 	                                , (unsigned char *) app.getKinect().getColorData());
 
 	animation = new Animation(0, "test_anim");
-	animation->createBoneTrack(EBoneID::HIP_CENTER);
+	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animation->createBoneTrack(boneID);
+	}
+
+	skeleton = new Skeleton();
+
 	timer.restart();
 }
 
@@ -108,24 +115,17 @@ void GLWindow::update()
 	colorTexture->subImage2D(colorData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 	depthTexture->subImage2D(depthData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 
-	// Update skeleton data
-	if (app.getGUIWindow().getGUI().isRecording()) {
-		const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-		if (nullptr == skeletonData) return;
+	// Save skeleton data
+	updateRecording();
 
-		// TODO : update all bone tracks
-		BoneAnimationTrack *hipTrack = animation->getBoneTrack(EBoneID::HIP_CENTER);
-		KeyFrame           *kf       = hipTrack->createKeyFrame(timer.getElapsedTime().asSeconds());
-		TransformKeyFrame  *keyFrame = dynamic_cast<TransformKeyFrame*>(kf);
-		const Vector4&      pos      = skeletonData->Position;
-
-		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
-		keyFrame->setRotation(glm::quat());
-		keyFrame->setScale(glm::vec3(1,1,1));
-
-		std::stringstream ss;
-		ss << "Saved keyframes: " << animation->getBoneTrack(0)->getNumKeyFrames() << "\n";
-		app.getGUIWindow().getGUI().setInfoLabel(ss.str());
+	// Update rendered skeleton data
+	// TODO : setup bone mask for all Kinect joints
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+		static float t = 0.f;
+		animation->apply(skeleton, t += 0.03333f);
+		if (t > animation->getLength()) {
+			t = 0.f;
+		}
 	}
 }
 
@@ -164,16 +164,9 @@ void GLWindow::render()
 	Render::quad();
 	d += 2.5f;
 
-	const NUI_SKELETON_FRAME& skeletonFrame = app.getKinect().getSkeletonFrame();
-	const NUI_SKELETON_DATA  *skeleton = app.getKinect().getFirstTrackedSkeletonData(skeletonFrame);
-	if (nullptr != skeleton) {
-		for (auto pos : skeleton->SkeletonPositions) {
-			model_matrix = glm::translate(glm::mat4(), glm::vec3(pos.x, pos.y, pos.z));
-			model_matrix = glm::scale(model_matrix, glm::vec3(0.1f,0.1f,0.1f));
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
-			Render::quad();
-		}
-	}
+	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	app.getKinect().getLiveSkeleton()->render();
+	//skeleton->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
@@ -217,4 +210,36 @@ void GLWindow::updateCamera()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) camera.offsetPosition(camera.right() *  dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) camera.offsetPosition(world_up       * -dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) camera.offsetPosition(world_up       *  dist);
+}
+
+void GLWindow::updateRecording()
+{
+	const KinectDevice& kinect = app.getKinect();
+	if (app.getGUIWindow().getGUI().isRecording()) {
+		const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
+		const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+		if (nullptr == skeletonData) return;
+
+		// Update all bone tracks
+		int numKeyFrames = 0;
+		for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+			BoneAnimationTrack *track = animation->getBoneTrack(boneID);
+			if (nullptr == track) continue;
+
+			const float now = timer.getElapsedTime().asSeconds();
+			TransformKeyFrame *keyFrame = dynamic_cast<TransformKeyFrame*>(track->createKeyFrame(now));
+			if (nullptr == keyFrame) continue;
+
+			const Vector4& pos = skeletonData->SkeletonPositions[boneID];
+			keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
+			keyFrame->setRotation(glm::quat()); // TODO
+			keyFrame->setScale(glm::vec3(1,1,1));
+
+			numKeyFrames += track->getNumKeyFrames();
+		}
+
+		std::stringstream ss;
+		ss << "Saved keyframes: " << numKeyFrames << "\n";
+		app.getGUIWindow().getGUI().setInfoLabel(ss.str());
+	}
 }

@@ -8,6 +8,7 @@
 namespace tdogl { class Texture; }
 
 class Animation;
+class Skeleton;
 
 
 class GLWindow : public Window
@@ -23,6 +24,7 @@ public:
 private:
 	void resetCamera();
 	void updateCamera();
+	void updateRecording();
 
 	tdogl::Camera camera;
 
@@ -30,5 +32,6 @@ private:
 	tdogl::Texture *depthTexture;
 
 	Animation *animation;
+	Skeleton *skeleton;
 
 };
