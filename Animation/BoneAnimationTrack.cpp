@@ -22,6 +22,7 @@ SOFTWARE.
 #include "BoneAnimationTrack.h"
 #include "TransformKeyFrame.h"
 #include "Animation.h"
+#include "Skeleton.h"
 
 #include <cassert>
 
@@ -89,27 +90,27 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 				// interpolation splines not built yet, build them now
 				_buildInterpSplines();
 
-			//tkf->setTranslation( mTransSpline.getPoint( tkf1->getIndex(), t ) );
-			//tkf->setRotation( mRotSpline.getPoint( tkf1->getIndex(), t ) );
-			//tkf->setScale( mScalSpline.getPoint( tkf1->getIndex(), t ) );
+			tkf->setTranslation( mTransSpline.getPoint( tkf1->getIndex(), t ) );
+			tkf->setRotation( mRotSpline.getPoint( tkf1->getIndex(), t ) );
+			tkf->setScale( mScalSpline.getPoint( tkf1->getIndex(), t ) );
 		}
 	}
 }
 
-//void BoneAnimationTrack::apply( Skeleton* skel, float time, float weight, float scale ) const
-//{
-//	TransformKeyFrame tkf( time, 0 );
-//	Bone* bone = skel->getBone(mBoneId);
-//	if( bone == NULL )
-//		// Skeleton doesn't contain a bone for this track
-//			return;
-//
-//	getInterpolatedKeyFrame( time, &tkf );
-//
-//	bone->translate( tkf.getTranslation() * weight * scale );
-//	bone->rotate( glm::quat().slerp( tkf.getRotation(), weight ) );
-//	bone->scale( glm::vec3(1,1,1) + ( glm::vec3(1,1,1) - tkf.getScale() ) * weight * scale );
-//}
+void BoneAnimationTrack::apply( Skeleton* skel, float time, float weight, float scale ) const
+{
+	TransformKeyFrame tkf( time, 0 );
+	Bone* bone = skel->getBone(mBoneId);
+	if( nullptr == bone )
+		// Skeleton doesn't contain a bone for this track
+		return;
+
+	getInterpolatedKeyFrame( time, &tkf );
+
+	bone->translation = glm::vec3( tkf.getTranslation() * weight * scale );
+	bone->rotation = glm::slerp( glm::quat(), tkf.getRotation(), weight );
+	bone->scale = ( glm::vec3(1,1,1) + ( glm::vec3(1,1,1) - tkf.getScale() ) * weight * scale );
+}
 
 KeyFrame* BoneAnimationTrack::_createKeyFrame( float time )
 {

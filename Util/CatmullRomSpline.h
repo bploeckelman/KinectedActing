@@ -160,7 +160,8 @@ public:
 
 		float t2 = t*t;
 		glm::vec4 tv(t2*t, t2, t, 1);
-		tv *= mCoeffs;
+		//tv *= mCoeffs;
+		tv = tv * mCoeffs;
 
 		const T& cpt1 = mCtrlPoints[index];
 		const T& cpt2 = mCtrlPoints[index+1];
@@ -168,12 +169,22 @@ public:
 		const T& tan2 = mTangents[index+1];
 		T pt = cpt1;
 
-		for( unsigned int ei = 0; ei < cpt1.size(); ++ei )
+		//for( unsigned int ei = 0; ei < cpt1.size(); ++ei )
+		//{
+		//	pt.set( ei, tv.get(0) * cpt1.get(ei) +
+		//		tv.get(1) * cpt2.get(ei) +
+		//		tv.get(2) * tan1.get(ei) +
+		//		tv.get(3) * tan2.get(ei) );
+		//}
+		// NOTE: glm::quat has a specialized version of CatmullRomSpline, but glm::vecN doesn't
+		// for now this is using a hardcoded size so that it can handle the translation/scaling 
+		// portions of a TransformKeyFrame object
+		for( unsigned int ei = 0; ei < 3; ++ei )
 		{
-			pt.set( ei, tv.get(0) * cpt1.get(ei) +
-				tv.get(1) * cpt2.get(ei) +
-				tv.get(2) * tan1.get(ei) +
-				tv.get(3) * tan2.get(ei) );
+			pt[ei] = tv[0] * cpt1[ei]
+				   + tv[1] * cpt2[ei]
+				   + tv[2] * tan1[ei]
+				   + tv[3] * tan2[ei];
 		}
 
 		return pt;

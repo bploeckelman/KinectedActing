@@ -23,19 +23,13 @@ SOFTWARE.
 
 #include "AnimationTrack.h"
 #include "Util/CatmullRomSpline.h"
+#include "Skeleton.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 class Animation;
 
-enum EBoneID
-{
-	HIP_CENTER = 0,
-	HIP_LEFT = 1,
-	HIP_RIGHT = 2,
-	// TODO... add rest of the the joints
-};
 
 /**
 * @brief Class representing a bone animation track.
@@ -92,7 +86,7 @@ public:
 	* should be applied.
 	* @param scale Scaling factor applied to this animation track.
 	*/
-	 //void apply( Skeleton* skel, float time, float weight = 1.f, float scale = 1.f ) const;
+	 void apply( Skeleton* skel, float time, float weight = 1.f, float scale = 1.f ) const;
 
 	 /**
 	 * Builds the splines used for key-frame interpolation.

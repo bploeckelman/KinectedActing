@@ -97,10 +97,17 @@ float Animation::getLength() const
 	return length;
 }
 
-//void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const std::set<unsigned short> boneMask/*=EmptyBoneMask*/ ) const
-//{
-//	// TODO...
-//}
+void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const std::set<EBoneID> boneMask/*=EmptyBoneMask*/ ) const
+{
+	assert(nullptr != skel);
+
+	// apply bone tracks
+	for(BoneTrackConstIterator bti = begin(mBoneTracks); bti != end(mBoneTracks); ++bti)
+	{
+		const BoneAnimationTrack& bt = *bti->second;
+		bt.apply(skel, time, weight, scale);
+	}
+}
 
 void Animation::computeAnimationBounds( float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ ) const
 {

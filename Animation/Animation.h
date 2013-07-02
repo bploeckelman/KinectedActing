@@ -2,8 +2,10 @@
 
 #include <string>
 #include <map>
+#include <set>
 
 class BoneAnimationTrack;
+enum EBoneID;
 
 enum KFInterpolationMethod
 {
@@ -11,9 +13,13 @@ enum KFInterpolationMethod
 	KFInterp_Spline
 };
 
+const std::set<EBoneID> EmptyBoneMask;
+
 
 class Animation
 {
+	friend class Skeleton;
+
 	typedef std::map<unsigned short, BoneAnimationTrack*>::iterator       BoneTrackIterator;
 	typedef std::map<unsigned short, BoneAnimationTrack*>::const_iterator BoneTrackConstIterator;
 
@@ -41,7 +47,7 @@ public:
 	int getFrameRate() const;
 	void setFrameRate(int frameRate);
 
-	//void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const std::set<unsigned short> boneMask=EmptyBoneMask) const;
+	void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const std::set<EBoneID> boneMask=EmptyBoneMask) const;
 
 	void computeAnimationBounds(float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ) const;
 
