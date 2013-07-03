@@ -4,6 +4,7 @@
 #include "Core/Resources/ImageManager.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
+#include "Scene/Objects/PlaneMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
@@ -21,6 +22,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <memory>
 
 static const int color_bits      = 32;
 static const int depth_bits      = 24;
@@ -37,6 +39,7 @@ static glm::vec2 mouse_pos_current;
 static sf::Clock timer;
 
 static GLUtils::Sphere sphere;
+static std::shared_ptr<PlaneMesh> plane;
 
 
 GLWindow::GLWindow(const std::string& title, App& app)
@@ -84,7 +87,8 @@ void GLWindow::init()
 
 	skeleton = new Skeleton();
 
-	sphere.init();
+	//sphere.init();
+	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
 
 	timer.restart();
 }
@@ -152,28 +156,24 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	glActiveTexture(GL_TEXTURE0);
 
-	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
 	glm::mat4 model_matrix;
-	model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -5, 0));
-	model_matrix = glm::scale(model_matrix, glm::vec3(5,1,5));
-	model_matrix = glm::rotate(model_matrix, -90.f, glm::vec3(1,0,0));
+	model_matrix = glm::translate(glm::mat4(), glm::vec3(0,1,-10));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
 	GLUtils::defaultProgram->setUniform("model", model_matrix);
 	Render::quad();
-
-	//glBindTexture(GL_TEXTURE_2D, depthTexture->object());
-	//model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
-	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
-	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
-	//GLUtils::defaultProgram->setUniform("model", model_matrix);
-	//Render::quad();
-	//d += 2.5f;
+	d += 2.5f;
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	app.getKinect().getLiveSkeleton()->render();
 	//skeleton->render();
 
+	//GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	//sphere.render();
+
 	GLUtils::defaultProgram->setUniform("model", glm::mat4());
-	sphere.render();
+	plane->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
@@ -209,7 +209,7 @@ void GLWindow::updateCamera()
 	// Apply keyboard movement to camera position
 	const glm::vec3 forward(camera.forward().x, 0, camera.forward().z);
 	const glm::vec3 world_up(0,1,0);
-	const float dist = 1.f;
+	const float dist = 0.1f;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) camera.offsetPosition(forward        * -dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) camera.offsetPosition(forward        *  dist);
