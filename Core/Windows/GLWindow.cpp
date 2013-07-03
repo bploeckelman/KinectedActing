@@ -135,6 +135,13 @@ void GLWindow::update()
 			t = 0.f;
 		}
 	}
+
+	// Toggle wireframe rendering 
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 float d = 0.f; // temporary, for rotating cube
