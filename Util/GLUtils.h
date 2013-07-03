@@ -28,4 +28,41 @@ namespace GLUtils
 
 	const std::string getShaderSource(const std::string& shaderFileName);
 
+
+	class Mesh
+	{
+	public:
+		Mesh();
+		virtual ~Mesh();
+
+		virtual void init() = 0;
+		virtual void render() const = 0;
+
+	private:
+		// Non-copyable
+		Mesh(const Mesh& mesh);
+		Mesh& operator=(const Mesh& mesh);
+
+	protected:
+		GLuint vertexBuffer;
+		GLuint indexBuffer;
+		std::vector<GLfloat> vertices;
+		std::vector<GLushort> indices;
+	};
+
+	class Sphere : public Mesh
+	{
+	public:
+		Sphere();
+
+		void init();
+		void init(float radius, unsigned int rings, unsigned int sectors);
+		void render() const;
+
+	private:
+		// Non-copyable
+		Sphere(const Sphere& sphere);
+		Sphere& operator=(const Sphere& sphere);
+	};
+
 } // namespace GLUtils

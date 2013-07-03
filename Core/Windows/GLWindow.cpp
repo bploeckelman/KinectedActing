@@ -36,6 +36,8 @@ static glm::vec2 mouse_pos_current;
 
 static sf::Clock timer;
 
+static GLUtils::Sphere sphere;
+
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
@@ -81,6 +83,8 @@ void GLWindow::init()
 	}
 
 	skeleton = new Skeleton();
+
+	sphere.init();
 
 	timer.restart();
 }
@@ -156,17 +160,20 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("model", model_matrix);
 	Render::quad();
 
-	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
-	model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
-	GLUtils::defaultProgram->setUniform("model", model_matrix);
-	Render::quad();
-	d += 2.5f;
+	//glBindTexture(GL_TEXTURE_2D, depthTexture->object());
+	//model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
+	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
+	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
+	//GLUtils::defaultProgram->setUniform("model", model_matrix);
+	//Render::quad();
+	//d += 2.5f;
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	app.getKinect().getLiveSkeleton()->render();
 	//skeleton->render();
+
+	GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	sphere.render();
 
 	GLUtils::defaultProgram->stopUsing();
 
