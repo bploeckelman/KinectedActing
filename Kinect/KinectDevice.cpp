@@ -1,4 +1,5 @@
 #include "KinectDevice.h"
+#include "Animation/Skeleton.h"
 
 #include <NuiApi.h>
 
@@ -27,6 +28,7 @@ KinectDevice::KinectDevice()
 	, depthStream(INVALID_HANDLE_VALUE)
 	, colorData(new byte[image_stream_width * image_stream_height * bytes_per_pixel])
 	, depthData(new byte[image_stream_width * image_stream_height * bytes_per_pixel])
+	, liveSkeleton(new Skeleton())
 	, skeletonFrame()
 	, skeletonData(nullptr)
 	, skeletonTrackingFlags(skeleton_tracking_flags)
@@ -37,8 +39,9 @@ KinectDevice::KinectDevice()
 
 KinectDevice::~KinectDevice()
 {
-	delete[] colorData;
+	delete liveSkeleton;
 	delete[] depthData;
+	delete[] colorData;
 }
 
 bool KinectDevice::init()
@@ -110,10 +113,10 @@ bool KinectDevice::init()
 
 	// Get the device id for this sensor
 	deviceId = bstr_to_std_string(sensor->NuiDeviceConnectionId());
-	stringstream ss;
-	ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
-	   << "Connection id: [" << deviceId << "]";
-	MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
+	//stringstream ss;
+	//ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
+	//   << "Connection id: [" << deviceId << "]";
+	//MessageBoxA(NULL, ss.str().c_str(), "Kinect Info", MB_OK | MB_ICONINFORMATION);
 
 	return true;
 }
@@ -271,6 +274,8 @@ HRESULT KinectDevice::processImageStreamData( const EStreamType& eStreamType )
 
 HRESULT KinectDevice::processSkeletonData()
 {
+	if (nullptr == sensor) return E_FAIL;
+
 	// Get the next skeleton frame
 	HRESULT hr = sensor->NuiSkeletonGetNextFrame(0, &skeletonFrame);
 	if (FAILED(hr)) {
@@ -289,6 +294,17 @@ HRESULT KinectDevice::processSkeletonData()
 	if (nullptr == skeletonData) {
 		//MessageBoxA(NULL, "Failed to find tracked skeleton data.", "Kinect Error", MB_OK | MB_ICONERROR);
 		return E_FAIL;
+	}
+
+	// Apply skeleton data to live Skeleton object
+	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		Bone *bone = liveSkeleton->getBone(boneID);
+		if (nullptr == bone) continue;
+
+		const Vector4& t = skeletonData->SkeletonPositions[boneID];
+		bone->translation = glm::vec3(t.x, t.y, t.z);
+		bone->rotation = glm::quat(); // TODO
+		bone->scale = glm::vec3(1,1,1);
 	}
 
 	return hr;

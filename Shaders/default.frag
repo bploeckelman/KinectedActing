@@ -4,6 +4,7 @@ uniform sampler2D tex;
 
 in vec3 fragVertex;
 in vec2 fragTexCoord;
+in vec3 fragNormal;
 
 out vec4 finalColor;
 

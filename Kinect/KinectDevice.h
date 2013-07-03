@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+class Skeleton;
+
 
 class KinectDevice
 {
@@ -38,6 +40,7 @@ public:
 	const std::string& getDeviceId() const;
 	const byte *getColorData() const;
 	const byte *getDepthData() const;
+	const Skeleton *getLiveSkeleton() const;
 	const NUI_SKELETON_FRAME& getSkeletonFrame() const;
 
 	bool isInitialized() const;
@@ -66,6 +69,7 @@ private:
 	byte *colorData;
 	byte *depthData;
 
+	Skeleton *liveSkeleton;
 	NUI_SKELETON_FRAME skeletonFrame;
 	NUI_SKELETON_DATA *skeletonData;
 	DWORD  skeletonTrackingFlags;
@@ -82,6 +86,7 @@ inline const std::string& KinectDevice::getDeviceId() const { return deviceId; }
 
 inline const byte *KinectDevice::getColorData() const { return colorData; }
 inline const byte *KinectDevice::getDepthData() const { return depthData; }
+inline const Skeleton *KinectDevice::getLiveSkeleton() const { return liveSkeleton; }
 inline const NUI_SKELETON_FRAME& KinectDevice:: getSkeletonFrame() const { return skeletonFrame; }
 
 inline bool KinectDevice::isInitialized()       const { return (nullptr != sensor); }

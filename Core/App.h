@@ -16,6 +16,8 @@ public:
 	void run();
 
 	KinectDevice& getKinect();
+	GLWindow& getGLWindow();
+	GUIWindow& getGUIWindow();
 
 private:
 	bool done;
@@ -29,3 +31,5 @@ private:
 
 
 inline KinectDevice& App::getKinect() { return kinect; }
+inline GLWindow& App::getGLWindow() { return glWindow; }
+inline GUIWindow& App::getGUIWindow() { return guiWindow; }

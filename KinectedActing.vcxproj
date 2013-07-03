@@ -86,6 +86,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\Animation.cpp" />
+    <ClCompile Include="Animation\AnimationTrack.cpp" />
+    <ClCompile Include="Animation\BoneAnimationTrack.cpp" />
+    <ClCompile Include="Animation\Skeleton.cpp" />
     <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\GUI\UserInterface.cpp" />
     <ClCompile Include="Core\Main.cpp" />
@@ -101,6 +105,12 @@
     <ClCompile Include="Util\RenderUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation\Animation.h" />
+    <ClInclude Include="Animation\AnimationTrack.h" />
+    <ClInclude Include="Animation\BoneAnimationTrack.h" />
+    <ClInclude Include="Animation\KeyFrame.h" />
+    <ClInclude Include="Animation\Skeleton.h" />
+    <ClInclude Include="Animation\TransformKeyFrame.h" />
     <ClInclude Include="Core\App.h" />
     <ClInclude Include="Core\GUI\UserInterface.h" />
     <ClInclude Include="Core\Resources\ImageManager.h" />
@@ -112,6 +122,7 @@
     <ClInclude Include="Scene\Camera.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
+    <ClInclude Include="Util\CatmullRomSpline.h" />
     <ClInclude Include="Util\GLUtils.h" />
     <ClInclude Include="Util\RenderUtils.h" />
   </ItemGroup>

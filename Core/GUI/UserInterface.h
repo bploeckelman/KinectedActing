@@ -19,7 +19,12 @@ public:
 	void handleEvent(const sf::Event& event);
 
 public: // External interface
-	void setKinectIdLabel(const std::string& label);
+	void setKinectIdLabel(const std::string& text);
+	void setInfoLabel(const std::string& text);
+
+	bool isRecording() const;
+	void startRecording();
+	void stopRecording();
 
 private:
 	void layoutWidgets();
@@ -29,6 +34,8 @@ private:
 	void onQuitButtonClick();
 	void onStartKinectButtonClick();
 	void onStopKinectButtonClick();
+	void onRecordStartButtonClick();
+	void onRecordStopButtonClick();
 
 private:
 	Window& parentWindow;
@@ -45,7 +52,20 @@ private:
 	sfg::Box::Ptr kinectScrolledWindowBox;
 	sfg::Label::Ptr kinectLabel;
 	sfg::Label::Ptr kinectIdLabel;
+
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::Button::Ptr recordStartButton;
+	sfg::Button::Ptr recordStopButton;
+
+	sfg::Label::Ptr infoLabel;
+
+	bool recording;
+
 };
+
+
+inline bool GUI::isRecording() const { return recording; }
+inline void GUI::startRecording() { recording = true;  }
+inline void GUI::stopRecording()  { recording = false; }

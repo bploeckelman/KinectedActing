@@ -25,6 +25,9 @@
     <Filter Include="Core\Resources">
       <UniqueIdentifier>{a9898055-a9cd-4bd6-840f-2dfafc34516e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Animation">
+      <UniqueIdentifier>{6e556407-b0a6-4cee-a7ef-1b07135751f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -66,6 +69,18 @@
     <ClCompile Include="Core\Resources\Texture.cpp">
       <Filter>Core\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Animation\AnimationTrack.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\BoneAnimationTrack.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Animation.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Skeleton.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -106,6 +121,27 @@
     </ClInclude>
     <ClInclude Include="Core\Resources\Texture.h">
       <Filter>Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationTrack.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\KeyFrame.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\TransformKeyFrame.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\BoneAnimationTrack.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\CatmullRomSpline.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animation.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Skeleton.h">
+      <Filter>Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
