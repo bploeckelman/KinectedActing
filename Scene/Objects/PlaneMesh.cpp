@@ -69,11 +69,12 @@ PlaneMesh::PlaneMesh( const std::string& name
 	glDisableVertexAttribArray(vertexAttribLoc);
 
 	// Generate index buffer data
+	// Note: CCW winding, extra vertices add degenerate triangles between rows
 	for (unsigned int r = 0, i = 0; r < rows - 1; ++r) {
 		indexData.push_back(r * cols);
 		for (unsigned int c = 0; c < cols; ++c) {
-			indexData.push_back(r * cols + c);
 			indexData.push_back((r + 1) * cols + c);
+			indexData.push_back(r * cols + c);
 		}
 		indexData.push_back((r + 1) * cols + (cols - 1));
 	}
