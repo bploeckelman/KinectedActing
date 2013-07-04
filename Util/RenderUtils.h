@@ -4,7 +4,13 @@
 /* ------
 /* A namespace containing functions for rendering various things 
 /************************************************************************/
+#include <gl/glew.h>
+
+#include "Scene/Objects/CubeMesh.h"
+
 #include <glm/glm.hpp>
+
+#include <memory>
 
 
 namespace Render
@@ -16,6 +22,9 @@ namespace Render
 
 	// Draw a basic quad
 	void quad();
+
+	// Draw a cube
+	void cube();
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);
