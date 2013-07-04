@@ -4,6 +4,7 @@
 #include "Core/Resources/ImageManager.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
+#include "Scene/Objects/CubeMesh.h"
 #include "Scene/Objects/PlaneMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
@@ -40,6 +41,7 @@ static sf::Clock timer;
 
 static GLUtils::Sphere sphere;
 static std::shared_ptr<PlaneMesh> plane;
+static std::shared_ptr<CubeMesh> cube;
 
 
 GLWindow::GLWindow(const std::string& title, App& app)
@@ -89,6 +91,7 @@ void GLWindow::init()
 
 	//sphere.init();
 	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
+	cube = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
 
 	timer.restart();
 }
@@ -182,6 +185,9 @@ void GLWindow::render()
 
 	GLUtils::defaultProgram->setUniform("model", glm::mat4());
 	plane->render();
+
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
+	cube->render();
 
 	GLUtils::defaultProgram->stopUsing();
 

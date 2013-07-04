@@ -90,6 +90,9 @@
     <ClCompile Include="Scene\Objects\PlaneMesh.cpp">
       <Filter>Scene\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\Objects\CubeMesh.cpp">
+      <Filter>Scene\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -156,6 +159,9 @@
       <Filter>Scene\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Objects\PlaneMesh.h">
+      <Filter>Scene\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Objects\CubeMesh.h">
       <Filter>Scene\Objects</Filter>
     </ClInclude>
   </ItemGroup>
