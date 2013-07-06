@@ -30,6 +30,7 @@ private:
 
 	tdogl::Texture *colorTexture;
 	tdogl::Texture *depthTexture;
+	tdogl::Texture *gridTexture;
 
 	Animation *animation;
 	Skeleton *skeleton;
