@@ -33,7 +33,7 @@ static const int gl_major_version = 3;
 static const int gl_minor_version = 3;
 static const int framerate_limit = 60;
 static const int initial_pos_x   = 260;
-static const int initial_pos_y   = 10;
+static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
 
@@ -183,7 +183,7 @@ void GLWindow::render()
 	//GLUtils::defaultProgram->setUniform("model", glm::mat4());
 	//sphere.render();
 
-	GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	plane->render();
 
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
@@ -199,7 +199,7 @@ void GLWindow::resetCamera()
 	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
 	camera.setFieldOfView(66.f);
 	camera.setNearAndFarPlanes(0.1f, 100.f);
-	camera.setPosition(glm::vec3(0, 0, 20));
+	camera.setPosition(glm::vec3(0, 2, 10));
 	camera.offsetOrientation(-camera.verticalAngle(), -camera.horizontalAngle());
 }
 
