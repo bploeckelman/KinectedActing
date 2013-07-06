@@ -66,36 +66,35 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 GLWindow::~GLWindow()
 {
-	delete skeleton;
-	delete animation;
-	delete gridTexture;
-	delete colorTexture;
-	delete depthTexture;
+	// Nothing to do, yay shared pointers
 }
 
 void GLWindow::init()
 {
 	SetForegroundWindow(window.getSystemHandle());
 
-	colorTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
-	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-	                                , (unsigned char *) app.getKinect().getColorData()); 
-	depthTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
-	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-	                                , (unsigned char *) app.getKinect().getColorData());
+	colorTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
+	depthTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
 
 	sf::Image gridImage(GetImage("grid.png"));
-	gridTexture = new tdogl::Texture(tdogl::Texture::Format::RGBA
-	                               , gridImage.getSize().x, gridImage.getSize().y
-	                               , (unsigned char *) gridImage.getPixelsPtr()
-	                               , GL_NEAREST, GL_REPEAT);
+	gridTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::RGBA
+		                 , gridImage.getSize().x, gridImage.getSize().y
+		                 , (unsigned char *) gridImage.getPixelsPtr()
+		                 , GL_NEAREST, GL_REPEAT));
 
-	animation = new Animation(0, "test_anim");
+	animation = std::shared_ptr<Animation>(new Animation(0, "test_anim"));
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animation->createBoneTrack(boneID);
 	}
 
-	skeleton = new Skeleton();
+	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
 
 	//sphere.init();
 	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
@@ -141,7 +140,7 @@ void GLWindow::update()
 	// TODO : setup bone mask for all Kinect joints
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
 		static float t = 0.f;
-		animation->apply(skeleton, t += 0.03333f);
+		animation->apply(skeleton.get(), t += 0.03333f);
 		if (t > animation->getLength()) {
 			t = 0.f;
 		}
