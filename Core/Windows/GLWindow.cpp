@@ -4,6 +4,8 @@
 #include "Core/Resources/ImageManager.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
+#include "Scene/Objects/CubeMesh.h"
+#include "Scene/Objects/PlaneMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
@@ -21,22 +23,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <memory>
 
 static const int color_bits      = 32;
 static const int depth_bits      = 24;
 static const int stencil_bits    = 8;
-static const int antialias_level = 4;
+static const int antialias_level = 8;
 static const int gl_major_version = 3;
 static const int gl_minor_version = 3;
 static const int framerate_limit = 60;
 static const int initial_pos_x   = 260;
-static const int initial_pos_y   = 10;
+static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
 
 static sf::Clock timer;
 
 static GLUtils::Sphere sphere;
+static std::shared_ptr<PlaneMesh> plane;
+static std::shared_ptr<CubeMesh> cube;
 
 
 GLWindow::GLWindow(const std::string& title, App& app)
@@ -44,6 +49,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, camera()
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
+	, gridTexture(nullptr)
 	, animation(nullptr)
 	, skeleton(nullptr)
 {
@@ -60,31 +66,39 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 GLWindow::~GLWindow()
 {
-	delete skeleton;
-	delete animation;
-	delete colorTexture;
-	delete depthTexture;
+	// Nothing to do, yay shared pointers
 }
 
 void GLWindow::init()
 {
 	SetForegroundWindow(window.getSystemHandle());
 
-	colorTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
-	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-	                                , (unsigned char *) app.getKinect().getColorData()); 
-	depthTexture = new tdogl::Texture(tdogl::Texture::Format::BGRA
-	                                , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-	                                , (unsigned char *) app.getKinect().getColorData());
+	colorTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
+	depthTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
 
-	animation = new Animation(0, "test_anim");
+	sf::Image gridImage(GetImage("grid.png"));
+	gridTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::RGBA
+		                 , gridImage.getSize().x, gridImage.getSize().y
+		                 , (unsigned char *) gridImage.getPixelsPtr()
+		                 , GL_NEAREST, GL_REPEAT));
+
+	animation = std::shared_ptr<Animation>(new Animation(0, "test_anim"));
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animation->createBoneTrack(boneID);
 	}
 
-	skeleton = new Skeleton();
+	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
 
-	sphere.init();
+	//sphere.init();
+	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
+	cube = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
 
 	timer.restart();
 }
@@ -126,10 +140,17 @@ void GLWindow::update()
 	// TODO : setup bone mask for all Kinect joints
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
 		static float t = 0.f;
-		animation->apply(skeleton, t += 0.03333f);
+		animation->apply(skeleton.get(), t += 0.03333f);
 		if (t > animation->getLength()) {
 			t = 0.f;
 		}
+	}
+
+	// Toggle wireframe rendering 
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
 
@@ -138,42 +159,42 @@ void GLWindow::render()
 {
 	window.setActive();
 
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
+	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 	GLUtils::defaultProgram->setUniform("tex", 0);
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	glActiveTexture(GL_TEXTURE0);
 
-	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
 	glm::mat4 model_matrix;
-	model_matrix = glm::translate(glm::mat4(), glm::vec3(0, -5, 0));
-	model_matrix = glm::scale(model_matrix, glm::vec3(5,1,5));
-	model_matrix = glm::rotate(model_matrix, -90.f, glm::vec3(1,0,0));
+	model_matrix = glm::translate(glm::mat4(), glm::vec3(0,1,-10));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
+	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
 	GLUtils::defaultProgram->setUniform("model", model_matrix);
 	Render::quad();
+	d += 2.5f;
 
-	//glBindTexture(GL_TEXTURE_2D, depthTexture->object());
-	//model_matrix = glm::translate(glm::mat4(), glm::vec3(0, 0, -10));
-	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
-	//model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
-	//GLUtils::defaultProgram->setUniform("model", model_matrix);
-	//Render::quad();
-	//d += 2.5f;
+	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(10,10));
+	plane->render();
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	app.getKinect().getLiveSkeleton()->render();
-	//skeleton->render();
-
-	GLUtils::defaultProgram->setUniform("model", glm::mat4());
-	sphere.render();
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
+	cube->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
@@ -185,7 +206,7 @@ void GLWindow::resetCamera()
 	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
 	camera.setFieldOfView(66.f);
 	camera.setNearAndFarPlanes(0.1f, 100.f);
-	camera.setPosition(glm::vec3(0, 0, 20));
+	camera.setPosition(glm::vec3(0, 2, 10));
 	camera.offsetOrientation(-camera.verticalAngle(), -camera.horizontalAngle());
 }
 
@@ -209,7 +230,7 @@ void GLWindow::updateCamera()
 	// Apply keyboard movement to camera position
 	const glm::vec3 forward(camera.forward().x, 0, camera.forward().z);
 	const glm::vec3 world_up(0,1,0);
-	const float dist = 1.f;
+	const float dist = 0.1f;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) camera.offsetPosition(forward        * -dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) camera.offsetPosition(forward        *  dist);

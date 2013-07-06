@@ -4,6 +4,7 @@
 #include "Util/GLUtils.h"
 
 #include <string>
+#include <memory>
 
 namespace tdogl { class Texture; }
 
@@ -28,10 +29,11 @@ private:
 
 	tdogl::Camera camera;
 
-	tdogl::Texture *colorTexture;
-	tdogl::Texture *depthTexture;
+	std::shared_ptr<tdogl::Texture> colorTexture;
+	std::shared_ptr<tdogl::Texture> depthTexture;
+	std::shared_ptr<tdogl::Texture> gridTexture;
 
-	Animation *animation;
-	Skeleton *skeleton;
+	std::shared_ptr<Animation> animation;
+	std::shared_ptr<Skeleton>  skeleton;
 
 };

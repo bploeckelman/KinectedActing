@@ -99,6 +99,9 @@
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
     <ClCompile Include="Scene\Camera.cpp" />
+    <ClCompile Include="Scene\Objects\CubeMesh.cpp" />
+    <ClCompile Include="Scene\Objects\Mesh.cpp" />
+    <ClCompile Include="Scene\Objects\PlaneMesh.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Shaders\Program.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
@@ -120,6 +123,9 @@
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Kinect\KinectDevice.h" />
     <ClInclude Include="Scene\Camera.h" />
+    <ClInclude Include="Scene\Objects\CubeMesh.h" />
+    <ClInclude Include="Scene\Objects\Mesh.h" />
+    <ClInclude Include="Scene\Objects\PlaneMesh.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
     <ClInclude Include="Util\CatmullRomSpline.h" />

@@ -28,7 +28,7 @@ void Skeleton::render() const
 		model_matrix = glm::translate(glm::mat4(), pos);
 		model_matrix = glm::scale(model_matrix, glm::vec3(0.1f, 0.1f, 0.1f));
 		GLUtils::defaultProgram->setUniform("model", model_matrix);
-		Render::quad();
+		Render::cube();
 	}
 }
 

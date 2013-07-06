@@ -3,24 +3,28 @@
 /* ------
 /* A namespace containing functions for rendering various things 
 /************************************************************************/
+#include <GL/glew.h>
+
 #include "RenderUtils.h"
 #include "GLUtils.h"
 #include "Shaders/Program.h"
+#include "Scene/Objects/CubeMesh.h"
 //#include "ImageManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <GL/glew.h>
-
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <memory>
 
 using glm::vec3;
 using glm::vec4;
 using glm::value_ptr;
+
+std::shared_ptr<CubeMesh> cubeMesh;
 
 GLuint quad_vao;
 GLuint quad_vbo;
@@ -73,6 +77,7 @@ void loadBufferObjects()
 void Render::init()
 {
 	loadBufferObjects();
+	cubeMesh = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
 }
 
 void Render::cleanup()
@@ -114,6 +119,11 @@ void Render::quad()
 	glDisableVertexAttribArray(texcoordAttribLoc);
 	glDisableVertexAttribArray(vertAttribLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Render::cube() 
+{
+	cubeMesh->render();
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )
