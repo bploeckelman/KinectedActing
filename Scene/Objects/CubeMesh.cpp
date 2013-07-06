@@ -15,20 +15,42 @@ CubeMesh::CubeMesh( const std::string& name )
 {
 	this->name = name;
 	// Generate vertex buffer data
-	const size_t numverts = 8;
-	const size_t vsize = 8 * numverts; // floats: 3 vertex, 2 texture, 3 normal
-	// TODO : fixup texture coordinates
+	const size_t num_faces = 6;
+	const size_t verts_per_face = 4;
+	const size_t vsize = 8 * verts_per_face * num_faces; // floats: 3 vertex, 2 texture, 3 normal
+	// Note: duplication is due to the same vertex with different texcoords/normals for different faces
 	GLfloat vdata[vsize] = {
 		// vertex x,y,z       texcoord s,t    normal x,y,z
+		// Front face  (0, 1, 2  :  2, 1, 3)
 		-0.5f,  0.5f,  0.5f,    0.f, 0.f,    0.f, 0.f, 1.f,
 		-0.5f, -0.5f,  0.5f,    0.f, 1.f,    0.f, 0.f, 1.f,
 		 0.5f,  0.5f,  0.5f,    1.f, 0.f,    0.f, 0.f, 1.f,
 		 0.5f, -0.5f,  0.5f,    1.f, 1.f,    0.f, 0.f, 1.f,
-
+		// Right face  (4, 5, 6  :  6, 5, 7)
+		 0.5f,  0.5f,  0.5f,    0.f, 0.f,    1.f, 0.f, 0.f,
+		 0.5f, -0.5f,  0.5f,    0.f, 1.f,    1.f, 0.f, 0.f,
+		 0.5f,  0.5f, -0.5f,    1.f, 0.f,    1.f, 0.f, 0.f,
+		 0.5f, -0.5f, -0.5f,    1.f, 1.f,    1.f, 0.f, 0.f,
+		// Rear face   (8, 10, 9  :  9, 10, 11)
 		-0.5f,  0.5f, -0.5f,    0.f, 0.f,    0.f, 0.f, -1.f,
 		-0.5f, -0.5f, -0.5f,    0.f, 1.f,    0.f, 0.f, -1.f,
 		 0.5f,  0.5f, -0.5f,    1.f, 0.f,    0.f, 0.f, -1.f,
 		 0.5f, -0.5f, -0.5f,    1.f, 1.f,    0.f, 0.f, -1.f,
+		// Left face   (12, 13, 14  : 14, 13, 15)
+		-0.5f,  0.5f, -0.5f,    0.f, 0.f,   -1.f, 0.f, 0.f,
+		-0.5f, -0.5f, -0.5f,    0.f, 1.f,   -1.f, 0.f, 0.f,
+		-0.5f,  0.5f,  0.5f,    1.f, 0.f,   -1.f, 0.f, 0.f,
+		-0.5f, -0.5f,  0.5f,    1.f, 1.f,   -1.f, 0.f, 0.f,
+		// Top face    (16, 17, 18  :  18, 17, 19)
+		-0.5f,  0.5f,  0.5f,    0.f, 0.f,    0.f, 1.f, 0.f,
+		 0.5f,  0.5f,  0.5f,    1.f, 0.f,    0.f, 1.f, 0.f,
+		-0.5f,  0.5f, -0.5f,    0.f, 1.f,    0.f, 1.f, 0.f,
+		 0.5f,  0.5f, -0.5f,    1.f, 1.f,    0.f, 1.f, 0.f,
+		// Bottom face (20, 21, 22  :  22, 21, 23)
+		-0.5f, -0.5f, -0.5f,    0.f, 1.f,    0.f, -1.f, 0.f,
+		 0.5f, -0.5f, -0.5f,    1.f, 1.f,    0.f, -1.f, 0.f,
+		-0.5f, -0.5f,  0.5f,    0.f, 0.f,    0.f, -1.f, 0.f,
+		 0.5f, -0.5f,  0.5f,    1.f, 0.f,    0.f, -1.f, 0.f
 	};
 	vertexData.insert(end(vertexData), &vdata[0], &vdata[vsize]);
 
@@ -60,12 +82,12 @@ CubeMesh::CubeMesh( const std::string& name )
 	const size_t numfaces = 6;
 	const size_t isize = 6 * numfaces;
 	GLushort idata[isize] = {
-		0, 1, 2,    2, 1, 3,
-		3, 7, 2,    2, 7, 6,
-		6, 7, 5,    5, 4, 6,
-		4, 5, 0,    0, 5, 1,
-		1, 5, 3,    3, 5, 7,
-		0, 2, 4,    2, 6, 4
+		 0,  1,  2,     2,  1,  3,
+		 4,  5,  6,     6,  5,  7,
+		 8, 10,  9,     9, 10, 11,
+		12, 13, 14,    14, 13, 15,
+		16, 17, 18,    18, 17, 19,
+		20, 21, 22,    22, 21, 23
 	};
 	indexData.insert(end(indexData), &idata[0], &idata[isize]);
 
