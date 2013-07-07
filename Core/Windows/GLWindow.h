@@ -1,7 +1,8 @@
 #pragma once
 #include "Window.h"
 #include "Scene/Camera.h"
-#include "Util/GLUtils.h"
+
+#include <SFML/System/Time.hpp>
 
 #include <string>
 #include <memory>
@@ -24,8 +25,12 @@ public:
 
 private:
 	void resetCamera();
+	void handleEvents();
 	void updateCamera();
 	void updateRecording();
+	void updateTextures();
+
+	sf::Time animTimer;
 
 	tdogl::Camera camera;
 
