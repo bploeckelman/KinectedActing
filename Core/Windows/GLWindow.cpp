@@ -256,6 +256,7 @@ void GLWindow::updateRecording()
 	const KinectDevice& kinect = app.getKinect();
 	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
 	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
 	if (nullptr == skeletonData) return;
 
 	// Update animation timer for this set of keyframes
@@ -272,8 +273,9 @@ void GLWindow::updateRecording()
 		if (nullptr == keyFrame) continue;
 
 		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
+		const Vector4& orient = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
 		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
-		keyFrame->setRotation(glm::quat()); // TODO
+		keyFrame->setRotation(glm::quat(orient.w, orient.x, orient.y, orient.z));
 		keyFrame->setScale(glm::vec3(1,1,1));
 
 		numKeyFrames += track->getNumKeyFrames();
