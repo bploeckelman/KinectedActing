@@ -23,9 +23,11 @@ GUI::GUI(Window& parentWindow)
 	, kinectIdLabel(sfg::Label::Create())
 	, startKinectButton(sfg::Button::Create("Start Kinect"))
 	, stopKinectButton(sfg::Button::Create("Stop Kinect"))
+	, recordingLabel(sfg::Label::Create("Skeleton Recording:"))
 	, recordStartButton(sfg::Button::Create("Start Recording"))
 	, recordStopButton(sfg::Button::Create("Stop Recording"))
 	, infoLabel(sfg::Label::Create(""))
+	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 	, recording(false)
 {}
 
@@ -79,6 +81,8 @@ void GUI::layoutWidgets()
 	recordStartButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
 	recordStopButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
 
+	liveSkeletonVisibleCheckButton->SetActive(true);
+
 	kinectTable->SetRequisition(sf::Vector2f(winsize.x - 30.f, winsize.y - 50.f));
 	// Attach widget:  (widgetPtr, <col idx, row idx, col span, row span>, horizontal packing, vertical packing, padding)
 	kinectTable->Attach(quitButton,           sf::Rect<sf::Uint32>(0, 0, 2, 1), 0, sfg::Table::FILL, sf::Vector2f(0.f, 0.f));
@@ -92,11 +96,13 @@ void GUI::layoutWidgets()
 	kinectTable->Attach(startKinectButton,    sf::Rect<sf::Uint32>(0, 4, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
 	kinectTable->Attach(stopKinectButton,     sf::Rect<sf::Uint32>(1, 4, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
 
-	sfg::Label::Ptr recordingLabel = sfg::Label::Create("Skeleton Recording:");
+	recordingLabel->SetText("Skeleton Recording:");
 	recordingLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
 	kinectTable->Attach(recordingLabel,       sf::Rect<sf::Uint32>(0, 5, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 	kinectTable->Attach(recordStartButton,    sf::Rect<sf::Uint32>(0, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
 	kinectTable->Attach(recordStopButton,     sf::Rect<sf::Uint32>(1, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
+
+	kinectTable->Attach(liveSkeletonVisibleCheckButton, sf::Rect<sf::Uint32>(0, 7, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
 	kinectTable->Attach(infoLabel,            sf::Rect<sf::Uint32>(0, 8, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
@@ -116,6 +122,7 @@ void GUI::connectSignals()
 	stopKinectButton ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onStopKinectButtonClick,  this);
 	recordStartButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordStartButtonClick, this);
 	recordStopButton ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordStopButtonClick,  this);
+	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
 }
 
 void GUI::onQuitButtonClick()
@@ -140,6 +147,11 @@ void GUI::setKinectIdLabel(const std::string& text)
 	kinectIdLabel->SetText(text);
 }
 
+void GUI::setRecordingLabel(const std::string& text)
+{
+	recordingLabel->SetText(text);
+}
+
 void GUI::setInfoLabel(const std::string& text)
 {
 	infoLabel->SetText(text);
@@ -153,4 +165,9 @@ void GUI::onRecordStartButtonClick()
 void GUI::onRecordStopButtonClick()
 {
 	stopRecording();
+}
+
+void GUI::onLiveSkeletonVisibleCheckButtonClick()
+{
+	liveSkeletonVisible = liveSkeletonVisibleCheckButton->IsActive();
 }

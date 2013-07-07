@@ -152,7 +152,10 @@ void GLWindow::render()
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	app.getKinect().getLiveSkeleton()->render();
+	if (app.getGUIWindow().getGUI().isLiveSkeletonVisible()) {
+		app.getKinect().getLiveSkeleton()->render();
+	}
+
 	skeleton->render();
 
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
@@ -276,6 +279,6 @@ void GLWindow::updateRecording()
 	}
 
 	std::stringstream ss;
-	ss << "Saved keyframes: " << numKeyFrames << "\n";
-	app.getGUIWindow().getGUI().setInfoLabel(ss.str());
+	ss << "Saved " << numKeyFrames << " key frames\n";
+	app.getGUIWindow().getGUI().setRecordingLabel(ss.str());
 }

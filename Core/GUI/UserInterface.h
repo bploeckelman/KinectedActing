@@ -20,11 +20,14 @@ public:
 
 public: // External interface
 	void setKinectIdLabel(const std::string& text);
+	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 
 	bool isRecording() const;
 	void startRecording();
 	void stopRecording();
+
+	bool isLiveSkeletonVisible() const;
 
 private:
 	void layoutWidgets();
@@ -36,6 +39,7 @@ private:
 	void onStopKinectButtonClick();
 	void onRecordStartButtonClick();
 	void onRecordStopButtonClick();
+	void onLiveSkeletonVisibleCheckButtonClick();
 
 private:
 	Window& parentWindow;
@@ -56,12 +60,16 @@ private:
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
 
 	sfg::Label::Ptr infoLabel;
 
+	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
+
 	bool recording;
+	bool liveSkeletonVisible;
 
 };
 
@@ -69,3 +77,4 @@ private:
 inline bool GUI::isRecording() const { return recording; }
 inline void GUI::startRecording() { recording = true;  }
 inline void GUI::stopRecording()  { recording = false; }
+inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }
