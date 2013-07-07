@@ -176,9 +176,10 @@ void GLWindow::handleEvents()
 					// Update rendered skeleton data
 					// TODO : setup bone mask for all Kinect joints
 					static float t = 0.f;
-					animation->apply(skeleton.get(), t += 0.01f);
-					if (t > animation->getLength()) {
-						t = 0.f;
+					const float len = animation->getLength();
+					if (len != 0.f) {
+						animation->apply(skeleton.get(), t);
+						if ((t += 0.1f) > len) t = 0.f;
 					}
 				}
 				break;
@@ -229,6 +230,24 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
+	// Handle a clear frames request
+	if (app.getGUIWindow().getGUI().isClearKeyFrames()) {
+		app.getGUIWindow().getGUI().stopRecording();
+
+		// Clear and recreate all bone tracks
+		animation->deleteAllBoneTrack();
+		for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+			animation->createBoneTrack(boneID);
+		}
+
+		// Update gui label
+		app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
+
+		// Reset clear flag
+		app.getGUIWindow().getGUI().keyFramesCleared();
+	}
+
+	// Bail early if not currently recording
 	if (!app.getGUIWindow().getGUI().isRecording()) {
 		return;
 	}
@@ -260,8 +279,10 @@ void GLWindow::updateRecording()
 		numKeyFrames += track->getNumKeyFrames();
 	}
 
+	// Update gui label text
 	std::stringstream ss;
-	ss << "Saved " << numKeyFrames << " key frames\n";
+	ss << "Saved " << numKeyFrames << " key frames\n"
+	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
 	app.getGUIWindow().getGUI().setRecordingLabel(ss.str());
 }
 

@@ -26,6 +26,8 @@ public: // External interface
 	bool isRecording() const;
 	void startRecording();
 	void stopRecording();
+	bool isClearKeyFrames() const;
+	void keyFramesCleared();
 
 	bool isLiveSkeletonVisible() const;
 
@@ -39,6 +41,7 @@ private:
 	void onStopKinectButtonClick();
 	void onRecordStartButtonClick();
 	void onRecordStopButtonClick();
+	void onRecordClearButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
 
 private:
@@ -63,6 +66,7 @@ private:
 	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
+	sfg::Button::Ptr recordClearButton;
 
 	sfg::Label::Ptr infoLabel;
 
@@ -70,6 +74,7 @@ private:
 
 	bool recording;
 	bool liveSkeletonVisible;
+	bool clearKeyFrames;
 
 };
 
@@ -78,3 +83,5 @@ inline bool GUI::isRecording() const { return recording; }
 inline void GUI::startRecording() { recording = true;  }
 inline void GUI::stopRecording()  { recording = false; }
 inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }
+inline bool GUI::isClearKeyFrames() const { return clearKeyFrames; }
+inline void GUI::keyFramesCleared() { clearKeyFrames = false; }
