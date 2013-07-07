@@ -8,7 +8,7 @@ Animation::Animation( unsigned short id, const std::string& name /*, AnimationSe
 	, mName(name)
 	, mFrameRate(60)
 	//, mAnimSet(animSet)
-	, mInterpMethod(KFInterp_Spline)
+	, mInterpMethod(KFInterp_Linear)
 {}
 
 Animation::~Animation()
