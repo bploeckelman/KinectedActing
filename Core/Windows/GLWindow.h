@@ -29,6 +29,7 @@ private:
 	void updateCamera();
 	void updateRecording();
 	void updateTextures();
+	void loadTextures();
 
 	sf::Time animTimer;
 

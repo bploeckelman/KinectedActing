@@ -71,21 +71,7 @@ void GLWindow::init()
 {
 	SetForegroundWindow(window.getSystemHandle());
 
-	colorTexture = std::shared_ptr<tdogl::Texture>(
-		new tdogl::Texture(tdogl::Texture::Format::BGRA
-		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-		                 , (unsigned char *) app.getKinect().getColorData()));
-	depthTexture = std::shared_ptr<tdogl::Texture>(
-		new tdogl::Texture(tdogl::Texture::Format::BGRA
-		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
-		                 , (unsigned char *) app.getKinect().getColorData()));
-
-	sf::Image gridImage(GetImage("grid.png"));
-	gridTexture = std::shared_ptr<tdogl::Texture>(
-		new tdogl::Texture(tdogl::Texture::Format::RGBA
-		                 , gridImage.getSize().x, gridImage.getSize().y
-		                 , (unsigned char *) gridImage.getPixelsPtr()
-		                 , GL_NEAREST, GL_REPEAT));
+	loadTextures();
 
 	animation = std::shared_ptr<Animation>(new Animation(0, "test_anim"));
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
@@ -106,12 +92,8 @@ void GLWindow::update()
 	updateTextures();
 	updateRecording();
 
-	// Toggle wireframe rendering 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	} else {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
+	bool space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }
 
 float d = 0.f; // temporary, for rotating cube
@@ -281,4 +263,24 @@ void GLWindow::updateRecording()
 	std::stringstream ss;
 	ss << "Saved " << numKeyFrames << " key frames\n";
 	app.getGUIWindow().getGUI().setRecordingLabel(ss.str());
+}
+
+void GLWindow::loadTextures()
+{
+	colorTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
+
+	depthTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::BGRA
+		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
+		                 , (unsigned char *) app.getKinect().getColorData()));
+
+	sf::Image gridImage(GetImage("grid.png"));
+	gridTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::RGBA
+		                 , gridImage.getSize().x, gridImage.getSize().y
+		                 , (unsigned char *) gridImage.getPixelsPtr()
+		                 , GL_NEAREST, GL_REPEAT));
 }
