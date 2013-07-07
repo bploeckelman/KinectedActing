@@ -106,16 +106,6 @@ void GLWindow::update()
 	updateTextures();
 	updateRecording();
 
-	// Update rendered skeleton data
-	// TODO : setup bone mask for all Kinect joints
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
-		static float t = 0.f;
-		animation->apply(skeleton.get(), t += 0.03333f);
-		if (t > animation->getLength()) {
-			t = 0.f;
-		}
-	}
-
 	// Toggle wireframe rendering 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -197,6 +187,16 @@ void GLWindow::handleEvents()
 			switch (event.key.code) {
 				case sf::Keyboard::Escape: window.close(); break;
 				case sf::Keyboard::BackSpace: resetCamera(); break;
+				case sf::Keyboard::Return: {
+					// Update rendered skeleton data
+					// TODO : setup bone mask for all Kinect joints
+					static float t = 0.f;
+					animation->apply(skeleton.get(), t += 0.01f);
+					if (t > animation->getLength()) {
+						t = 0.f;
+					}
+				}
+				break;
 			}
 		}
 	}
