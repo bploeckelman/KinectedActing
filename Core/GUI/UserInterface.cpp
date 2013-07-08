@@ -5,6 +5,7 @@
 #include "UserInterface.h"
 #include "Core/App.h"
 #include "Core/Windows/Window.h"
+#include "Core/Messages/Messages.h"
 
 #include <string>
 
@@ -36,9 +37,7 @@ GUI::GUI(Window& parentWindow)
 	, playbackLastButton(sfg::Button::Create(">>"))
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
-	, recording(false)
 	, liveSkeletonVisible(true)
-	, clearKeyFrames(false)
 {}
 
 GUI::~GUI()
@@ -150,19 +149,17 @@ void GUI::connectSignals()
 
 void GUI::onQuitButtonClick()
 {
-	parentWindow.getWindow().close();
+	gMessageDispatcher.dispatchMessage(QuitProgramMessage());
 }
 
 void GUI::onStartKinectButtonClick()
 {
-	parentWindow.getApp().getKinect().init();
-	kinectIdLabel->SetText(parentWindow.getApp().getKinect().getDeviceId());
+	gMessageDispatcher.dispatchMessage(StartKinectDeviceMessage());
 }
 
 void GUI::onStopKinectButtonClick()
 {
-	parentWindow.getApp().getKinect().shutdown();
-	kinectIdLabel->SetText("[ offline ]");
+	gMessageDispatcher.dispatchMessage(StopKinectDeviceMessage());
 }
 
 void GUI::setKinectIdLabel(const std::string& text)
@@ -182,17 +179,17 @@ void GUI::setInfoLabel(const std::string& text)
 
 void GUI::onRecordStartButtonClick()
 {
-	startRecording();
+	gMessageDispatcher.dispatchMessage(StartRecordingMessage());
 }
 
 void GUI::onRecordStopButtonClick()
 {
-	stopRecording();
+	gMessageDispatcher.dispatchMessage(StopRecordingMessage());
 }
 
 void GUI::onRecordClearButtonClick()
 {
-	clearKeyFrames = true;
+	gMessageDispatcher.dispatchMessage(ClearRecordingMessage());
 }
 
 void GUI::onLiveSkeletonVisibleCheckButtonClick()

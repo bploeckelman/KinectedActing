@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "Scene/Camera.h"
+#include "Core/Messages/Messages.h"
 
 #include <SFML/System/Time.hpp>
 
@@ -13,7 +14,7 @@ class Animation;
 class Skeleton;
 
 
-class GLWindow : public Window
+class GLWindow : public Window, MessageHandler
 {
 public:
 	GLWindow(const std::string& title, App& app);
@@ -22,6 +23,8 @@ public:
 	void init();
 	void update();
 	void render();
+
+	void process(const ClearRecordingMessage *message);
 
 private:
 	void resetCamera();

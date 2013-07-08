@@ -23,12 +23,6 @@ public: // External interface
 	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 
-	bool isRecording() const;
-	void startRecording();
-	void stopRecording();
-	bool isClearKeyFrames() const;
-	void keyFramesCleared();
-
 	bool isLiveSkeletonVisible() const;
 
 private:
@@ -85,16 +79,9 @@ private:
 
 	sfg::Label::Ptr infoLabel;
 
-	bool recording;
 	bool liveSkeletonVisible;
-	bool clearKeyFrames;
 
 };
 
 
-inline bool GUI::isRecording() const { return recording; }
-inline void GUI::startRecording() { recording = true;  }
-inline void GUI::stopRecording()  { recording = false; }
 inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }
-inline bool GUI::isClearKeyFrames() const { return clearKeyFrames; }
-inline void GUI::keyFramesCleared() { clearKeyFrames = false; }

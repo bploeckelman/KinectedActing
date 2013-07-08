@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 
 #include "Kinect/KinectDevice.h"
+#include "Messages/Messages.h"
 
 #include "Windows/GLWindow.h"
 #include "Windows/GUIWindow.h"
@@ -10,7 +11,7 @@
 #include <SFML/System/Clock.hpp>
 
 
-class App
+class App : public MessageHandler
 {
 public:
 	App();
@@ -24,8 +25,17 @@ public:
 	GLWindow& getGLWindow();
 	GUIWindow& getGUIWindow();
 
+	bool isRecording() const { return recording; }
+
+	void process(const QuitProgramMessage       *message);
+	void process(const StartKinectDeviceMessage *message);
+	void process(const StopKinectDeviceMessage  *message);
+	void process(const StartRecordingMessage    *message);
+	void process(const StopRecordingMessage     *message);
+
 private:
 	bool done;
+	bool recording;
 
 	sf::Clock timer;
 

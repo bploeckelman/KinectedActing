@@ -2,6 +2,7 @@
 #include "Core/App.h"
 #include "Core/Resources/Texture.h"
 #include "Core/Resources/ImageManager.h"
+#include "Core/Messages/Messages.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
 #include "Scene/Objects/CubeMesh.h"
@@ -60,6 +61,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
 
 	resetCamera();
+
+	gMessageDispatcher.registerHandler(Message::CLEAR_SKELETON_RECORDING, this);
 }
 
 GLWindow::~GLWindow()
@@ -230,25 +233,7 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
-	// Handle a clear frames request
-	if (app.getGUIWindow().getGUI().isClearKeyFrames()) {
-		app.getGUIWindow().getGUI().stopRecording();
-
-		// Clear and recreate all bone tracks
-		animation->deleteAllBoneTrack();
-		for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-			animation->createBoneTrack(boneID);
-		}
-
-		// Update gui label
-		app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
-
-		// Reset clear flag
-		app.getGUIWindow().getGUI().keyFramesCleared();
-	}
-
-	// Bail early if not currently recording
-	if (!app.getGUIWindow().getGUI().isRecording()) {
+	if (!app.isRecording()) {
 		return;
 	}
 
@@ -282,6 +267,7 @@ void GLWindow::updateRecording()
 	}
 
 	// Update gui label text
+	// TODO : send a message to do this
 	std::stringstream ss;
 	ss << "Saved " << numKeyFrames << " key frames\n"
 	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
@@ -306,4 +292,20 @@ void GLWindow::loadTextures()
 		                 , gridImage.getSize().x, gridImage.getSize().y
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
+}
+
+void GLWindow::process( const ClearRecordingMessage *message )
+{
+	// Handle a clear frames request
+	gMessageDispatcher.dispatchMessage(StopRecordingMessage());
+
+	// Clear and recreate all bone tracks
+	animation->deleteAllBoneTrack();
+	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animation->createBoneTrack(boneID);
+	}
+
+	// Update gui label
+	// TODO : send a message to do this
+	app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
 }
