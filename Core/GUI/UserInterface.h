@@ -20,11 +20,16 @@ public:
 
 public: // External interface
 	void setKinectIdLabel(const std::string& text);
+	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 
 	bool isRecording() const;
 	void startRecording();
 	void stopRecording();
+	bool isClearKeyFrames() const;
+	void keyFramesCleared();
+
+	bool isLiveSkeletonVisible() const;
 
 private:
 	void layoutWidgets();
@@ -36,6 +41,14 @@ private:
 	void onStopKinectButtonClick();
 	void onRecordStartButtonClick();
 	void onRecordStopButtonClick();
+	void onRecordClearButtonClick();
+	void onLiveSkeletonVisibleCheckButtonClick();
+	void onPlaybackFirstButtonClick();
+	void onPlaybackPreviousButtonClick();
+	void onPlaybackStopButtonClick();
+	void onPlaybackStartButtonClick();
+	void onPlaybackNextButtonClick();
+	void onPlaybackLastButtonClick();
 
 private:
 	Window& parentWindow;
@@ -44,10 +57,8 @@ private:
 	sfg::Desktop desktop;
 	sfg::Window::Ptr window;
 
-	sfg::Box::Ptr box;
+	sfg::Table::Ptr table;
 	sfg::Button::Ptr quitButton;
-
-	sfg::Table::Ptr kinectTable;
 	sfg::ScrolledWindow::Ptr kinectScrolledWindow;
 	sfg::Box::Ptr kinectScrolledWindowBox;
 	sfg::Label::Ptr kinectLabel;
@@ -56,12 +67,27 @@ private:
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
+
+	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
+	sfg::Button::Ptr recordClearButton;
+
+	sfg::Label::Ptr playbackLabel;
+	sfg::ProgressBar::Ptr playbackProgressBar;
+	sfg::Button::Ptr playbackFirstButton;
+	sfg::Button::Ptr playbackPreviousButton;
+	sfg::Button::Ptr playbackStopButton;
+	sfg::Button::Ptr playbackStartButton;
+	sfg::Button::Ptr playbackNextButton;
+	sfg::Button::Ptr playbackLastButton;
 
 	sfg::Label::Ptr infoLabel;
 
 	bool recording;
+	bool liveSkeletonVisible;
+	bool clearKeyFrames;
 
 };
 
@@ -69,3 +95,6 @@ private:
 inline bool GUI::isRecording() const { return recording; }
 inline void GUI::startRecording() { recording = true;  }
 inline void GUI::stopRecording()  { recording = false; }
+inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }
+inline bool GUI::isClearKeyFrames() const { return clearKeyFrames; }
+inline void GUI::keyFramesCleared() { clearKeyFrames = false; }

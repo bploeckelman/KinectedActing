@@ -14,19 +14,31 @@ GUI::GUI(Window& parentWindow)
 	, sfgui()
 	, desktop()
 	, window(sfg::Window::Create())
-	, box(sfg::Box::Create(sfg::Box::Orientation::VERTICAL))
 	, quitButton(sfg::Button::Create("Quit"))
-	, kinectTable(sfg::Table::Create())
+	, table(sfg::Table::Create())
 	, kinectScrolledWindow(sfg::ScrolledWindow::Create())
 	, kinectScrolledWindowBox(sfg::Box::Create(sfg::Box::HORIZONTAL))
 	, kinectLabel(sfg::Label::Create("Kinect Sensor:"))
 	, kinectIdLabel(sfg::Label::Create())
 	, startKinectButton(sfg::Button::Create("Start Kinect"))
 	, stopKinectButton(sfg::Button::Create("Stop Kinect"))
+	, recordingLabel(sfg::Label::Create("Skeleton Recording:"))
 	, recordStartButton(sfg::Button::Create("Start Recording"))
 	, recordStopButton(sfg::Button::Create("Stop Recording"))
+	, recordClearButton(sfg::Button::Create("Clear Recorded Keyframes"))
+	, playbackLabel(sfg::Label::Create("Playback Controls:"))
+	, playbackProgressBar(sfg::ProgressBar::Create())
+	, playbackFirstButton(sfg::Button::Create("<<"))
+	, playbackPreviousButton(sfg::Button::Create("<"))
+	, playbackStopButton(sfg::Button::Create("Stop"))
+	, playbackStartButton(sfg::Button::Create("Start"))
+	, playbackNextButton(sfg::Button::Create(">"))
+	, playbackLastButton(sfg::Button::Create(">>"))
 	, infoLabel(sfg::Label::Create(""))
+	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 	, recording(false)
+	, liveSkeletonVisible(true)
+	, clearKeyFrames(false)
 {}
 
 GUI::~GUI()
@@ -63,48 +75,53 @@ void GUI::layoutWidgets()
 	kinectLabel->SetAlignment(sf::Vector2f(0.f,0.75f));
 
 	kinectIdLabel->SetText("[ offline ]");
-	kinectScrolledWindowBox->SetRequisition(sf::Vector2f(winsize.x - 30.f, 0.f));
-	kinectScrolledWindowBox->Pack(kinectIdLabel, false, false);
-
+	kinectScrolledWindowBox->Pack(kinectIdLabel);
 	kinectScrolledWindow->SetScrollbarPolicy(sfg::ScrolledWindow::HORIZONTAL_ALWAYS | sfg::ScrolledWindow::VERTICAL_NEVER);
 	kinectScrolledWindow->SetHorizontalAdjustment(sfg::Adjustment::Create(0.f, 0.f, 1.f, 0.1f, 0.5f, 0.5f));
 	kinectScrolledWindow->AddWithViewport(kinectScrolledWindowBox);
-	kinectScrolledWindow->SetRequisition(sf::Vector2f(winsize.x - 30.f, 0.f));
 
-	quitButton->SetRequisition(sf::Vector2f(winsize.x - 30.f, 20.f));
+	liveSkeletonVisibleCheckButton->SetActive(true);
 
-	startKinectButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
-	stopKinectButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
+	const sf::Uint32 colspan = 6;
 
-	recordStartButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
-	recordStopButton->SetRequisition(sf::Vector2f((winsize.x - 30.f) / 2.f, 20.f));
-
-	kinectTable->SetRequisition(sf::Vector2f(winsize.x - 30.f, winsize.y - 50.f));
 	// Attach widget:  (widgetPtr, <col idx, row idx, col span, row span>, horizontal packing, vertical packing, padding)
-	kinectTable->Attach(quitButton,           sf::Rect<sf::Uint32>(0, 0, 2, 1), 0, sfg::Table::FILL, sf::Vector2f(0.f, 0.f));
+	table->Attach(quitButton, sf::Rect<sf::Uint32>(0, 0, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	kinectTable->Attach(kinectLabel,          sf::Rect<sf::Uint32>(0, 1, 2, 1), sfg::Table::FILL,   sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
-	kinectTable->Attach(kinectScrolledWindow, sf::Rect<sf::Uint32>(0, 2, 2, 1), sfg::Table::EXPAND, sfg::Table::FILL, sf::Vector2f(0.f, 0.f));
+	table->Attach(kinectLabel,          sf::Rect<sf::Uint32>(0, 1, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(kinectScrolledWindow, sf::Rect<sf::Uint32>(0, 2, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	sfg::Label::Ptr deviceLabel = sfg::Label::Create("Kinect Device:");
 	deviceLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	kinectTable->Attach(deviceLabel,          sf::Rect<sf::Uint32>(0, 3, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
-	kinectTable->Attach(startKinectButton,    sf::Rect<sf::Uint32>(0, 4, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
-	kinectTable->Attach(stopKinectButton,     sf::Rect<sf::Uint32>(1, 4, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
+	table->Attach(deviceLabel,       sf::Rect<sf::Uint32>(0, 3, colspan,     1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(startKinectButton, sf::Rect<sf::Uint32>(0, 4, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(stopKinectButton,  sf::Rect<sf::Uint32>(3, 4, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	sfg::Label::Ptr recordingLabel = sfg::Label::Create("Skeleton Recording:");
+	table->Attach(liveSkeletonVisibleCheckButton, sf::Rect<sf::Uint32>(0, 5, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+
+	recordingLabel->SetText("Skeleton Recording:");
 	recordingLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	kinectTable->Attach(recordingLabel,       sf::Rect<sf::Uint32>(0, 5, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
-	kinectTable->Attach(recordStartButton,    sf::Rect<sf::Uint32>(0, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
-	kinectTable->Attach(recordStopButton,     sf::Rect<sf::Uint32>(1, 6, 1, 1), 0, 0, sf::Vector2f(2.f, 0.f));
+	table->Attach(recordingLabel,    sf::Rect<sf::Uint32>(0, 6, colspan,     1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(recordStartButton, sf::Rect<sf::Uint32>(0, 7, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(recordStopButton,  sf::Rect<sf::Uint32>(3, 7, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(recordClearButton, sf::Rect<sf::Uint32>(0, 8, colspan,     1), sfg::Table::FILL, sfg::Table::FILL);
+
+	playbackLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
+	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0,  9, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
+	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 10, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+
+	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStartButton,    sf::Rect<sf::Uint32>(3, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	kinectTable->Attach(infoLabel,            sf::Rect<sf::Uint32>(0, 8, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
-
-	box->Pack(kinectTable);
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 12, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
-	window->Add(box);
+	window->SetRequisition(winsize);
+	window->Add(table);
 
 	desktop.Add(window);
 }
@@ -112,10 +129,23 @@ void GUI::layoutWidgets()
 void GUI::connectSignals()
 {
 	quitButton       ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onQuitButtonClick,        this);
+
 	startKinectButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onStartKinectButtonClick, this);
 	stopKinectButton ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onStopKinectButtonClick,  this);
+
 	recordStartButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordStartButtonClick, this);
 	recordStopButton ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordStopButtonClick,  this);
+	recordClearButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordClearButtonClick, this);
+
+	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
+
+	//playbackProgressBar->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onButtonClick, this);
+	playbackFirstButton   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackFirstButtonClick,    this);
+	playbackPreviousButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackPreviousButtonClick, this);
+	playbackStopButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackStopButtonClick,     this);
+	playbackStartButton   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackStartButtonClick,    this);
+	playbackNextButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackNextButtonClick,     this);
+	playbackLastButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackLastButtonClick,     this);
 }
 
 void GUI::onQuitButtonClick()
@@ -140,6 +170,11 @@ void GUI::setKinectIdLabel(const std::string& text)
 	kinectIdLabel->SetText(text);
 }
 
+void GUI::setRecordingLabel(const std::string& text)
+{
+	recordingLabel->SetText(text);
+}
+
 void GUI::setInfoLabel(const std::string& text)
 {
 	infoLabel->SetText(text);
@@ -153,4 +188,44 @@ void GUI::onRecordStartButtonClick()
 void GUI::onRecordStopButtonClick()
 {
 	stopRecording();
+}
+
+void GUI::onRecordClearButtonClick()
+{
+	clearKeyFrames = true;
+}
+
+void GUI::onLiveSkeletonVisibleCheckButtonClick()
+{
+	liveSkeletonVisible = liveSkeletonVisibleCheckButton->IsActive();
+}
+
+void GUI::onPlaybackFirstButtonClick()
+{
+	// TODO
+}
+
+void GUI::onPlaybackPreviousButtonClick()
+{
+	// TODO
+}
+
+void GUI::onPlaybackStopButtonClick()
+{
+	// TODO
+}
+
+void GUI::onPlaybackStartButtonClick()
+{
+	// TODO
+}
+
+void GUI::onPlaybackNextButtonClick()
+{
+	// TODO
+}
+
+void GUI::onPlaybackLastButtonClick()
+{
+	// TODO
 }

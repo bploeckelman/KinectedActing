@@ -7,6 +7,7 @@
 
 App::App()
 	: done(false)
+	, timer()
 	, kinect()
 	, guiWindow("GUI", *this)
 	, glWindow("OpenGL Window", *this)
@@ -41,5 +42,7 @@ void App::run()
 
 		guiWindow.render();
 		glWindow.render();
+
+		timer.restart();
 	}
 }

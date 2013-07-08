@@ -6,6 +6,9 @@
 #include "Windows/GLWindow.h"
 #include "Windows/GUIWindow.h"
 
+#include <SFML/System/Time.hpp>
+#include <SFML/System/Clock.hpp>
+
 
 class App
 {
@@ -15,12 +18,16 @@ public:
 
 	void run();
 
+	sf::Time getDeltaTime() const;
+
 	KinectDevice& getKinect();
 	GLWindow& getGLWindow();
 	GUIWindow& getGUIWindow();
 
 private:
 	bool done;
+
+	sf::Clock timer;
 
 	KinectDevice kinect;
 
@@ -29,6 +36,8 @@ private:
 
 };
 
+
+inline sf::Time App::getDeltaTime() const { return timer.getElapsedTime(); }
 
 inline KinectDevice& App::getKinect() { return kinect; }
 inline GLWindow& App::getGLWindow() { return glWindow; }

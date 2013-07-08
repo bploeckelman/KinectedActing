@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
 #include <map>
 
 
@@ -22,14 +23,19 @@ Skeleton::~Skeleton()
 
 void Skeleton::render() const
 {
+	const glm::vec3 scale(0.1f, 0.1f, 0.1f);
+
 	glm::mat4 model_matrix;
-	for (const auto& bone : bones) {
-		const glm::vec3 pos = bone.second.translation;
-		model_matrix = glm::translate(glm::mat4(), pos);
-		model_matrix = glm::scale(model_matrix, glm::vec3(0.1f, 0.1f, 0.1f));
+
+	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
+		const Bone& bone = pair.second;
+
+		model_matrix = glm::translate(glm::mat4(), bone.translation);
+		model_matrix = glm::scale(model_matrix, scale);
 		GLUtils::defaultProgram->setUniform("model", model_matrix);
+
 		Render::cube();
-	}
+	});
 }
 
 void Skeleton::initBones() 
