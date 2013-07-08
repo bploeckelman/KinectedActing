@@ -57,6 +57,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -64,6 +65,9 @@
       <AdditionalLibraryDirectories>$(GLEW)\lib;$(SFML)\lib\Debug;$(SFGUI)\lib;$(KINECTSDK10_DIR)\lib\x86\</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glu32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfgui-d.lib;opengl32.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -93,6 +97,7 @@
     <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\GUI\UserInterface.cpp" />
     <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="Core\Messages\Messages.cpp" />
     <ClCompile Include="Core\Resources\ImageManager.cpp" />
     <ClCompile Include="Core\Resources\Texture.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
@@ -116,6 +121,7 @@
     <ClInclude Include="Animation\TransformKeyFrame.h" />
     <ClInclude Include="Core\App.h" />
     <ClInclude Include="Core\GUI\UserInterface.h" />
+    <ClInclude Include="Core\Messages\Messages.h" />
     <ClInclude Include="Core\Resources\ImageManager.h" />
     <ClInclude Include="Core\Resources\Texture.h" />
     <ClInclude Include="Core\Windows\GLWindow.h" />
