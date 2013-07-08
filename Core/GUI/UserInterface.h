@@ -43,6 +43,12 @@ private:
 	void onRecordStopButtonClick();
 	void onRecordClearButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
+	void onPlaybackFirstButtonClick();
+	void onPlaybackPreviousButtonClick();
+	void onPlaybackStopButtonClick();
+	void onPlaybackStartButtonClick();
+	void onPlaybackNextButtonClick();
+	void onPlaybackLastButtonClick();
 
 private:
 	Window& parentWindow;
@@ -51,10 +57,8 @@ private:
 	sfg::Desktop desktop;
 	sfg::Window::Ptr window;
 
-	sfg::Box::Ptr box;
+	sfg::Table::Ptr table;
 	sfg::Button::Ptr quitButton;
-
-	sfg::Table::Ptr kinectTable;
 	sfg::ScrolledWindow::Ptr kinectScrolledWindow;
 	sfg::Box::Ptr kinectScrolledWindowBox;
 	sfg::Label::Ptr kinectLabel;
@@ -63,14 +67,23 @@ private:
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
+
 	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
 	sfg::Button::Ptr recordClearButton;
 
-	sfg::Label::Ptr infoLabel;
+	sfg::Label::Ptr playbackLabel;
+	sfg::ProgressBar::Ptr playbackProgressBar;
+	sfg::Button::Ptr playbackFirstButton;
+	sfg::Button::Ptr playbackPreviousButton;
+	sfg::Button::Ptr playbackStopButton;
+	sfg::Button::Ptr playbackStartButton;
+	sfg::Button::Ptr playbackNextButton;
+	sfg::Button::Ptr playbackLastButton;
 
-	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
+	sfg::Label::Ptr infoLabel;
 
 	bool recording;
 	bool liveSkeletonVisible;
