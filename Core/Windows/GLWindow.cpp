@@ -270,11 +270,10 @@ void GLWindow::updateRecording()
 	}
 
 	// Update gui label text
-	// TODO : send a message to do this
 	std::stringstream ss;
 	ss << "Saved " << numKeyFrames << " key frames\n"
 	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
-	app.getGUIWindow().getGUI().setRecordingLabel(ss.str());
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 }
 
 void GLWindow::loadTextures()
@@ -309,8 +308,7 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 	}
 
 	// Update gui label
-	// TODO : send a message to do this
-	app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage("Skeleton Recording:"));
 }
 
 void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )

@@ -1,5 +1,6 @@
 #include "Core/App.h"
 #include "GUIWindow.h"
+#include "Core/Messages/Messages.h"
 
 #include <iostream>
 
@@ -31,6 +32,8 @@ void GUIWindow::init()
 {
 	gui.initialize();
 	gui.setKinectIdLabel(app.getKinect().getDeviceId());
+
+	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL, this);
 }
 
 void GUIWindow::update()
@@ -48,4 +51,9 @@ void GUIWindow::render()
 	window.clear(sf::Color::Black);
 	gui.render();
 	window.display();
+}
+
+void GUIWindow::process( const msg::SetRecordingLabelMessage *message )
+{
+	gui.setRecordingLabel(message->text);
 }

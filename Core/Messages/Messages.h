@@ -31,6 +31,7 @@ namespace msg
 		, CLEAR_SKELETON_RECORDING
 		, SAVE_SKELETON_RECORDING
 		, LOAD_SKELETON_RECORDING
+		, SET_RECORDING_LABEL
 		// Skeleton playback controls
 		, START_PLAYBACK
 		, STOP_PLAYBACK
@@ -87,6 +88,16 @@ namespace msg
 	public: ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
 	};
 	// ------------------------------------------------------------------------
+	class SetRecordingLabelMessage : public Message
+	{
+	public:
+		SetRecordingLabelMessage(const std::string& text)
+			: Message(SET_RECORDING_LABEL)
+			, text(text)
+		{}
+		const std::string text;
+	};
+	// ------------------------------------------------------------------------
 	class ShowLiveSkeletonMessage : public Message
 	{
 	public: ShowLiveSkeletonMessage() : Message(SHOW_LIVE_SKELETON) {}
@@ -113,6 +124,7 @@ namespace msg
 		virtual void process(const StartRecordingMessage    *message) {}
 		virtual void process(const StopRecordingMessage     *message) {}
 		virtual void process(const ClearRecordingMessage    *message) {}
+		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
 	};
