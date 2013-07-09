@@ -44,6 +44,7 @@ static std::shared_ptr<CubeMesh> cube;
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
+	, liveSkeletonVisible(true)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
@@ -63,6 +64,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	resetCamera();
 
 	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
 }
 
 GLWindow::~GLWindow()
@@ -137,7 +140,7 @@ void GLWindow::render()
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	if (app.getGUIWindow().getGUI().isLiveSkeletonVisible()) {
+	if (liveSkeletonVisible) {
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
@@ -308,4 +311,14 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 	// Update gui label
 	// TODO : send a message to do this
 	app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
+}
+
+void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )
+{
+	liveSkeletonVisible = true;
+}
+
+void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
+{
+	liveSkeletonVisible = false;
 }

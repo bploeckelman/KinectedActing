@@ -37,7 +37,6 @@ GUI::GUI(Window& parentWindow)
 	, playbackLastButton(sfg::Button::Create(">>"))
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
-	, liveSkeletonVisible(true)
 {}
 
 GUI::~GUI()
@@ -194,7 +193,12 @@ void GUI::onRecordClearButtonClick()
 
 void GUI::onLiveSkeletonVisibleCheckButtonClick()
 {
-	liveSkeletonVisible = liveSkeletonVisibleCheckButton->IsActive();
+	const bool active = liveSkeletonVisibleCheckButton->IsActive();
+	if (active) {
+		msg::gDispatcher.dispatchMessage(msg::ShowLiveSkeletonMessage());
+	} else {
+		msg::gDispatcher.dispatchMessage(msg::HideLiveSkeletonMessage());
+	}
 }
 
 void GUI::onPlaybackFirstButtonClick()

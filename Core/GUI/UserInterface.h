@@ -79,9 +79,4 @@ private:
 
 	sfg::Label::Ptr infoLabel;
 
-	bool liveSkeletonVisible;
-
 };
-
-
-inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }

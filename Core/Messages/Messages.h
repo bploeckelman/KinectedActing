@@ -6,6 +6,13 @@
 namespace msg
 {
 
+	// ------------------------------------
+	// Global Message Dispatcher
+	// ------------------------------------
+	class Dispatcher;
+	extern Dispatcher gDispatcher;
+	// ------------------------------------
+
 	// ------------------------------------------------------------------------
 	// Message Type Enumeration -----------------------------------------------
 	// ------------------------------------------------------------------------
@@ -16,7 +23,8 @@ namespace msg
 		// Kinect device
 		, START_KINECT_DEVICE
 		, STOP_KINECT_DEVICE
-		, SET_KINECT_DEVICE_ID_LABEL
+		, SHOW_LIVE_SKELETON
+		, HIDE_LIVE_SKELETON
 		// Skeleton recording controls
 		, START_SKELETON_RECORDING
 		, STOP_SKELETON_RECORDING
@@ -78,6 +86,16 @@ namespace msg
 	{
 	public: ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
 	};
+	// ------------------------------------------------------------------------
+	class ShowLiveSkeletonMessage : public Message
+	{
+	public: ShowLiveSkeletonMessage() : Message(SHOW_LIVE_SKELETON) {}
+	};
+	// ------------------------------------------------------------------------
+	class HideLiveSkeletonMessage : public Message
+	{
+	public: HideLiveSkeletonMessage() : Message(HIDE_LIVE_SKELETON) {}
+	};
 
 
 	// ------------------------------------------------------------------------
@@ -95,6 +113,8 @@ namespace msg
 		virtual void process(const StartRecordingMessage    *message) {}
 		virtual void process(const StopRecordingMessage     *message) {}
 		virtual void process(const ClearRecordingMessage    *message) {}
+		virtual void process(const ShowLiveSkeletonMessage  *message) {}
+		virtual void process(const HideLiveSkeletonMessage  *message) {}
 	};
 
 
@@ -122,12 +142,5 @@ namespace msg
 	private:
 		std::multimap<EType, Handler*> handlers;
 	};
-
-
-	// ------------------------------------
-	// Global Message Dispatcher
-	// ------------------------------------
-	extern Dispatcher gDispatcher;
-	// ------------------------------------
 
 } // end namespace Messages
