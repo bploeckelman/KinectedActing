@@ -22,8 +22,6 @@ public:
 	sf::Time getDeltaTime() const;
 
 	KinectDevice& getKinect();
-	GLWindow& getGLWindow();
-	GUIWindow& getGUIWindow();
 
 	bool isRecording() const { return recording; }
 
@@ -50,5 +48,3 @@ private:
 inline sf::Time App::getDeltaTime() const { return timer.getElapsedTime(); }
 
 inline KinectDevice& App::getKinect() { return kinect; }
-inline GLWindow& App::getGLWindow() { return glWindow; }
-inline GUIWindow& App::getGUIWindow() { return guiWindow; }
