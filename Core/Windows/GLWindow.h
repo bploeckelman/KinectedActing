@@ -14,7 +14,7 @@ class Animation;
 class Skeleton;
 
 
-class GLWindow : public Window, MessageHandler
+class GLWindow : public Window, msg::Handler
 {
 public:
 	GLWindow(const std::string& title, App& app);
@@ -24,7 +24,7 @@ public:
 	void update();
 	void render();
 
-	void process(const ClearRecordingMessage *message);
+	void process(const msg::ClearRecordingMessage *message);
 
 private:
 	void resetCamera();

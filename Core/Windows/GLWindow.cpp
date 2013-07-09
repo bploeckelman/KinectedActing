@@ -62,7 +62,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 	resetCamera();
 
-	gMessageDispatcher.registerHandler(Message::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
 }
 
 GLWindow::~GLWindow()
@@ -294,10 +294,10 @@ void GLWindow::loadTextures()
 		                 , GL_NEAREST, GL_REPEAT));
 }
 
-void GLWindow::process( const ClearRecordingMessage *message )
+void GLWindow::process( const msg::ClearRecordingMessage *message )
 {
 	// Handle a clear frames request
-	gMessageDispatcher.dispatchMessage(StopRecordingMessage());
+	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
 
 	// Clear and recreate all bone tracks
 	animation->deleteAllBoneTrack();

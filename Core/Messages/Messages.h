@@ -3,9 +3,12 @@
 #include <map>
 
 
-class Message
+namespace msg
 {
-public:
+
+	// ------------------------------------------------------------------------
+	// Message Type Enumeration -----------------------------------------------
+	// ------------------------------------------------------------------------
 	enum EType
 	{
 		// General application
@@ -29,106 +32,102 @@ public:
 		, NEXT_FRAME_PLAYBACK
 	};
 
-	explicit Message(EType type) : _type(type) {}
+	// ------------------------------------------------------------------------
+	// Base Message Class -----------------------------------------------------
+	// ------------------------------------------------------------------------
 
-	const EType& type() const { return _type; }
+	class Message
+	{
+	public:
+		explicit Message(EType type) : _type(type) {}
+		const EType& type() const { return _type; }
 
-protected:
-	const EType _type;
+	private:
+		const EType _type;
+	};
 
-};
-
-
-// ----------------------------------------------------------------------------
-
-
-class QuitProgramMessage : public Message
-{
-public:
-	QuitProgramMessage() : Message(QUIT_PROGRAM) {}
-};
-
-// ----------------------------------------------------------------------------
-
-class StartKinectDeviceMessage : public Message
-{
-public:
-	StartKinectDeviceMessage() : Message(START_KINECT_DEVICE) {}
-};
-
-// ----------------------------------------------------------------------------
-
-class StopKinectDeviceMessage : public Message
-{
-public:
-	StopKinectDeviceMessage() : Message(STOP_KINECT_DEVICE) {}
-};
-
-// ----------------------------------------------------------------------------
-
-class StartRecordingMessage : public Message
-{
-public:
-	StartRecordingMessage() : Message(START_SKELETON_RECORDING) {}
-};
-
-// ----------------------------------------------------------------------------
-
-class StopRecordingMessage : public Message
-{
-public:
-	StopRecordingMessage() : Message(STOP_SKELETON_RECORDING) {}
-};
-
-// ----------------------------------------------------------------------------
-
-class ClearRecordingMessage : public Message
-{
-public:
-	ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
-};
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// Message Types ----------------------------------------------------------
+	// ------------------------------------------------------------------------
+	class QuitProgramMessage : public Message
+	{
+	public: QuitProgramMessage() : Message(QUIT_PROGRAM) {}
+	};
+	// ------------------------------------------------------------------------
+	class StartKinectDeviceMessage : public Message
+	{
+	public: StartKinectDeviceMessage() : Message(START_KINECT_DEVICE) {}
+	};
+	// ------------------------------------------------------------------------
+	class StopKinectDeviceMessage : public Message
+	{
+	public: StopKinectDeviceMessage() : Message(STOP_KINECT_DEVICE) {}
+	};
+	// ------------------------------------------------------------------------
+	class StartRecordingMessage : public Message
+	{
+	public: StartRecordingMessage() : Message(START_SKELETON_RECORDING) {}
+	};
+	// ------------------------------------------------------------------------
+	class StopRecordingMessage : public Message
+	{
+	public: StopRecordingMessage() : Message(STOP_SKELETON_RECORDING) {}
+	};
+	// ------------------------------------------------------------------------
+	class ClearRecordingMessage : public Message
+	{
+	public: ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
+	};
 
 
-class MessageHandler
-{
-public:
-	// Overload the specific Message subclasses to be handled
-	virtual void process(const QuitProgramMessage       *message) {}
-	virtual void process(const StartKinectDeviceMessage *message) {}
-	virtual void process(const StopKinectDeviceMessage  *message) {}
-	virtual void process(const StartRecordingMessage    *message) {}
-	virtual void process(const StopRecordingMessage     *message) {}
-	virtual void process(const ClearRecordingMessage    *message) {}
-};
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 
-// ----------------------------------------------------------------------------
+	class Handler
+	{
+	public:
+		// Overload the specific Message subclasses to be handled
+		virtual void process(const QuitProgramMessage       *message) {}
+		virtual void process(const StartKinectDeviceMessage *message) {}
+		virtual void process(const StopKinectDeviceMessage  *message) {}
+		virtual void process(const StartRecordingMessage    *message) {}
+		virtual void process(const StopRecordingMessage     *message) {}
+		virtual void process(const ClearRecordingMessage    *message) {}
+	};
 
 
-class MessageDispatcher
-{
-public:
-	void registerHandler(Message::EType type, MessageHandler* handler);
+	// ------------------------------------------------------------------------
 
-	template<class MsgType> void dispatchMessage(const MsgType& message);
 
-private:
-	std::multimap<Message::EType, MessageHandler*> handlers;
+	class Dispatcher
+	{
+	public:
+		void registerHandler(EType type, Handler* handler)
+		{
+			handlers.insert(std::make_pair(type, handler));
+		}
 
-};
+		template<class MsgType> inline void dispatchMessage(const MsgType& msg)
+		{
+			auto range = handlers.equal_range(msg.type());
 
-template<class MsgType>
-inline void MessageDispatcher::dispatchMessage(const MsgType& message)
-{
-	auto handlersRange = handlers.equal_range(message.type());
-	for (auto it = handlersRange.first; it != handlersRange.second; ++it) {
-		MessageHandler *handler = (*it).second;
-		handler->process(&message);
-	}
-}
+			for (auto it = range.first; it != range.second; ++it) {
+				Handler *handler = (*it).second;
+				handler->process(&msg);
+			}
+		}
 
-extern MessageDispatcher gMessageDispatcher;
+	private:
+		std::multimap<EType, Handler*> handlers;
+	};
+
+
+	// ------------------------------------
+	// Global Message Dispatcher
+	// ------------------------------------
+	extern Dispatcher gDispatcher;
+	// ------------------------------------
+
+} // end namespace Messages

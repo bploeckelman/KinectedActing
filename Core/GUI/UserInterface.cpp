@@ -149,17 +149,17 @@ void GUI::connectSignals()
 
 void GUI::onQuitButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(QuitProgramMessage());
+	msg::gDispatcher.dispatchMessage(msg::QuitProgramMessage());
 }
 
 void GUI::onStartKinectButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(StartKinectDeviceMessage());
+	msg::gDispatcher.dispatchMessage(msg::StartKinectDeviceMessage());
 }
 
 void GUI::onStopKinectButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(StopKinectDeviceMessage());
+	msg::gDispatcher.dispatchMessage(msg::StopKinectDeviceMessage());
 }
 
 void GUI::setKinectIdLabel(const std::string& text)
@@ -179,17 +179,17 @@ void GUI::setInfoLabel(const std::string& text)
 
 void GUI::onRecordStartButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(StartRecordingMessage());
+	msg::gDispatcher.dispatchMessage(msg::StartRecordingMessage());
 }
 
 void GUI::onRecordStopButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(StopRecordingMessage());
+	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
 }
 
 void GUI::onRecordClearButtonClick()
 {
-	gMessageDispatcher.dispatchMessage(ClearRecordingMessage());
+	msg::gDispatcher.dispatchMessage(msg::ClearRecordingMessage());
 }
 
 void GUI::onLiveSkeletonVisibleCheckButtonClick()

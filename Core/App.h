@@ -11,7 +11,7 @@
 #include <SFML/System/Clock.hpp>
 
 
-class App : public MessageHandler
+class App : public msg::Handler
 {
 public:
 	App();
@@ -27,11 +27,11 @@ public:
 
 	bool isRecording() const { return recording; }
 
-	void process(const QuitProgramMessage       *message);
-	void process(const StartKinectDeviceMessage *message);
-	void process(const StopKinectDeviceMessage  *message);
-	void process(const StartRecordingMessage    *message);
-	void process(const StopRecordingMessage     *message);
+	void process(const msg::QuitProgramMessage       *message);
+	void process(const msg::StartKinectDeviceMessage *message);
+	void process(const msg::StopKinectDeviceMessage  *message);
+	void process(const msg::StartRecordingMessage    *message);
+	void process(const msg::StopRecordingMessage     *message);
 
 private:
 	bool done;
