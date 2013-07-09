@@ -23,12 +23,6 @@ public: // External interface
 	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 
-	bool isRecording() const;
-	void startRecording();
-	void stopRecording();
-	bool isClearKeyFrames() const;
-	void keyFramesCleared();
-
 	bool isLiveSkeletonVisible() const;
 
 private:
@@ -49,6 +43,7 @@ private:
 	void onPlaybackStartButtonClick();
 	void onPlaybackNextButtonClick();
 	void onPlaybackLastButtonClick();
+	void onPlaybackDeltaScaleClick();
 
 private:
 	Window& parentWindow;
@@ -82,19 +77,8 @@ private:
 	sfg::Button::Ptr playbackStartButton;
 	sfg::Button::Ptr playbackNextButton;
 	sfg::Button::Ptr playbackLastButton;
+	sfg::Scale::Ptr playbackDeltaScale;
 
 	sfg::Label::Ptr infoLabel;
 
-	bool recording;
-	bool liveSkeletonVisible;
-	bool clearKeyFrames;
-
 };
-
-
-inline bool GUI::isRecording() const { return recording; }
-inline void GUI::startRecording() { recording = true;  }
-inline void GUI::stopRecording()  { recording = false; }
-inline bool GUI::isLiveSkeletonVisible() const { return liveSkeletonVisible; }
-inline bool GUI::isClearKeyFrames() const { return clearKeyFrames; }
-inline void GUI::keyFramesCleared() { clearKeyFrames = false; }

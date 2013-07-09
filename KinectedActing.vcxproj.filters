@@ -31,6 +31,9 @@
     <Filter Include="Scene\Objects">
       <UniqueIdentifier>{af7986e9-14a8-4882-b926-2905346f5544}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Messages">
+      <UniqueIdentifier>{5f8ca540-f1ac-4a39-86fb-4a28a3e7dbb1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -92,6 +95,9 @@
     </ClCompile>
     <ClCompile Include="Scene\Objects\CubeMesh.cpp">
       <Filter>Scene\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Messages\Messages.cpp">
+      <Filter>Core\Messages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="Scene\Objects\CubeMesh.h">
       <Filter>Scene\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Messages\Messages.h">
+      <Filter>Core\Messages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

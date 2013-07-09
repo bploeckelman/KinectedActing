@@ -2,6 +2,7 @@
 #include "Core/App.h"
 #include "Core/Resources/Texture.h"
 #include "Core/Resources/ImageManager.h"
+#include "Core/Messages/Messages.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
 #include "Scene/Objects/CubeMesh.h"
@@ -43,6 +44,10 @@ static std::shared_ptr<CubeMesh> cube;
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
+	, liveSkeletonVisible(true)
+	, playbackRunning(false)
+	, playbackTime(0)
+	, playbackDelta(1.f / 60.f)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
@@ -60,6 +65,17 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
 
 	resetCamera();
+
+	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
 }
 
 GLWindow::~GLWindow()
@@ -134,11 +150,13 @@ void GLWindow::render()
 
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	if (app.getGUIWindow().getGUI().isLiveSkeletonVisible()) {
+	if (liveSkeletonVisible) {
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
-	skeleton->render();
+	if (animation->getLength() > 0.f) {
+		skeleton->render();
+	}
 
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
 	cube->render();
@@ -175,11 +193,10 @@ void GLWindow::handleEvents()
 				case sf::Keyboard::Return: {
 					// Update rendered skeleton data
 					// TODO : setup bone mask for all Kinect joints
-					static float t = 0.f;
 					const float len = animation->getLength();
 					if (len != 0.f) {
-						animation->apply(skeleton.get(), t);
-						if ((t += 0.1f) > len) t = 0.f;
+						animation->apply(skeleton.get(), playbackTime);
+						if ((playbackTime += playbackDelta) > len) playbackTime = 0.f;
 					}
 				}
 				break;
@@ -230,25 +247,20 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
-	// Handle a clear frames request
-	if (app.getGUIWindow().getGUI().isClearKeyFrames()) {
-		app.getGUIWindow().getGUI().stopRecording();
+	if (playbackRunning) {
+		const float anim_length = animation->getLength();
 
-		// Clear and recreate all bone tracks
-		animation->deleteAllBoneTrack();
-		for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-			animation->createBoneTrack(boneID);
+		playbackTime += playbackDelta;
+		if (playbackTime > anim_length) {
+			playbackTime = 0.f;
 		}
 
-		// Update gui label
-		app.getGUIWindow().getGUI().setRecordingLabel("Skeleton Recording:");
-
-		// Reset clear flag
-		app.getGUIWindow().getGUI().keyFramesCleared();
+		if (anim_length > 0.f) {
+			animation->apply(skeleton.get(), playbackTime);
+		}
 	}
 
-	// Bail early if not currently recording
-	if (!app.getGUIWindow().getGUI().isRecording()) {
+	if (!app.isRecording()) {
 		return;
 	}
 
@@ -285,7 +297,7 @@ void GLWindow::updateRecording()
 	std::stringstream ss;
 	ss << "Saved " << numKeyFrames << " key frames\n"
 	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
-	app.getGUIWindow().getGUI().setRecordingLabel(ss.str());
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 }
 
 void GLWindow::loadTextures()
@@ -306,4 +318,82 @@ void GLWindow::loadTextures()
 		                 , gridImage.getSize().x, gridImage.getSize().y
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
+}
+
+void GLWindow::process( const msg::ClearRecordingMessage *message )
+{
+	// Handle a clear frames request
+	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
+
+	// Clear and recreate all bone tracks
+	animation->deleteAllBoneTrack();
+	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animation->createBoneTrack(boneID);
+	}
+
+	// Update gui label
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage("Skeleton Recording:"));
+}
+
+void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )
+{
+	liveSkeletonVisible = true;
+}
+
+void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
+{
+	liveSkeletonVisible = false;
+}
+
+void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
+{
+	playbackTime = 0.f;
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
+{
+	playbackTime = animation->getLength();
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
+{
+	playbackTime -= playbackDelta;
+	if (playbackTime < 0.f) {
+		playbackTime = 0.f;
+	}
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
+{
+	playbackTime += playbackDelta;
+	if (playbackTime > animation->getLength()) {
+		playbackTime = animation->getLength();
+	}
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackStartMessage *message )
+{
+	playbackRunning = true;
+}
+
+void GLWindow::process( const msg::PlaybackStopMessage *message )
+{
+	playbackRunning = false;
+}
+
+void GLWindow::process( const msg::PlaybackSetDeltaMessage *message )
+{
+	playbackDelta = message->delta;
 }

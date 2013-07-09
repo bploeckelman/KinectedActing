@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "Scene/Camera.h"
+#include "Core/Messages/Messages.h"
 
 #include <SFML/System/Time.hpp>
 
@@ -13,7 +14,7 @@ class Animation;
 class Skeleton;
 
 
-class GLWindow : public Window
+class GLWindow : public Window, msg::Handler
 {
 public:
 	GLWindow(const std::string& title, App& app);
@@ -23,6 +24,17 @@ public:
 	void update();
 	void render();
 
+	void process(const msg::ClearRecordingMessage   *message);
+	void process(const msg::ShowLiveSkeletonMessage *message);
+	void process(const msg::HideLiveSkeletonMessage *message);
+	void process(const msg::PlaybackFirstFrameMessage *message);
+	void process(const msg::PlaybackLastFrameMessage  *message);
+	void process(const msg::PlaybackPrevFrameMessage  *message);
+	void process(const msg::PlaybackNextFrameMessage  *message);
+	void process(const msg::PlaybackStartMessage      *message);
+	void process(const msg::PlaybackStopMessage       *message);
+	void process(const msg::PlaybackSetDeltaMessage   *message);
+
 private:
 	void resetCamera();
 	void handleEvents();
@@ -30,6 +42,12 @@ private:
 	void updateRecording();
 	void updateTextures();
 	void loadTextures();
+
+	bool liveSkeletonVisible;
+	bool playbackRunning;
+
+	float playbackTime;
+	float playbackDelta;
 
 	sf::Time animTimer;
 

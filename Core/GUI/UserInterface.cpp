@@ -5,6 +5,7 @@
 #include "UserInterface.h"
 #include "Core/App.h"
 #include "Core/Windows/Window.h"
+#include "Core/Messages/Messages.h"
 
 #include <string>
 
@@ -34,11 +35,9 @@ GUI::GUI(Window& parentWindow)
 	, playbackStartButton(sfg::Button::Create("Start"))
 	, playbackNextButton(sfg::Button::Create(">"))
 	, playbackLastButton(sfg::Button::Create(">>"))
+	, playbackDeltaScale(sfg::Scale::Create(1.f / 1000.f, 1.f, 1.f / 1000.f))
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
-	, recording(false)
-	, liveSkeletonVisible(true)
-	, clearKeyFrames(false)
 {}
 
 GUI::~GUI()
@@ -80,9 +79,11 @@ void GUI::layoutWidgets()
 	kinectScrolledWindow->SetHorizontalAdjustment(sfg::Adjustment::Create(0.f, 0.f, 1.f, 0.1f, 0.5f, 0.5f));
 	kinectScrolledWindow->AddWithViewport(kinectScrolledWindowBox);
 
+	playbackDeltaScale->SetValue(1.f / 60.f);
 	liveSkeletonVisibleCheckButton->SetActive(true);
 
 	const sf::Uint32 colspan = 6;
+	table->SetColumnSpacings(1.f);
 
 	// Attach widget:  (widgetPtr, <col idx, row idx, col span, row span>, horizontal packing, vertical packing, padding)
 	table->Attach(quitButton, sf::Rect<sf::Uint32>(0, 0, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
@@ -103,12 +104,14 @@ void GUI::layoutWidgets()
 	table->Attach(recordingLabel,    sf::Rect<sf::Uint32>(0, 6, colspan,     1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 	table->Attach(recordStartButton, sf::Rect<sf::Uint32>(0, 7, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(recordStopButton,  sf::Rect<sf::Uint32>(3, 7, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(7, 2.5f);
 	table->Attach(recordClearButton, sf::Rect<sf::Uint32>(0, 8, colspan,     1), sfg::Table::FILL, sfg::Table::FILL);
 
 	playbackLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
 	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0,  9, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
 	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 10, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
+	table->SetRowSpacing(10, 5.f);
 	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
@@ -116,8 +119,13 @@ void GUI::layoutWidgets()
 	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 11, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 
+	table->SetRowSpacing(11, 5.f);
+	sfg::Label::Ptr deltaScaleLabel(sfg::Label::Create("Delta"));
+	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 12,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 12, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 12, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -146,23 +154,22 @@ void GUI::connectSignals()
 	playbackStartButton   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackStartButtonClick,    this);
 	playbackNextButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackNextButtonClick,     this);
 	playbackLastButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackLastButtonClick,     this);
+	playbackDeltaScale    ->GetSignal(sfg::Scale::OnLeftClick ).Connect(&GUI::onPlaybackDeltaScaleClick,     this);
 }
 
 void GUI::onQuitButtonClick()
 {
-	parentWindow.getWindow().close();
+	msg::gDispatcher.dispatchMessage(msg::QuitProgramMessage());
 }
 
 void GUI::onStartKinectButtonClick()
 {
-	parentWindow.getApp().getKinect().init();
-	kinectIdLabel->SetText(parentWindow.getApp().getKinect().getDeviceId());
+	msg::gDispatcher.dispatchMessage(msg::StartKinectDeviceMessage());
 }
 
 void GUI::onStopKinectButtonClick()
 {
-	parentWindow.getApp().getKinect().shutdown();
-	kinectIdLabel->SetText("[ offline ]");
+	msg::gDispatcher.dispatchMessage(msg::StopKinectDeviceMessage());
 }
 
 void GUI::setKinectIdLabel(const std::string& text)
@@ -182,50 +189,60 @@ void GUI::setInfoLabel(const std::string& text)
 
 void GUI::onRecordStartButtonClick()
 {
-	startRecording();
+	msg::gDispatcher.dispatchMessage(msg::StartRecordingMessage());
 }
 
 void GUI::onRecordStopButtonClick()
 {
-	stopRecording();
+	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
 }
 
 void GUI::onRecordClearButtonClick()
 {
-	clearKeyFrames = true;
+	msg::gDispatcher.dispatchMessage(msg::ClearRecordingMessage());
 }
 
 void GUI::onLiveSkeletonVisibleCheckButtonClick()
 {
-	liveSkeletonVisible = liveSkeletonVisibleCheckButton->IsActive();
+	const bool active = liveSkeletonVisibleCheckButton->IsActive();
+	if (active) {
+		msg::gDispatcher.dispatchMessage(msg::ShowLiveSkeletonMessage());
+	} else {
+		msg::gDispatcher.dispatchMessage(msg::HideLiveSkeletonMessage());
+	}
 }
 
 void GUI::onPlaybackFirstButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackFirstFrameMessage());
 }
 
 void GUI::onPlaybackPreviousButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackPrevFrameMessage());
 }
 
 void GUI::onPlaybackStopButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackStopMessage());
 }
 
 void GUI::onPlaybackStartButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackStartMessage());
 }
 
 void GUI::onPlaybackNextButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackNextFrameMessage());
 }
 
 void GUI::onPlaybackLastButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackLastFrameMessage());
+}
+
+void GUI::onPlaybackDeltaScaleClick()
+{
+	msg::gDispatcher.dispatchMessage(msg::PlaybackSetDeltaMessage(playbackDeltaScale->GetValue()));
 }
