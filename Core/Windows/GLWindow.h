@@ -29,6 +29,8 @@ public:
 	void process(const msg::HideLiveSkeletonMessage *message);
 	void process(const msg::PlaybackFirstFrameMessage *message);
 	void process(const msg::PlaybackLastFrameMessage  *message);
+	void process(const msg::PlaybackPrevFrameMessage  *message);
+	void process(const msg::PlaybackNextFrameMessage  *message);
 
 private:
 	void resetCamera();
@@ -40,6 +42,7 @@ private:
 
 	bool liveSkeletonVisible;
 	float playbackTime;
+	float playbackDelta;
 
 	sf::Time animTimer;
 

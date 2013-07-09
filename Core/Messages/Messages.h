@@ -37,7 +37,7 @@ namespace msg
 		, STOP_PLAYBACK
 		, PLAYBACK_FIRST_FRAME
 		, PLAYBACK_LAST_FRAME
-		, PLAYBACK_PREVIOUS_FRAME
+		, PLAYBACK_PREV_FRAME
 		, PLAYBACK_NEXT_FRAME
 	};
 
@@ -118,6 +118,16 @@ namespace msg
 	public: PlaybackLastFrameMessage() : Message(PLAYBACK_LAST_FRAME) {}
 	};
 	// ------------------------------------------------------------------------
+	class PlaybackNextFrameMessage : public Message
+	{
+	public: PlaybackNextFrameMessage() : Message(PLAYBACK_NEXT_FRAME) {}
+	};
+	// ------------------------------------------------------------------------
+	class PlaybackPrevFrameMessage : public Message
+	{
+	public: PlaybackPrevFrameMessage() : Message(PLAYBACK_PREV_FRAME) {}
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -144,6 +154,8 @@ namespace msg
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
 		virtual void process(const PlaybackFirstFrameMessage *message) {}
 		virtual void process(const PlaybackLastFrameMessage  *message) {}
+		virtual void process(const PlaybackNextFrameMessage  *message) {}
+		virtual void process(const PlaybackPrevFrameMessage  *message) {}
 	};
 
 

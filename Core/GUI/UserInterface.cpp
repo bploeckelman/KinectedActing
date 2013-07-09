@@ -208,7 +208,7 @@ void GUI::onPlaybackFirstButtonClick()
 
 void GUI::onPlaybackPreviousButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackPrevFrameMessage());
 }
 
 void GUI::onPlaybackStopButtonClick()
@@ -223,7 +223,7 @@ void GUI::onPlaybackStartButtonClick()
 
 void GUI::onPlaybackNextButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackNextFrameMessage());
 }
 
 void GUI::onPlaybackLastButtonClick()

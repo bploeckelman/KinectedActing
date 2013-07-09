@@ -46,6 +46,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
 	, playbackTime(0)
+	, playbackDelta(1.f / 60.f)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
@@ -69,6 +70,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
 }
 
 GLWindow::~GLWindow()
@@ -147,7 +150,9 @@ void GLWindow::render()
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
-	skeleton->render();
+	if (animation->getLength() > 0.f) {
+		skeleton->render();
+	}
 
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
 	cube->render();
@@ -187,7 +192,7 @@ void GLWindow::handleEvents()
 					const float len = animation->getLength();
 					if (len != 0.f) {
 						animation->apply(skeleton.get(), playbackTime);
-						if ((playbackTime += 0.1f) > len) playbackTime = 0.f;
+						if ((playbackTime += playbackDelta) > len) playbackTime = 0.f;
 					}
 				}
 				break;
@@ -326,11 +331,37 @@ void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
 {
 	playbackTime = 0.f;
-	animation->apply(skeleton.get(), playbackTime);
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
 }
 
 void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
 {
 	playbackTime = animation->getLength();
-	animation->apply(skeleton.get(), playbackTime);
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
+{
+	playbackTime -= playbackDelta;
+	if (playbackTime < 0.f) {
+		playbackTime = 0.f;
+	}
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
+{
+	playbackTime += playbackDelta;
+	if (playbackTime > animation->getLength()) {
+		playbackTime = animation->getLength();
+	}
+	if (animation->getLength() > 0.f) {
+		animation->apply(skeleton.get(), playbackTime);
+	}
 }
