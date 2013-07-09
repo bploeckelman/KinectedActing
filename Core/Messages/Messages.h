@@ -39,6 +39,7 @@ namespace msg
 		, PLAYBACK_LAST_FRAME
 		, PLAYBACK_PREV_FRAME
 		, PLAYBACK_NEXT_FRAME
+		, PLAYBACK_SET_DELTA
 	};
 
 	// ------------------------------------------------------------------------
@@ -138,6 +139,16 @@ namespace msg
 	public: PlaybackStopMessage() : Message(PLAYBACK_STOP) {}
 	};
 	// ------------------------------------------------------------------------
+	class PlaybackSetDeltaMessage : public Message
+	{
+	public:
+		PlaybackSetDeltaMessage(const float delta)
+			: Message(PLAYBACK_SET_DELTA)
+			, delta(delta)
+		{}
+		const float delta;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -168,6 +179,7 @@ namespace msg
 		virtual void process(const PlaybackPrevFrameMessage  *message) {}
 		virtual void process(const PlaybackStartMessage      *message) {}
 		virtual void process(const PlaybackStopMessage       *message) {}
+		virtual void process(const PlaybackSetDeltaMessage   *message) {}
 	};
 
 

@@ -43,6 +43,7 @@ private:
 	void onPlaybackStartButtonClick();
 	void onPlaybackNextButtonClick();
 	void onPlaybackLastButtonClick();
+	void onPlaybackDeltaScaleClick();
 
 private:
 	Window& parentWindow;
@@ -76,6 +77,7 @@ private:
 	sfg::Button::Ptr playbackStartButton;
 	sfg::Button::Ptr playbackNextButton;
 	sfg::Button::Ptr playbackLastButton;
+	sfg::Scale::Ptr playbackDeltaScale;
 
 	sfg::Label::Ptr infoLabel;
 

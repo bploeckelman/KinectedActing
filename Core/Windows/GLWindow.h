@@ -33,6 +33,7 @@ public:
 	void process(const msg::PlaybackNextFrameMessage  *message);
 	void process(const msg::PlaybackStartMessage      *message);
 	void process(const msg::PlaybackStopMessage       *message);
+	void process(const msg::PlaybackSetDeltaMessage   *message);
 
 private:
 	void resetCamera();

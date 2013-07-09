@@ -75,6 +75,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
 }
 
 GLWindow::~GLWindow()
@@ -249,7 +250,7 @@ void GLWindow::updateRecording()
 	if (playbackRunning) {
 		const float anim_length = animation->getLength();
 
-		playbackTime += std::min(app.getDeltaTime().asSeconds(), playbackDelta);
+		playbackTime += playbackDelta;
 		if (playbackTime > anim_length) {
 			playbackTime = 0.f;
 		}
@@ -390,4 +391,9 @@ void GLWindow::process( const msg::PlaybackStartMessage *message )
 void GLWindow::process( const msg::PlaybackStopMessage *message )
 {
 	playbackRunning = false;
+}
+
+void GLWindow::process( const msg::PlaybackSetDeltaMessage *message )
+{
+	playbackDelta = message->delta;
 }
