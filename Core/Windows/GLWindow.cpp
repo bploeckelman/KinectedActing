@@ -45,6 +45,7 @@ static std::shared_ptr<CubeMesh> cube;
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
+	, playbackTime(0)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
@@ -66,6 +67,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
 	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
 }
 
 GLWindow::~GLWindow()
@@ -181,11 +184,10 @@ void GLWindow::handleEvents()
 				case sf::Keyboard::Return: {
 					// Update rendered skeleton data
 					// TODO : setup bone mask for all Kinect joints
-					static float t = 0.f;
 					const float len = animation->getLength();
 					if (len != 0.f) {
-						animation->apply(skeleton.get(), t);
-						if ((t += 0.1f) > len) t = 0.f;
+						animation->apply(skeleton.get(), playbackTime);
+						if ((playbackTime += 0.1f) > len) playbackTime = 0.f;
 					}
 				}
 				break;
@@ -319,4 +321,16 @@ void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )
 void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 {
 	liveSkeletonVisible = false;
+}
+
+void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
+{
+	playbackTime = 0.f;
+	animation->apply(skeleton.get(), playbackTime);
+}
+
+void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
+{
+	playbackTime = animation->getLength();
+	animation->apply(skeleton.get(), playbackTime);
 }

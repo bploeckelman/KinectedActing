@@ -35,10 +35,10 @@ namespace msg
 		// Skeleton playback controls
 		, START_PLAYBACK
 		, STOP_PLAYBACK
-		, FIRST_FRAME_PLAYBACK
-		, LAST_FRAME_PLAYBACK
-		, PREVIOUS_FRAME_PLAYBACK
-		, NEXT_FRAME_PLAYBACK
+		, PLAYBACK_FIRST_FRAME
+		, PLAYBACK_LAST_FRAME
+		, PLAYBACK_PREVIOUS_FRAME
+		, PLAYBACK_NEXT_FRAME
 	};
 
 	// ------------------------------------------------------------------------
@@ -107,6 +107,21 @@ namespace msg
 	{
 	public: HideLiveSkeletonMessage() : Message(HIDE_LIVE_SKELETON) {}
 	};
+	// ------------------------------------------------------------------------
+	class PlaybackFirstFrameMessage : public Message
+	{
+	public: PlaybackFirstFrameMessage() : Message(PLAYBACK_FIRST_FRAME) {}
+	};
+	// ------------------------------------------------------------------------
+	class PlaybackLastFrameMessage : public Message
+	{
+	public: PlaybackLastFrameMessage() : Message(PLAYBACK_LAST_FRAME) {}
+	};
+	// ------------------------------------------------------------------------
+	//class Message : public Message
+	//{
+	//public: Message() : Message() {}
+	//};
 
 
 	// ------------------------------------------------------------------------
@@ -127,6 +142,8 @@ namespace msg
 		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
+		virtual void process(const PlaybackFirstFrameMessage *message) {}
+		virtual void process(const PlaybackLastFrameMessage  *message) {}
 	};
 
 

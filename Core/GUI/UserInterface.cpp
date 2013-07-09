@@ -203,7 +203,7 @@ void GUI::onLiveSkeletonVisibleCheckButtonClick()
 
 void GUI::onPlaybackFirstButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackFirstFrameMessage());
 }
 
 void GUI::onPlaybackPreviousButtonClick()
@@ -228,5 +228,5 @@ void GUI::onPlaybackNextButtonClick()
 
 void GUI::onPlaybackLastButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackLastFrameMessage());
 }
