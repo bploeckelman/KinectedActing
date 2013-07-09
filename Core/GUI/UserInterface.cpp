@@ -146,7 +146,7 @@ void GUI::connectSignals()
 
 	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
 
-	//playbackProgressBar->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onButtonClick, this);
+	playbackProgressBar   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackProgressBarClick,    this);
 	playbackFirstButton   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackFirstButtonClick,    this);
 	playbackPreviousButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackPreviousButtonClick, this);
 	playbackStopButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackStopButtonClick,     this);
@@ -186,6 +186,16 @@ void GUI::setInfoLabel(const std::string& text)
 	infoLabel->SetText(text);
 }
 
+void GUI::setProgressFraction( const float fraction )
+{
+	// Clamp [0..1]
+	float frac = fraction;
+	     if (fraction < 0.f) frac = 0.f;
+	else if (fraction > 1.f) frac = 1.f;
+
+	playbackProgressBar->SetFraction(frac);
+}
+
 void GUI::onRecordStartButtonClick()
 {
 	msg::gDispatcher.dispatchMessage(msg::StartRecordingMessage());
@@ -209,6 +219,12 @@ void GUI::onLiveSkeletonVisibleCheckButtonClick()
 	} else {
 		msg::gDispatcher.dispatchMessage(msg::HideLiveSkeletonMessage());
 	}
+}
+
+void GUI::onPlaybackProgressBarClick()
+{
+	// TODO : msg::PlaybackSetProgress???Message
+	// send message back to glwindow to change playbackTime
 }
 
 void GUI::onPlaybackFirstButtonClick()

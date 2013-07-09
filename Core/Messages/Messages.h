@@ -40,6 +40,7 @@ namespace msg
 		, PLAYBACK_PREV_FRAME
 		, PLAYBACK_NEXT_FRAME
 		, PLAYBACK_SET_DELTA
+		, PLAYBACK_SET_PROGRESS
 	};
 
 	// ------------------------------------------------------------------------
@@ -149,6 +150,16 @@ namespace msg
 		const float delta;
 	};
 	// ------------------------------------------------------------------------
+	class PlaybackSetProgressMessage : public Message
+	{
+	public:
+		PlaybackSetProgressMessage(const float progress)
+			: Message(PLAYBACK_SET_PROGRESS)
+			, progress(progress)
+		{}
+		const float progress;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -180,6 +191,7 @@ namespace msg
 		virtual void process(const PlaybackStartMessage      *message) {}
 		virtual void process(const PlaybackStopMessage       *message) {}
 		virtual void process(const PlaybackSetDeltaMessage   *message) {}
+		virtual void process(const PlaybackSetProgressMessage *message) {}
 	};
 
 

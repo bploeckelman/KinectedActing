@@ -108,6 +108,10 @@ void GLWindow::update()
 	updateTextures();
 	updateRecording();
 
+	const float length = animation->getLength();
+	const float progress = (length == 0.f) ? 0.f : playbackTime / length;
+	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
+
 	bool space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
 	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }

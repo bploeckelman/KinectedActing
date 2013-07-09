@@ -20,6 +20,7 @@ public: // External interface
 	void setKinectIdLabel(const std::string& text);
 	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
+	void setProgressFraction(const float fraction);
 
 	bool isLiveSkeletonVisible() const;
 
@@ -35,6 +36,7 @@ private:
 	void onRecordStopButtonClick();
 	void onRecordClearButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
+	void onPlaybackProgressBarClick();
 	void onPlaybackFirstButtonClick();
 	void onPlaybackPreviousButtonClick();
 	void onPlaybackStopButtonClick();

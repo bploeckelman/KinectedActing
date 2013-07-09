@@ -33,7 +33,8 @@ void GUIWindow::init()
 	gui.initialize(window);
 	gui.setKinectIdLabel(app.getKinect().getDeviceId());
 
-	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL, this);
+	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL,   this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_PROGRESS, this);
 }
 
 void GUIWindow::update()
@@ -56,4 +57,9 @@ void GUIWindow::render()
 void GUIWindow::process( const msg::SetRecordingLabelMessage *message )
 {
 	gui.setRecordingLabel(message->text);
+}
+
+void GUIWindow::process( const msg::PlaybackSetProgressMessage *message )
+{
+	gui.setProgressFraction(message->progress);
 }
