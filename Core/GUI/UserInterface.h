@@ -4,18 +4,16 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include "Core/Windows/Window.h"
-
 
 class GUI
 {
 public:
-	GUI(Window& parentWindow);
+	GUI();
 	~GUI();
 
-	void initialize();
+	void initialize(sf::RenderWindow& parentWindow);
 	void update();
-	void render();
+	void render(sf::RenderWindow& parentWindow);
 	void handleEvent(const sf::Event& event);
 
 public: // External interface
@@ -26,7 +24,7 @@ public: // External interface
 	bool isLiveSkeletonVisible() const;
 
 private:
-	void layoutWidgets();
+	void layoutWidgets(sf::RenderWindow& parentWindow);
 	void connectSignals();
 
 	// Signal methods -----------------
@@ -46,8 +44,6 @@ private:
 	void onPlaybackDeltaScaleClick();
 
 private:
-	Window& parentWindow;
-
 	sfg::SFGUI sfgui;
 	sfg::Desktop desktop;
 	sfg::Window::Ptr window;

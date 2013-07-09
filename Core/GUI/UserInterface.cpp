@@ -3,16 +3,15 @@
 #include "Kinect/KinectDevice.h"
 
 #include "UserInterface.h"
-#include "Core/App.h"
-#include "Core/Windows/Window.h"
 #include "Core/Messages/Messages.h"
+
+#include <SFML/Graphics/RenderWindow.hpp>
 
 #include <string>
 
 
-GUI::GUI(Window& parentWindow)
-	: parentWindow(parentWindow)
-	, sfgui()
+GUI::GUI()
+	: sfgui()
 	, desktop()
 	, window(sfg::Window::Create())
 	, quitButton(sfg::Button::Create("Quit"))
@@ -48,16 +47,16 @@ void GUI::update()
 	desktop.Update(1.f);
 }
 
-void GUI::render()
+void GUI::render( sf::RenderWindow& parentWindow )
 {
-	parentWindow.getWindow().pushGLStates();
-	sfgui.Display(parentWindow.getWindow());
-	parentWindow.getWindow().popGLStates();
+	parentWindow.pushGLStates();
+	sfgui.Display(parentWindow);
+	parentWindow.popGLStates();
 }
 
-void GUI::initialize()
+void GUI::initialize( sf::RenderWindow& parentWindow )
 {
-	layoutWidgets();
+	layoutWidgets(parentWindow);
 	connectSignals();
 }
 
@@ -66,9 +65,9 @@ void GUI::handleEvent(const sf::Event& event)
 	desktop.HandleEvent(event);
 }
 
-void GUI::layoutWidgets()
+void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 {
-	const sf::Vector2f winsize(parentWindow.getWindow().getSize());
+	const sf::Vector2f winsize(parentWindow.getSize());
 
 	kinectLabel->SetText("Kinect Sensor:");
 	kinectLabel->SetAlignment(sf::Vector2f(0.f,0.75f));

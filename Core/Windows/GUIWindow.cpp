@@ -15,7 +15,7 @@ static const sf::Uint32 style    = sf::Style::None;
 
 GUIWindow::GUIWindow(const std::string& title, App& app)
 	: Window(title, app)
-	, gui(*this)
+	, gui()
 {
 	videoMode = sf::VideoMode(window_width
 	                        , sf::VideoMode::getDesktopMode().height - height_offset
@@ -30,7 +30,7 @@ GUIWindow::~GUIWindow()
 
 void GUIWindow::init()
 {
-	gui.initialize();
+	gui.initialize(window);
 	gui.setKinectIdLabel(app.getKinect().getDeviceId());
 
 	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL, this);
@@ -49,7 +49,7 @@ void GUIWindow::render()
 {
 	window.setActive();
 	window.clear(sf::Color::Black);
-	gui.render();
+	gui.render(window);
 	window.display();
 }
 
