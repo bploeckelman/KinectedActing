@@ -33,8 +33,8 @@ namespace msg
 		, LOAD_SKELETON_RECORDING
 		, SET_RECORDING_LABEL
 		// Skeleton playback controls
-		, START_PLAYBACK
-		, STOP_PLAYBACK
+		, PLAYBACK_START
+		, PLAYBACK_STOP
 		, PLAYBACK_FIRST_FRAME
 		, PLAYBACK_LAST_FRAME
 		, PLAYBACK_PREV_FRAME
@@ -128,6 +128,16 @@ namespace msg
 	public: PlaybackPrevFrameMessage() : Message(PLAYBACK_PREV_FRAME) {}
 	};
 	// ------------------------------------------------------------------------
+	class PlaybackStartMessage : public Message
+	{
+	public: PlaybackStartMessage() : Message(PLAYBACK_START) {}
+	};
+	// ------------------------------------------------------------------------
+	class PlaybackStopMessage : public Message
+	{
+	public: PlaybackStopMessage() : Message(PLAYBACK_STOP) {}
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -156,6 +166,8 @@ namespace msg
 		virtual void process(const PlaybackLastFrameMessage  *message) {}
 		virtual void process(const PlaybackNextFrameMessage  *message) {}
 		virtual void process(const PlaybackPrevFrameMessage  *message) {}
+		virtual void process(const PlaybackStartMessage      *message) {}
+		virtual void process(const PlaybackStopMessage       *message) {}
 	};
 
 

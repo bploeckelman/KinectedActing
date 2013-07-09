@@ -31,6 +31,8 @@ public:
 	void process(const msg::PlaybackLastFrameMessage  *message);
 	void process(const msg::PlaybackPrevFrameMessage  *message);
 	void process(const msg::PlaybackNextFrameMessage  *message);
+	void process(const msg::PlaybackStartMessage      *message);
+	void process(const msg::PlaybackStopMessage       *message);
 
 private:
 	void resetCamera();
@@ -41,6 +43,8 @@ private:
 	void loadTextures();
 
 	bool liveSkeletonVisible;
+	bool playbackRunning;
+
 	float playbackTime;
 	float playbackDelta;
 

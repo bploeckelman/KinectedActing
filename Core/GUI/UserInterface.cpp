@@ -213,12 +213,12 @@ void GUI::onPlaybackPreviousButtonClick()
 
 void GUI::onPlaybackStopButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackStopMessage());
 }
 
 void GUI::onPlaybackStartButtonClick()
 {
-	// TODO
+	msg::gDispatcher.dispatchMessage(msg::PlaybackStartMessage());
 }
 
 void GUI::onPlaybackNextButtonClick()

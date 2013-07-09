@@ -45,6 +45,7 @@ static std::shared_ptr<CubeMesh> cube;
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
+	, playbackRunning(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
 	, animTimer(sf::Time::Zero)
@@ -72,6 +73,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
 }
 
 GLWindow::~GLWindow()
@@ -243,6 +246,19 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
+	if (playbackRunning) {
+		const float anim_length = animation->getLength();
+
+		playbackTime += std::min(app.getDeltaTime().asSeconds(), playbackDelta);
+		if (playbackTime > anim_length) {
+			playbackTime = 0.f;
+		}
+
+		if (anim_length > 0.f) {
+			animation->apply(skeleton.get(), playbackTime);
+		}
+	}
+
 	if (!app.isRecording()) {
 		return;
 	}
@@ -364,4 +380,14 @@ void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
 	if (animation->getLength() > 0.f) {
 		animation->apply(skeleton.get(), playbackTime);
 	}
+}
+
+void GLWindow::process( const msg::PlaybackStartMessage *message )
+{
+	playbackRunning = true;
+}
+
+void GLWindow::process( const msg::PlaybackStopMessage *message )
+{
+	playbackRunning = false;
 }
