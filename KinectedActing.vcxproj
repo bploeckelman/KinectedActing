@@ -58,6 +58,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,6 +80,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
