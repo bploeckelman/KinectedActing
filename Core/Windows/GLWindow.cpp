@@ -7,6 +7,7 @@
 #include "Scene/Camera.h"
 #include "Scene/Objects/CubeMesh.h"
 #include "Scene/Objects/PlaneMesh.h"
+#include "Scene/Objects/SphereMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
@@ -38,6 +39,7 @@ static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
 
+static std::shared_ptr<SphereMesh> sphere;
 static std::shared_ptr<PlaneMesh> plane;
 static std::shared_ptr<CubeMesh> cube;
 
@@ -96,6 +98,7 @@ void GLWindow::init()
 
 	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
 
+	sphere = std::shared_ptr<SphereMesh>(new SphereMesh("sphere"));
 	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
 	cube = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
 }
@@ -163,7 +166,7 @@ void GLWindow::render()
 	}
 
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
-	cube->render();
+	sphere->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
