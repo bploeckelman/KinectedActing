@@ -99,6 +99,9 @@
     <ClCompile Include="Core\Messages\Messages.cpp">
       <Filter>Core\Messages</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\Objects\SphereMesh.cpp">
+      <Filter>Scene\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -172,6 +175,9 @@
     </ClInclude>
     <ClInclude Include="Core\Messages\Messages.h">
       <Filter>Core\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Objects\SphereMesh.h">
+      <Filter>Scene\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -109,6 +109,7 @@
     <ClCompile Include="Scene\Objects\CubeMesh.cpp" />
     <ClCompile Include="Scene\Objects\Mesh.cpp" />
     <ClCompile Include="Scene\Objects\PlaneMesh.cpp" />
+    <ClCompile Include="Scene\Objects\SphereMesh.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Shaders\Program.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
@@ -134,6 +135,7 @@
     <ClInclude Include="Scene\Objects\CubeMesh.h" />
     <ClInclude Include="Scene\Objects\Mesh.h" />
     <ClInclude Include="Scene\Objects\PlaneMesh.h" />
+    <ClInclude Include="Scene\Objects\SphereMesh.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
     <ClInclude Include="Util\CatmullRomSpline.h" />
