@@ -5,9 +5,6 @@
 #include "Core/Messages/Messages.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
-#include "Scene/Objects/CubeMesh.h"
-#include "Scene/Objects/PlaneMesh.h"
-#include "Scene/Objects/SphereMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
@@ -38,10 +35,6 @@ static const int initial_pos_x   = 260;
 static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
-
-static std::shared_ptr<SphereMesh> sphere;
-static std::shared_ptr<PlaneMesh> plane;
-static std::shared_ptr<CubeMesh> cube;
 
 
 GLWindow::GLWindow(const std::string& title, App& app)
@@ -97,10 +90,6 @@ void GLWindow::init()
 	}
 
 	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
-
-	sphere = std::shared_ptr<SphereMesh>(new SphereMesh("sphere"));
-	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
-	cube = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
 }
 
 void GLWindow::update()
@@ -119,7 +108,6 @@ void GLWindow::update()
 	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }
 
-float d = 0.f; // temporary, for rotating cube
 void GLWindow::render()
 {
 	window.setActive();
@@ -141,32 +129,23 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	glActiveTexture(GL_TEXTURE0);
 
-	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
-	glm::mat4 model_matrix;
-	model_matrix = glm::translate(glm::mat4(), glm::vec3(0,1,-10));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
-	GLUtils::defaultProgram->setUniform("model", model_matrix);
-	Render::quad();
-	d += 2.5f;
-
+	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(10,10));
-	plane->render();
+	Render::plane();
 
+	// Draw live skeleton
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	if (liveSkeletonVisible) {
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
+	// Draw recorded animation
 	if (animation->getLength() > 0.f) {
 		skeleton->render();
 	}
-
-	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
-	sphere->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
