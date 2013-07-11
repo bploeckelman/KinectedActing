@@ -85,6 +85,7 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 
 	animLayersComboBox->AppendItem("base");
 	animLayersComboBox->AppendItem("blend");
+	animLayersComboBox->SelectItem(0);
 
 	const sf::Uint32 colspan = 6;
 	table->SetColumnSpacings(1.f);
