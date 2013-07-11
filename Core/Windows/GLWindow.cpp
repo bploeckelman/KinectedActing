@@ -484,5 +484,10 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 	// Lookup selected layer by name; if it exists, set it as current
 	auto it = animLayer.find(message->layerName);
 	currentAnimation = (end(animLayer) != it) ? it->second.get() : nullptr;
+
+	// Restart playback timer and apply animation to skeleton viz
 	animTimer = sf::Time::Zero;
+	if (nullptr != currentAnimation) {
+		currentAnimation->apply(skeleton.get(), animTimer.asSeconds());
+	}
 }
