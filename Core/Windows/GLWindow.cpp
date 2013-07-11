@@ -51,8 +51,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, depthTexture(nullptr)
 	, gridTexture(nullptr)
 	, capsuleTexture(nullptr)
-	, animation(nullptr)
 	, skeleton(nullptr)
+	, animLayer()
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -90,12 +90,17 @@ void GLWindow::init()
 
 	loadTextures();
 
-	animation = std::unique_ptr<Animation>(new Animation(0, "test_anim"));
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		animation->createBoneTrack(boneID);
+	skeleton = std::unique_ptr<Skeleton>(new Skeleton());
+
+	animLayer["base"] = std::unique_ptr<Animation>(new Animation(0, "base"));
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animLayer["base"]->createBoneTrack(boneID);
 	}
 
-	skeleton = std::unique_ptr<Skeleton>(new Skeleton());
+	animLayer["blend"] = std::unique_ptr<Animation>(new Animation(0, "blend"));
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animLayer["blend"]->createBoneTrack(boneID);
+	}
 }
 
 void GLWindow::update()
@@ -106,7 +111,7 @@ void GLWindow::update()
 	updateTextures();
 	updateRecording();
 
-	const float length = animation->getLength();
+	const float length = animLayer["base"]->getLength();
 	const float progress = (length == 0.f) ? 0.f : playbackTime / length;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
 
@@ -151,7 +156,7 @@ void GLWindow::render()
 	// Draw recorded animation
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(2,2));
-	if (animation->getLength() > 0.f) {
+	if (animLayer["base"]->getLength() > 0.f) {
 		skeleton->render();
 	}
 
@@ -192,9 +197,9 @@ void GLWindow::handleEvents()
 				case sf::Keyboard::Return: {
 					// Update rendered skeleton data
 					// TODO : setup bone mask for all Kinect joints
-					const float len = animation->getLength();
+					const float len = animLayer["base"]->getLength();
 					if (len != 0.f) {
-						animation->apply(skeleton.get(), playbackTime);
+						animLayer["base"]->apply(skeleton.get(), playbackTime);
 						if ((playbackTime += playbackDelta) > len) playbackTime = 0.f;
 					}
 				}
@@ -247,7 +252,7 @@ void GLWindow::updateTextures()
 void GLWindow::updateRecording()
 {
 	if (playbackRunning) {
-		const float anim_length = animation->getLength();
+		const float anim_length = animLayer["base"]->getLength();
 
 		playbackTime += playbackDelta;
 		if (playbackTime > anim_length) {
@@ -255,7 +260,7 @@ void GLWindow::updateRecording()
 		}
 
 		if (anim_length > 0.f) {
-			animation->apply(skeleton.get(), playbackTime);
+			animLayer["base"]->apply(skeleton.get(), playbackTime);
 		}
 	}
 
@@ -275,7 +280,7 @@ void GLWindow::updateRecording()
 	// Update all bone tracks
 	int numKeyFrames = 0;
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		BoneAnimationTrack *track = animation->getBoneTrack(boneID);
+		BoneAnimationTrack *track = animLayer["base"]->getBoneTrack(boneID);
 		if (nullptr == track) continue;
 
 		TransformKeyFrame *keyFrame = dynamic_cast<TransformKeyFrame*>(track->createKeyFrame(now));
@@ -293,7 +298,7 @@ void GLWindow::updateRecording()
 	// Update gui label text
 	std::stringstream ss;
 	ss << "Saved " << numKeyFrames << " key frames\n"
-	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
+	   << "Mem usage: " << animLayer["base"]->_calcMemoryUsage() << " bytes\n";
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 }
 
@@ -303,7 +308,7 @@ void GLWindow::recordLayer()
 	if (layering || recording) return;
 
 	// Need to have a base animation loaded to layer over
-	if (animation->getLength() == 0.f) {
+	if (animLayer["base"]->getLength() == 0.f) {
 		return;
 	}
 
@@ -360,9 +365,9 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
 
 	// Clear and recreate all bone tracks
-	animation->deleteAllBoneTrack();
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		animation->createBoneTrack(boneID);
+	animLayer["base"]->deleteAllBoneTrack();
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animLayer["base"]->createBoneTrack(boneID);
 	}
 
 	// Update gui label
@@ -382,16 +387,16 @@ void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
 {
 	playbackTime = 0.f;
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	if (animLayer["base"]->getLength() > 0.f) {
+		animLayer["base"]->apply(skeleton.get(), playbackTime);
 	}
 }
 
 void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
 {
-	playbackTime = animation->getLength();
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	playbackTime = animLayer["blue"]->getLength();
+	if (animLayer["base"]->getLength() > 0.f) {
+		animLayer["base"]->apply(skeleton.get(), playbackTime);
 	}
 }
 
@@ -401,19 +406,19 @@ void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
 	if (playbackTime < 0.f) {
 		playbackTime = 0.f;
 	}
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	if (animLayer["base"]->getLength() > 0.f) {
+		animLayer["base"]->apply(skeleton.get(), playbackTime);
 	}
 }
 
 void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
 {
 	playbackTime += playbackDelta;
-	if (playbackTime > animation->getLength()) {
-		playbackTime = animation->getLength();
+	if (playbackTime > animLayer["base"]->getLength()) {
+		playbackTime = animLayer["base"]->getLength();
 	}
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	if (animLayer["base"]->getLength() > 0.f) {
+		animLayer["base"]->apply(skeleton.get(), playbackTime);
 	}
 }
 

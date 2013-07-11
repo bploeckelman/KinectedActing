@@ -7,6 +7,7 @@
 
 #include <string>
 #include <memory>
+#include <map>
 
 namespace tdogl { class Texture; }
 
@@ -64,7 +65,8 @@ private:
 	std::unique_ptr<tdogl::Texture> gridTexture;
 	std::unique_ptr<tdogl::Texture> capsuleTexture;
 
-	std::unique_ptr<Animation> animation;
 	std::unique_ptr<Skeleton>  skeleton;
+
+	std::map< std::string, std::unique_ptr<Animation> > animLayer;
 
 };
