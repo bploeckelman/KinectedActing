@@ -41,6 +41,8 @@ namespace msg
 		, PLAYBACK_NEXT_FRAME
 		, PLAYBACK_SET_DELTA
 		, PLAYBACK_SET_PROGRESS
+		// Layering controls
+		, START_LAYERING
 	};
 
 	// ------------------------------------------------------------------------
@@ -160,6 +162,11 @@ namespace msg
 		const float progress;
 	};
 	// ------------------------------------------------------------------------
+	class StartLayeringMessage : public Message
+	{
+	public: StartLayeringMessage() : Message(START_LAYERING) {}
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -192,6 +199,7 @@ namespace msg
 		virtual void process(const PlaybackStopMessage       *message) {}
 		virtual void process(const PlaybackSetDeltaMessage   *message) {}
 		virtual void process(const PlaybackSetProgressMessage *message) {}
+		virtual void process(const StartLayeringMessage       *message) {}
 	};
 
 

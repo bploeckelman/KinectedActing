@@ -41,6 +41,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
 	, playbackRunning(false)
+	, recording(false)
+	, layering(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
 	, animTimer(sf::Time::Zero)
@@ -62,6 +64,8 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 	resetCamera();
 
+	msg::gDispatcher.registerHandler(msg::START_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::STOP_SKELETON_RECORDING,  this);
 	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
 	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
@@ -72,6 +76,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
+	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
 }
 
 GLWindow::~GLWindow()
@@ -254,9 +259,7 @@ void GLWindow::updateRecording()
 		}
 	}
 
-	if (!app.isRecording()) {
-		return;
-	}
+	if (!recording) return;
 
 	// Get the Kinect skeleton data if there is any
 	const KinectDevice& kinect = app.getKinect();
@@ -294,6 +297,26 @@ void GLWindow::updateRecording()
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 }
 
+void GLWindow::recordLayer()
+{
+	// Ignore if currently layering or recording
+	if (layering || recording) return;
+
+	// Need to have a base animation loaded to layer over
+	if (animation->getLength() == 0.f) {
+		return;
+	}
+
+	layering = true;
+	// TODO : record a performance layer
+	// - reqd animations:
+	//     - base
+	//     - saved layers
+	//     - new layer
+	//     - blend
+	std::cout << "now layering...\n";
+}
+
 void GLWindow::loadTextures()
 {
 	colorTexture = std::shared_ptr<tdogl::Texture>(
@@ -319,6 +342,16 @@ void GLWindow::loadTextures()
 		                 , capsuleImage.getSize().x, capsuleImage.getSize().y
 		                 , (unsigned char *) capsuleImage.getPixelsPtr()
 						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
+}
+
+void GLWindow::process( const msg::StartRecordingMessage *message )
+{
+	recording = true;
+}
+
+void GLWindow::process( const msg::StopRecordingMessage *message )
+{
+	recording = false;
 }
 
 void GLWindow::process( const msg::ClearRecordingMessage *message )
@@ -397,4 +430,9 @@ void GLWindow::process( const msg::PlaybackStopMessage *message )
 void GLWindow::process( const msg::PlaybackSetDeltaMessage *message )
 {
 	playbackDelta = message->delta;
+}
+
+void GLWindow::process( const msg::StartLayeringMessage *message )
+{
+	recordLayer();
 }

@@ -35,6 +35,7 @@ GUI::GUI()
 	, playbackNextButton(sfg::Button::Create(">"))
 	, playbackLastButton(sfg::Button::Create(">>"))
 	, playbackDeltaScale(sfg::Scale::Create(1.f / 1000.f, 1.f, 1.f / 1000.f))
+	, startLayeringButton(sfg::Button::Create("Record Layer"))
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 {}
@@ -123,8 +124,11 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 12,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 12, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
+	table->SetRowSpacing(12, 2.5f);
+	table->Attach(startLayeringButton, sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -154,6 +158,8 @@ void GUI::connectSignals()
 	playbackNextButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackNextButtonClick,     this);
 	playbackLastButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackLastButtonClick,     this);
 	playbackDeltaScale    ->GetSignal(sfg::Scale::OnLeftClick ).Connect(&GUI::onPlaybackDeltaScaleClick,     this);
+
+	startLayeringButton->GetSignal(sfg::Button::OnLeftClick ).Connect(&GUI::onStartLayeringButtonClick, this);
 }
 
 void GUI::onQuitButtonClick()
@@ -260,4 +266,9 @@ void GUI::onPlaybackLastButtonClick()
 void GUI::onPlaybackDeltaScaleClick()
 {
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetDeltaMessage(playbackDeltaScale->GetValue()));
+}
+
+void GUI::onStartLayeringButtonClick()
+{
+	msg::gDispatcher.dispatchMessage(msg::StartLayeringMessage());
 }

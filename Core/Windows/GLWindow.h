@@ -24,6 +24,8 @@ public:
 	void update();
 	void render();
 
+	void process(const msg::StartRecordingMessage    *message);
+	void process(const msg::StopRecordingMessage     *message);
 	void process(const msg::ClearRecordingMessage   *message);
 	void process(const msg::ShowLiveSkeletonMessage *message);
 	void process(const msg::HideLiveSkeletonMessage *message);
@@ -34,6 +36,7 @@ public:
 	void process(const msg::PlaybackStartMessage      *message);
 	void process(const msg::PlaybackStopMessage       *message);
 	void process(const msg::PlaybackSetDeltaMessage   *message);
+	void process(const msg::StartLayeringMessage      *message);
 
 private:
 	void resetCamera();
@@ -41,10 +44,13 @@ private:
 	void updateCamera();
 	void updateRecording();
 	void updateTextures();
+	void recordLayer();
 	void loadTextures();
 
 	bool liveSkeletonVisible;
 	bool playbackRunning;
+	bool recording;
+	bool layering;
 
 	float playbackTime;
 	float playbackDelta;

@@ -44,6 +44,7 @@ private:
 	void onPlaybackNextButtonClick();
 	void onPlaybackLastButtonClick();
 	void onPlaybackDeltaScaleClick();
+	void onStartLayeringButtonClick();
 
 private:
 	sfg::SFGUI sfgui;
@@ -76,6 +77,8 @@ private:
 	sfg::Button::Ptr playbackNextButton;
 	sfg::Button::Ptr playbackLastButton;
 	sfg::Scale::Ptr playbackDeltaScale;
+
+	sfg::Button::Ptr startLayeringButton;
 
 	sfg::Label::Ptr infoLabel;
 
