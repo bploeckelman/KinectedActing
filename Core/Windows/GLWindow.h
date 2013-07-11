@@ -38,6 +38,7 @@ public:
 	void process(const msg::PlaybackStopMessage       *message);
 	void process(const msg::PlaybackSetDeltaMessage   *message);
 	void process(const msg::StartLayeringMessage      *message);
+	void process(const msg::LayerSelectMessage        *message);
 
 private:
 	void resetCamera();
@@ -47,7 +48,7 @@ private:
 	void updateTextures();
 	void recordLayer();
 	void loadTextures();
-	size_t saveKeyFrame(float now, Animation *layer);
+	size_t saveKeyFrame(float now, Animation *animation);
 
 	bool liveSkeletonVisible;
 	bool playbackRunning;
@@ -68,6 +69,7 @@ private:
 
 	std::unique_ptr<Skeleton>  skeleton;
 
+	Animation *currentAnimation;
 	std::map< std::string, std::unique_ptr<Animation> > animLayer;
 
 };

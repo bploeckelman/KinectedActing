@@ -35,7 +35,8 @@ GUI::GUI()
 	, playbackNextButton(sfg::Button::Create(">"))
 	, playbackLastButton(sfg::Button::Create(">>"))
 	, playbackDeltaScale(sfg::Scale::Create(1.f / 1000.f, 1.f, 1.f / 1000.f))
-	, startLayeringButton(sfg::Button::Create("Record Layer"))
+	, startLayeringButton(sfg::Button::Create("Record New Layer"))
+	, animLayersComboBox(sfg::ComboBox::Create())
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 {}
@@ -82,6 +83,9 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	playbackDeltaScale->SetValue(1.f / 60.f);
 	liveSkeletonVisibleCheckButton->SetActive(true);
 
+	animLayersComboBox->AppendItem("base");
+	animLayersComboBox->AppendItem("blend");
+
 	const sf::Uint32 colspan = 6;
 	table->SetColumnSpacings(1.f);
 
@@ -127,8 +131,11 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->SetRowSpacing(12, 2.5f);
 	table->Attach(startLayeringButton, sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
+	table->SetRowSpacing(13, 5.f);
+	table->Attach(animLayersComboBox, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 15, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -160,6 +167,7 @@ void GUI::connectSignals()
 	playbackDeltaScale    ->GetSignal(sfg::Scale::OnLeftClick ).Connect(&GUI::onPlaybackDeltaScaleClick,     this);
 
 	startLayeringButton->GetSignal(sfg::Button::OnLeftClick ).Connect(&GUI::onStartLayeringButtonClick, this);
+	animLayersComboBox ->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onAnimLayersComboBoxSelect, this);
 }
 
 void GUI::onQuitButtonClick()
@@ -271,4 +279,10 @@ void GUI::onPlaybackDeltaScaleClick()
 void GUI::onStartLayeringButtonClick()
 {
 	msg::gDispatcher.dispatchMessage(msg::StartLayeringMessage());
+}
+
+void GUI::onAnimLayersComboBoxSelect()
+{
+	const std::string layerName = animLayersComboBox->GetSelectedText();
+	msg::gDispatcher.dispatchMessage(msg::LayerSelectMessage(layerName));
 }

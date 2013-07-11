@@ -45,6 +45,7 @@ private:
 	void onPlaybackLastButtonClick();
 	void onPlaybackDeltaScaleClick();
 	void onStartLayeringButtonClick();
+	void onAnimLayersComboBoxSelect();
 
 private:
 	sfg::SFGUI sfgui;
@@ -79,6 +80,7 @@ private:
 	sfg::Scale::Ptr playbackDeltaScale;
 
 	sfg::Button::Ptr startLayeringButton;
+	sfg::ComboBox::Ptr animLayersComboBox;
 
 	sfg::Label::Ptr infoLabel;
 

@@ -43,6 +43,7 @@ namespace msg
 		, PLAYBACK_SET_PROGRESS
 		// Layering controls
 		, START_LAYERING
+		, LAYER_SELECT
 	};
 
 	// ------------------------------------------------------------------------
@@ -167,6 +168,16 @@ namespace msg
 	public: StartLayeringMessage() : Message(START_LAYERING) {}
 	};
 	// ------------------------------------------------------------------------
+	class LayerSelectMessage: public Message
+	{
+	public:
+		LayerSelectMessage(const std::string& layerName)
+			: Message(LAYER_SELECT)
+			, layerName(layerName)
+		{}
+		const std::string layerName;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -200,6 +211,7 @@ namespace msg
 		virtual void process(const PlaybackSetDeltaMessage   *message) {}
 		virtual void process(const PlaybackSetProgressMessage *message) {}
 		virtual void process(const StartLayeringMessage       *message) {}
+		virtual void process(const LayerSelectMessage         *message) {}
 	};
 
 
