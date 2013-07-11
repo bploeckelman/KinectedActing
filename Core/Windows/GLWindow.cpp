@@ -48,6 +48,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
 	, gridTexture(nullptr)
+	, capsuleTexture(nullptr)
 	, animation(nullptr)
 	, skeleton(nullptr)
 {
@@ -143,9 +144,16 @@ void GLWindow::render()
 	}
 
 	// Draw recorded animation
+	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(2,2));
 	if (animation->getLength() > 0.f) {
 		skeleton->render();
 	}
+
+	glBindTexture(GL_TEXTURE_2D, capsuleTexture->object());
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
+	Render::capsule();
 
 	GLUtils::defaultProgram->stopUsing();
 
@@ -304,6 +312,13 @@ void GLWindow::loadTextures()
 		                 , gridImage.getSize().x, gridImage.getSize().y
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
+
+	sf::Image capsuleImage(GetImage("capsule.png"));
+	capsuleTexture = std::shared_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::RGBA
+		                 , capsuleImage.getSize().x, capsuleImage.getSize().y
+		                 , (unsigned char *) capsuleImage.getPixelsPtr()
+						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
 }
 
 void GLWindow::process( const msg::ClearRecordingMessage *message )

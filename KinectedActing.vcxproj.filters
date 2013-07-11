@@ -102,6 +102,9 @@
     <ClCompile Include="Scene\Objects\SphereMesh.cpp">
       <Filter>Scene\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\Objects\CapsuleMesh.cpp">
+      <Filter>Scene\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -177,6 +180,9 @@
       <Filter>Core\Messages</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Objects\SphereMesh.h">
+      <Filter>Scene\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Objects\CapsuleMesh.h">
       <Filter>Scene\Objects</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@
 #include "Scene/Objects/CubeMesh.h"
 #include "Scene/Objects/PlaneMesh.h"
 #include "Scene/Objects/SphereMesh.h"
+#include "Scene/Objects/CapsuleMesh.h"
 
 
 namespace Render
@@ -20,6 +21,7 @@ namespace Render
 	static std::unique_ptr<CubeMesh> cubeMesh;
 	static std::unique_ptr<PlaneMesh> planeMesh;
 	static std::unique_ptr<SphereMesh> sphereMesh;
+	static std::unique_ptr<CapsuleMesh> capsuleMesh;
 
 	// Initialize meshes, textures, etc...
 	void init();
@@ -37,6 +39,9 @@ namespace Render
 
 	// Draw a plane
 	void plane();
+
+	// Draw a capsule
+	void capsule();
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

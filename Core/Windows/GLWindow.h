@@ -56,6 +56,7 @@ private:
 	std::shared_ptr<tdogl::Texture> colorTexture;
 	std::shared_ptr<tdogl::Texture> depthTexture;
 	std::shared_ptr<tdogl::Texture> gridTexture;
+	std::shared_ptr<tdogl::Texture> capsuleTexture;
 
 	std::shared_ptr<Animation> animation;
 	std::shared_ptr<Skeleton>  skeleton;
