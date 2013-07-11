@@ -11,6 +11,7 @@
 #include "Scene/Objects/CubeMesh.h"
 #include "Scene/Objects/PlaneMesh.h"
 #include "Scene/Objects/SphereMesh.h"
+#include "Scene/Objects/CapsuleMesh.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -39,6 +40,7 @@ const GLfloat buffer_data[] = {
 std::unique_ptr<CubeMesh> cubeMesh;
 std::unique_ptr<PlaneMesh> planeMesh;
 std::unique_ptr<SphereMesh> sphereMesh;
+std::unique_ptr<CapsuleMesh> capsuleMesh;
 
 
 void loadBufferObjects()
@@ -83,6 +85,7 @@ void Render::init()
 	cubeMesh = std::unique_ptr<CubeMesh>(new CubeMesh("cube"));
 	planeMesh = std::unique_ptr<PlaneMesh>(new PlaneMesh("plane"));
 	sphereMesh = std::unique_ptr<SphereMesh>(new SphereMesh("sphere"));
+	capsuleMesh = std::unique_ptr<CapsuleMesh>(new CapsuleMesh("capsule"));
 }
 
 void Render::cleanup()
@@ -139,6 +142,11 @@ void Render::sphere()
 void Render::plane()
 {
 	planeMesh->render();
+}
+
+void Render::capsule()
+{
+	capsuleMesh->render();
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )

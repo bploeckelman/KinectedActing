@@ -106,6 +106,7 @@
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
     <ClCompile Include="Scene\Camera.cpp" />
+    <ClCompile Include="Scene\Objects\CapsuleMesh.cpp" />
     <ClCompile Include="Scene\Objects\CubeMesh.cpp" />
     <ClCompile Include="Scene\Objects\Mesh.cpp" />
     <ClCompile Include="Scene\Objects\PlaneMesh.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Kinect\KinectDevice.h" />
     <ClInclude Include="Scene\Camera.h" />
+    <ClInclude Include="Scene\Objects\CapsuleMesh.h" />
     <ClInclude Include="Scene\Objects\CubeMesh.h" />
     <ClInclude Include="Scene\Objects\Mesh.h" />
     <ClInclude Include="Scene\Objects\PlaneMesh.h" />
