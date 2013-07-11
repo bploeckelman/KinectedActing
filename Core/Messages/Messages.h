@@ -44,6 +44,8 @@ namespace msg
 		// Layering controls
 		, START_LAYERING
 		, LAYER_SELECT
+		// Misc
+		, SET_INFO_LABEL
 	};
 
 	// ------------------------------------------------------------------------
@@ -178,6 +180,16 @@ namespace msg
 		const std::string layerName;
 	};
 	// ------------------------------------------------------------------------
+	class SetInfoLabelMessage : public Message
+	{
+	public:
+		SetInfoLabelMessage(const std::string& text)
+			: Message(SET_INFO_LABEL)
+			, text(text)
+		{}
+		const std::string text;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -212,6 +224,7 @@ namespace msg
 		virtual void process(const PlaybackSetProgressMessage *message) {}
 		virtual void process(const StartLayeringMessage       *message) {}
 		virtual void process(const LayerSelectMessage         *message) {}
+		virtual void process(const SetInfoLabelMessage        *message) {}
 	};
 
 
