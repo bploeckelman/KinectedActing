@@ -266,40 +266,22 @@ void GLWindow::updateRecording()
 
 	if (!recording) return;
 
-	// Get the Kinect skeleton data if there is any
-	const KinectDevice& kinect = app.getKinect();
-	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
-	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
-	if (nullptr == skeletonData) return;
-
 	// Update animation timer for this set of keyframes
 	animTimer += app.getDeltaTime();
 	const float now = animTimer.asSeconds();
 
-	// Update all bone tracks
-	int numKeyFrames = 0;
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		BoneAnimationTrack *track = animLayer["base"]->getBoneTrack(boneID);
-		if (nullptr == track) continue;
+	const std::string layerName = "base";
+	auto it = animLayer.find(layerName);
+	if (end(animLayer) != it) {
+		auto layer = it->second.get();
+		size_t numKeyFrames = saveKeyFrame(now, layer);
 
-		TransformKeyFrame *keyFrame = dynamic_cast<TransformKeyFrame*>(track->createKeyFrame(now));
-		if (nullptr == keyFrame) continue;
-
-		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
-		const Vector4& orient = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
-		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
-		keyFrame->setRotation(glm::quat(orient.w, orient.x, orient.y, orient.z));
-		keyFrame->setScale(glm::vec3(1,1,1));
-
-		numKeyFrames += track->getNumKeyFrames();
+		// Update gui label text
+		std::stringstream ss;
+		ss << "Saved " << numKeyFrames << " key frames\n"
+		   << "Mem usage: " << layer->_calcMemoryUsage() << " bytes\n";
+		msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 	}
-
-	// Update gui label text
-	std::stringstream ss;
-	ss << "Saved " << numKeyFrames << " key frames\n"
-	   << "Mem usage: " << animLayer["base"]->_calcMemoryUsage() << " bytes\n";
-	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
 }
 
 void GLWindow::recordLayer()
@@ -313,13 +295,43 @@ void GLWindow::recordLayer()
 	}
 
 	layering = true;
-	// TODO : record a performance layer
-	// - reqd animations:
-	//     - base
-	//     - saved layers
-	//     - new layer
-	//     - blend
 	std::cout << "now layering...\n";
+}
+
+size_t GLWindow::saveKeyFrame( float now, Animation *layer)
+{
+	if (nullptr == layer) {
+		return 0;
+	}
+
+	// Get the Kinect skeleton data if there is any
+	const KinectDevice& kinect = app.getKinect();
+	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
+	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
+	if (nullptr == skeletonData) return 0;
+
+	// Update all bone tracks with a new keyframe
+	BoneAnimationTrack *track = nullptr;
+	TransformKeyFrame *keyFrame = nullptr;
+	size_t numKeyFrames = 0;
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		track = layer->getBoneTrack(boneID);
+		if (nullptr == track) continue;
+
+		keyFrame = dynamic_cast<TransformKeyFrame*>(track->createKeyFrame(now));
+		if (nullptr == keyFrame) continue;
+
+		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
+		const Vector4& orient = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
+		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
+		keyFrame->setRotation(glm::quat(orient.w, orient.x, orient.y, orient.z));
+		keyFrame->setScale(glm::vec3(1,1,1));
+
+		numKeyFrames += track->getNumKeyFrames();
+	}
+
+	return numKeyFrames;
 }
 
 void GLWindow::loadTextures()

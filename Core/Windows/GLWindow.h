@@ -47,6 +47,7 @@ private:
 	void updateTextures();
 	void recordLayer();
 	void loadTextures();
+	size_t saveKeyFrame(float now, Animation *layer);
 
 	bool liveSkeletonVisible;
 	bool playbackRunning;
