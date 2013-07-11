@@ -59,12 +59,12 @@ private:
 
 	tdogl::Camera camera;
 
-	std::shared_ptr<tdogl::Texture> colorTexture;
-	std::shared_ptr<tdogl::Texture> depthTexture;
-	std::shared_ptr<tdogl::Texture> gridTexture;
-	std::shared_ptr<tdogl::Texture> capsuleTexture;
+	std::unique_ptr<tdogl::Texture> colorTexture;
+	std::unique_ptr<tdogl::Texture> depthTexture;
+	std::unique_ptr<tdogl::Texture> gridTexture;
+	std::unique_ptr<tdogl::Texture> capsuleTexture;
 
-	std::shared_ptr<Animation> animation;
-	std::shared_ptr<Skeleton>  skeleton;
+	std::unique_ptr<Animation> animation;
+	std::unique_ptr<Skeleton>  skeleton;
 
 };

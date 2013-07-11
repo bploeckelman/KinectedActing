@@ -81,7 +81,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 
 GLWindow::~GLWindow()
 {
-	// Nothing to do, yay shared pointers
+	// Nothing to do, yay unique pointers
 }
 
 void GLWindow::init()
@@ -90,12 +90,12 @@ void GLWindow::init()
 
 	loadTextures();
 
-	animation = std::shared_ptr<Animation>(new Animation(0, "test_anim"));
+	animation = std::unique_ptr<Animation>(new Animation(0, "test_anim"));
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animation->createBoneTrack(boneID);
 	}
 
-	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
+	skeleton = std::unique_ptr<Skeleton>(new Skeleton());
 }
 
 void GLWindow::update()
@@ -319,25 +319,25 @@ void GLWindow::recordLayer()
 
 void GLWindow::loadTextures()
 {
-	colorTexture = std::shared_ptr<tdogl::Texture>(
+	colorTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::BGRA
 		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 		                 , (unsigned char *) app.getKinect().getColorData()));
 
-	depthTexture = std::shared_ptr<tdogl::Texture>(
+	depthTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::BGRA
 		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 		                 , (unsigned char *) app.getKinect().getColorData()));
 
 	sf::Image gridImage(GetImage("grid.png"));
-	gridTexture = std::shared_ptr<tdogl::Texture>(
+	gridTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
 		                 , gridImage.getSize().x, gridImage.getSize().y
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
 
 	sf::Image capsuleImage(GetImage("capsule.png"));
-	capsuleTexture = std::shared_ptr<tdogl::Texture>(
+	capsuleTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
 		                 , capsuleImage.getSize().x, capsuleImage.getSize().y
 		                 , (unsigned char *) capsuleImage.getPixelsPtr()
