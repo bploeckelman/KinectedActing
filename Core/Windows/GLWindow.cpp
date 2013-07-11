@@ -174,8 +174,8 @@ void GLWindow::resetCamera()
 	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
 	camera.setFieldOfView(66.f);
 	camera.setNearAndFarPlanes(0.1f, 100.f);
-	camera.setPosition(glm::vec3(0, 2, 10));
-	camera.offsetOrientation(-camera.verticalAngle(), -camera.horizontalAngle());
+	camera.setPosition(glm::vec3(0, 1, 3));
+	camera.offsetOrientation(33.f, 0.f);
 }
 
 void GLWindow::handleEvents()
