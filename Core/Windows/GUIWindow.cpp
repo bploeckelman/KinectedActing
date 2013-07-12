@@ -23,6 +23,8 @@ GUIWindow::GUIWindow(const std::string& title, App& app)
 	window.create(videoMode, title, style);
 	window.setFramerateLimit(framerate_limit);
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
+
+	registerMessageHandlers();
 }
 
 GUIWindow::~GUIWindow()
@@ -32,9 +34,6 @@ void GUIWindow::init()
 {
 	gui.initialize(window);
 	gui.setKinectIdLabel(app.getKinect().getDeviceId());
-
-	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL,   this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_PROGRESS, this);
 }
 
 void GUIWindow::update()
@@ -54,6 +53,18 @@ void GUIWindow::render()
 	window.display();
 }
 
+
+// ----------------------------------------------------------------------------
+// Message processing methods -------------------------------------------------
+// ----------------------------------------------------------------------------
+void GUIWindow::registerMessageHandlers()
+{
+	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL,   this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_PROGRESS, this);
+	msg::gDispatcher.registerHandler(msg::SET_INFO_LABEL,        this);
+	msg::gDispatcher.registerHandler(msg::ADD_LAYER_ITEM,        this);
+}
+
 void GUIWindow::process( const msg::SetRecordingLabelMessage *message )
 {
 	gui.setRecordingLabel(message->text);
@@ -62,4 +73,14 @@ void GUIWindow::process( const msg::SetRecordingLabelMessage *message )
 void GUIWindow::process( const msg::PlaybackSetProgressMessage *message )
 {
 	gui.setProgressFraction(message->progress);
+}
+
+void GUIWindow::process( const msg::SetInfoLabelMessage *message )
+{
+	gui.setInfoLabel(message->text);
+}
+
+void GUIWindow::process( const msg::AddLayerItemMessage *message )
+{
+	gui.appendLayerItem(message->item);
 }

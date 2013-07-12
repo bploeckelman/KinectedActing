@@ -6,18 +6,26 @@
 /************************************************************************/
 #include <gl/glew.h>
 
-#include "Scene/Objects/CubeMesh.h"
-
 #include <glm/glm.hpp>
 
 #include <memory>
 
+#include "Scene/Objects/CubeMesh.h"
+#include "Scene/Objects/PlaneMesh.h"
+#include "Scene/Objects/SphereMesh.h"
+#include "Scene/Objects/CapsuleMesh.h"
+
 
 namespace Render
 {
-	// Initialize buffers, textures, etc...
+	static std::unique_ptr<CubeMesh> cubeMesh;
+	static std::unique_ptr<PlaneMesh> planeMesh;
+	static std::unique_ptr<SphereMesh> sphereMesh;
+	static std::unique_ptr<CapsuleMesh> capsuleMesh;
+
+	// Initialize meshes, textures, etc...
 	void init();
-	// Cleanup buffers, textures, etc...
+	// Cleanup meshes, textures, etc...
 	void cleanup();
 
 	// Draw a basic quad
@@ -25,6 +33,15 @@ namespace Render
 
 	// Draw a cube
 	void cube();
+
+	// Draw a sphere
+	void sphere();
+
+	// Draw a plane
+	void plane();
+
+	// Draw a capsule
+	void capsule();
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

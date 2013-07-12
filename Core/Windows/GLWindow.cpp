@@ -5,9 +5,6 @@
 #include "Core/Messages/Messages.h"
 #include "Kinect/KinectDevice.h"
 #include "Scene/Camera.h"
-#include "Scene/Objects/CubeMesh.h"
-#include "Scene/Objects/PlaneMesh.h"
-#include "Scene/Objects/SphereMesh.h"
 #include "Shaders/Shader.h"
 #include "Shaders/Program.h"
 #include "Util/GLUtils.h"
@@ -39,24 +36,25 @@ static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
 
-static std::shared_ptr<SphereMesh> sphere;
-static std::shared_ptr<PlaneMesh> plane;
-static std::shared_ptr<CubeMesh> cube;
-
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
 	, playbackRunning(false)
+	, recording(false)
+	, layering(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
+	, layerID(0)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
 	, gridTexture(nullptr)
-	, animation(nullptr)
+	, redTileTexture(nullptr)
 	, skeleton(nullptr)
+	, currentAnimation(nullptr)
+	, animLayer()
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -67,22 +65,12 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
 
 	resetCamera();
-
-	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
-	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
-	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
+	registerMessageHandlers();
 }
 
 GLWindow::~GLWindow()
 {
-	// Nothing to do, yay shared pointers
+	// Nothing to do, yay unique pointers
 }
 
 void GLWindow::init()
@@ -91,16 +79,18 @@ void GLWindow::init()
 
 	loadTextures();
 
-	animation = std::shared_ptr<Animation>(new Animation(0, "test_anim"));
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		animation->createBoneTrack(boneID);
+	skeleton = std::unique_ptr<Skeleton>(new Skeleton());
+
+	animLayer["base"] = std::unique_ptr<Animation>(new Animation(0, "base"));
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animLayer["base"]->createBoneTrack(boneID);
 	}
+	currentAnimation = animLayer["base"].get();
 
-	skeleton = std::shared_ptr<Skeleton>(new Skeleton());
-
-	sphere = std::shared_ptr<SphereMesh>(new SphereMesh("sphere"));
-	plane = std::shared_ptr<PlaneMesh>(new PlaneMesh("plane"));
-	cube = std::shared_ptr<CubeMesh>(new CubeMesh("cube"));
+	animLayer["blend"] = std::unique_ptr<Animation>(new Animation(0, "blend"));
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animLayer["blend"]->createBoneTrack(boneID);
+	}
 }
 
 void GLWindow::update()
@@ -110,16 +100,18 @@ void GLWindow::update()
 	updateCamera();
 	updateTextures();
 	updateRecording();
+	updatePlayback();
 
-	const float length = animation->getLength();
+	if (nullptr == currentAnimation) {
+		return;
+	}
+
+	const float length = currentAnimation->getLength();
 	const float progress = (length == 0.f) ? 0.f : playbackTime / length;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
 
-	bool space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }
 
-float d = 0.f; // temporary, for rotating cube
 void GLWindow::render()
 {
 	window.setActive();
@@ -141,32 +133,24 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	glActiveTexture(GL_TEXTURE0);
 
-	glBindTexture(GL_TEXTURE_2D, depthTexture->object());
-	glm::mat4 model_matrix;
-	model_matrix = glm::translate(glm::mat4(), glm::vec3(0,1,-10));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,1,0));
-	model_matrix = glm::rotate(model_matrix, d, glm::vec3(0,0,1));
-	GLUtils::defaultProgram->setUniform("model", model_matrix);
-	Render::quad();
-	d += 2.5f;
-
+	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(10,10));
-	plane->render();
+	Render::plane();
 
+	// Draw live skeleton
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	if (liveSkeletonVisible) {
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
-	if (animation->getLength() > 0.f) {
+	// Draw current animation layer
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 	}
-
-	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, 2.f, 0.f)));
-	sphere->render();
 
 	GLUtils::defaultProgram->stopUsing();
 
@@ -178,8 +162,8 @@ void GLWindow::resetCamera()
 	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
 	camera.setFieldOfView(66.f);
 	camera.setNearAndFarPlanes(0.1f, 100.f);
-	camera.setPosition(glm::vec3(0, 2, 10));
-	camera.offsetOrientation(-camera.verticalAngle(), -camera.horizontalAngle());
+	camera.setPosition(glm::vec3(0, 1, 3));
+	camera.offsetOrientation(33.f - camera.verticalAngle(), -camera.horizontalAngle());
 }
 
 void GLWindow::handleEvents()
@@ -197,19 +181,12 @@ void GLWindow::handleEvents()
 			switch (event.key.code) {
 				case sf::Keyboard::Escape: window.close(); break;
 				case sf::Keyboard::BackSpace: resetCamera(); break;
-				case sf::Keyboard::Return: {
-					// Update rendered skeleton data
-					// TODO : setup bone mask for all Kinect joints
-					const float len = animation->getLength();
-					if (len != 0.f) {
-						animation->apply(skeleton.get(), playbackTime);
-						if ((playbackTime += playbackDelta) > len) playbackTime = 0.f;
-					}
-				}
-				break;
 			}
 		}
 	}
+
+	bool space = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }
 
 void GLWindow::updateCamera()
@@ -254,21 +231,91 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
-	if (playbackRunning) {
-		const float anim_length = animation->getLength();
+	// Select animation to save keyframe to
+	Animation *animation = nullptr;
+	     if (recording) animation = animLayer["base"].get();
+	else if (layering)  animation = currentAnimation;
 
-		playbackTime += playbackDelta;
-		if (playbackTime > anim_length) {
-			playbackTime = 0.f;
-		}
+	// Can't save if there's nothing to save to
+	if (nullptr == animation) {
+		return;
+	}
 
-		if (anim_length > 0.f) {
-			animation->apply(skeleton.get(), playbackTime);
+	// Update animation timer for this new keyframe
+	animTimer += app.getDeltaTime();
+	const float now = animTimer.asSeconds();
+
+	size_t numKeyFrames = saveKeyFrame(now, currentAnimation);
+
+	if (layering) {
+		if (now < animLayer["base"]->getLength()) {
+			saveBlendKeyFrame(now, animLayer["blend"].get());
+		} else {
+			msg::StopRecordingMessage msg;
+			process(&msg);
+			MessageBoxA(NULL, "Done recording layer", "Done", MB_OK);
 		}
 	}
 
-	if (!app.isRecording()) {
+	// Update gui label text
+	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
+		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n";
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(text));
+}
+
+void GLWindow::updatePlayback()
+{
+	if (!playbackRunning || nullptr == currentAnimation) {
 		return;
+	}
+
+	const float anim_length = currentAnimation->getLength();
+	playbackTime += playbackDelta;
+	if (playbackTime > anim_length) {
+		playbackTime = 0.f;
+	}
+
+	if (layering) {
+		animLayer["blend"]->apply(skeleton.get(), playbackTime);
+	} else if (anim_length > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
+	}
+}
+
+void GLWindow::recordLayer()
+{
+	// Ignore if currently layering or recording, or no animation is selected
+	if (layering || recording) return;
+
+	// Need to have a base animation loaded to layer over
+	Animation *base = animLayer["base"].get();
+	if (nullptr == base || base->getLength() == 0.f) {
+		 return;
+	}
+
+	layering = true;
+	animTimer = sf::Time::Zero;
+	std::cout << "now layering...\n";
+	// TODO : start countdown timer
+
+	// Create a new animation layer
+	const std::string layerName = "layer " + std::to_string(++layerID);
+
+	animLayer[layerName] = std::unique_ptr<Animation>(new Animation(layerID, layerName));
+	Animation *newLayer = animLayer[layerName].get();
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		newLayer->createBoneTrack(boneID);
+	}
+	currentAnimation = newLayer;
+
+	// Update ui layer combo box
+	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
+}
+
+size_t GLWindow::saveKeyFrame( float now, Animation *animation)
+{
+	if (nullptr == animation) {
+		return 0;
 	}
 
 	// Get the Kinect skeleton data if there is any
@@ -276,19 +323,17 @@ void GLWindow::updateRecording()
 	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
 	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
 	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
-	if (nullptr == skeletonData) return;
+	if (nullptr == skeletonData) return 0;
 
-	// Update animation timer for this set of keyframes
-	animTimer += app.getDeltaTime();
-	const float now = animTimer.asSeconds();
-
-	// Update all bone tracks
-	int numKeyFrames = 0;
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		BoneAnimationTrack *track = animation->getBoneTrack(boneID);
+	// Update all bone tracks with a new keyframe
+	BoneAnimationTrack *track = nullptr;
+	TransformKeyFrame *keyFrame = nullptr;
+	size_t numKeyFrames = 0;
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		track = animation->getBoneTrack(boneID);
 		if (nullptr == track) continue;
 
-		TransformKeyFrame *keyFrame = dynamic_cast<TransformKeyFrame*>(track->createKeyFrame(now));
+		keyFrame = static_cast<TransformKeyFrame*>(track->createKeyFrame(now));
 		if (nullptr == keyFrame) continue;
 
 		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
@@ -300,31 +345,101 @@ void GLWindow::updateRecording()
 		numKeyFrames += track->getNumKeyFrames();
 	}
 
-	// Update gui label text
-	std::stringstream ss;
-	ss << "Saved " << numKeyFrames << " key frames\n"
-	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
-	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
+	return numKeyFrames;
+}
+
+void GLWindow::saveBlendKeyFrame( float now, Animation *animation )
+{
+	Animation *base = animLayer["base"].get();
+	Animation *blend = animLayer["blend"].get();
+	BoneAnimationTrack *baseTrack = nullptr;
+	BoneAnimationTrack *animTrack = nullptr;
+	BoneAnimationTrack *blendTrack = nullptr;
+	TransformKeyFrame baseKeyFrame(now, 0);
+	TransformKeyFrame animKeyFrame1(now, 0);
+	TransformKeyFrame animKeyFrame2(now - playbackDelta, 0);
+
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		baseTrack = base->getBoneTrack(boneID);
+		animTrack = currentAnimation->getBoneTrack(boneID);
+		blendTrack = blend->getBoneTrack(boneID);
+		if (nullptr == baseTrack || nullptr == animTrack || nullptr == blendTrack) continue;
+
+		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(now));
+		if (nullptr == blendTKF) continue;
+
+		baseTrack->getInterpolatedKeyFrame(now, &baseKeyFrame);
+		animTrack->getInterpolatedKeyFrame(now, &animKeyFrame1);
+		animTrack->getInterpolatedKeyFrame(now - playbackDelta, &animKeyFrame2);
+
+		const glm::vec3 basePos(baseKeyFrame.getTranslation());
+		const glm::vec3 animPos1(animKeyFrame1.getTranslation());
+		const glm::vec3 animPos2(animKeyFrame2.getTranslation());
+
+		blendTKF->setTranslation(glm::vec3(basePos + (animPos1 - animPos2)));
+		blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
+		blendTKF->setScale(glm::vec3(1,1,1));
+	}
 }
 
 void GLWindow::loadTextures()
 {
-	colorTexture = std::shared_ptr<tdogl::Texture>(
+	colorTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::BGRA
 		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 		                 , (unsigned char *) app.getKinect().getColorData()));
 
-	depthTexture = std::shared_ptr<tdogl::Texture>(
+	depthTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::BGRA
 		                 , KinectDevice::image_stream_width, KinectDevice::image_stream_height
 		                 , (unsigned char *) app.getKinect().getColorData()));
 
 	sf::Image gridImage(GetImage("grid.png"));
-	gridTexture = std::shared_ptr<tdogl::Texture>(
+	gridTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
 		                 , gridImage.getSize().x, gridImage.getSize().y
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
+
+	sf::Image redTileImage(GetImage("red-tiles.png"));
+	redTileTexture = std::unique_ptr<tdogl::Texture>(
+		new tdogl::Texture(tdogl::Texture::Format::RGBA
+		                 , redTileImage.getSize().x, redTileImage.getSize().y
+		                 , (unsigned char *) redTileImage.getPixelsPtr()
+						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
+}
+
+
+// ----------------------------------------------------------------------------
+// Message processing methods -------------------------------------------------
+// ----------------------------------------------------------------------------
+void GLWindow::registerMessageHandlers()
+{
+	msg::gDispatcher.registerHandler(msg::START_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::STOP_SKELETON_RECORDING,  this);
+	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
+	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
+	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
+}
+
+void GLWindow::process( const msg::StartRecordingMessage *message )
+{
+	recording = true;
+}
+
+void GLWindow::process( const msg::StopRecordingMessage *message )
+{
+	recording = false;
+	layering = false;
 }
 
 void GLWindow::process( const msg::ClearRecordingMessage *message )
@@ -332,10 +447,14 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 	// Handle a clear frames request
 	msg::gDispatcher.dispatchMessage(msg::StopRecordingMessage());
 
+	if (nullptr == currentAnimation) {
+		return;
+	}
+
 	// Clear and recreate all bone tracks
-	animation->deleteAllBoneTrack();
-	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		animation->createBoneTrack(boneID);
+	currentAnimation->deleteAllBoneTrack();
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		currentAnimation->createBoneTrack(boneID);
 	}
 
 	// Update gui label
@@ -355,16 +474,16 @@ void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
 {
 	playbackTime = 0.f;
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
 
 void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
 {
-	playbackTime = animation->getLength();
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	playbackTime = currentAnimation->getLength();
+	if (nullptr != currentAnimation && playbackTime > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
 
@@ -374,19 +493,26 @@ void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
 	if (playbackTime < 0.f) {
 		playbackTime = 0.f;
 	}
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
 
 void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
 {
-	playbackTime += playbackDelta;
-	if (playbackTime > animation->getLength()) {
-		playbackTime = animation->getLength();
+	if (nullptr == currentAnimation) {
+		return;
 	}
-	if (animation->getLength() > 0.f) {
-		animation->apply(skeleton.get(), playbackTime);
+	const float length = currentAnimation->getLength();
+
+	playbackTime += playbackDelta;
+	if (playbackTime > length) {
+		playbackTime = length;
+	}
+
+	if (length > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
 
@@ -403,4 +529,24 @@ void GLWindow::process( const msg::PlaybackStopMessage *message )
 void GLWindow::process( const msg::PlaybackSetDeltaMessage *message )
 {
 	playbackDelta = message->delta;
+}
+
+void GLWindow::process( const msg::StartLayeringMessage *message )
+{
+	recordLayer();
+}
+
+void GLWindow::process( const msg::LayerSelectMessage *message )
+{
+	// Lookup selected layer by name; if it exists, set it as current
+	auto it = animLayer.find(message->layerName);
+	currentAnimation = (end(animLayer) != it) ? it->second.get() : nullptr;
+
+	// Restart playback timer and apply animation to skeleton viz
+	animTimer = sf::Time::Zero;
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		playbackTime = 0.f;
+		playbackRunning = false;
+		currentAnimation->apply(skeleton.get(), playbackTime);
+	}
 }

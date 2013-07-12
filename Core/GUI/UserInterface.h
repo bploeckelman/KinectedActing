@@ -21,6 +21,7 @@ public: // External interface
 	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 	void setProgressFraction(const float fraction);
+	void appendLayerItem(const std::string& text);
 
 	bool isLiveSkeletonVisible() const;
 
@@ -44,6 +45,8 @@ private:
 	void onPlaybackNextButtonClick();
 	void onPlaybackLastButtonClick();
 	void onPlaybackDeltaScaleClick();
+	void onStartLayeringButtonClick();
+	void onAnimLayersComboBoxSelect();
 
 private:
 	sfg::SFGUI sfgui;
@@ -76,6 +79,9 @@ private:
 	sfg::Button::Ptr playbackNextButton;
 	sfg::Button::Ptr playbackLastButton;
 	sfg::Scale::Ptr playbackDeltaScale;
+
+	sfg::Button::Ptr startLayeringButton;
+	sfg::ComboBox::Ptr animLayersComboBox;
 
 	sfg::Label::Ptr infoLabel;
 

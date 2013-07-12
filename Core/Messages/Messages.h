@@ -41,6 +41,12 @@ namespace msg
 		, PLAYBACK_NEXT_FRAME
 		, PLAYBACK_SET_DELTA
 		, PLAYBACK_SET_PROGRESS
+		// Layering controls
+		, START_LAYERING
+		, LAYER_SELECT
+		, ADD_LAYER_ITEM
+		// Misc
+		, SET_INFO_LABEL
 	};
 
 	// ------------------------------------------------------------------------
@@ -160,6 +166,41 @@ namespace msg
 		const float progress;
 	};
 	// ------------------------------------------------------------------------
+	class StartLayeringMessage : public Message
+	{
+	public: StartLayeringMessage() : Message(START_LAYERING) {}
+	};
+	// ------------------------------------------------------------------------
+	class LayerSelectMessage: public Message
+	{
+	public:
+		LayerSelectMessage(const std::string& layerName)
+			: Message(LAYER_SELECT)
+			, layerName(layerName)
+		{}
+		const std::string layerName;
+	};
+	// ------------------------------------------------------------------------
+	class SetInfoLabelMessage : public Message
+	{
+	public:
+		SetInfoLabelMessage(const std::string& text)
+			: Message(SET_INFO_LABEL)
+			, text(text)
+		{}
+		const std::string text;
+	};
+	// ------------------------------------------------------------------------
+	class AddLayerItemMessage: public Message
+	{
+	public:
+		AddLayerItemMessage(const std::string& item)
+			: Message(ADD_LAYER_ITEM)
+			, item(item)
+		{}
+		const std::string item;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -192,6 +233,10 @@ namespace msg
 		virtual void process(const PlaybackStopMessage       *message) {}
 		virtual void process(const PlaybackSetDeltaMessage   *message) {}
 		virtual void process(const PlaybackSetProgressMessage *message) {}
+		virtual void process(const StartLayeringMessage       *message) {}
+		virtual void process(const LayerSelectMessage         *message) {}
+		virtual void process(const AddLayerItemMessage        *message) {}
+		virtual void process(const SetInfoLabelMessage        *message) {}
 	};
 
 

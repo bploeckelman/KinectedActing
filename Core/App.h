@@ -23,17 +23,12 @@ public:
 
 	KinectDevice& getKinect();
 
-	bool isRecording() const { return recording; }
-
 	void process(const msg::QuitProgramMessage       *message);
 	void process(const msg::StartKinectDeviceMessage *message);
 	void process(const msg::StopKinectDeviceMessage  *message);
-	void process(const msg::StartRecordingMessage    *message);
-	void process(const msg::StopRecordingMessage     *message);
 
 private:
 	bool done;
-	bool recording;
 
 	sf::Clock timer;
 
