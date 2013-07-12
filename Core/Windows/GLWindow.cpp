@@ -424,24 +424,16 @@ void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 
 void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
 {
-	if (nullptr == currentAnimation) {
-		return;
-	}
-
 	playbackTime = 0.f;
-	if (currentAnimation->getLength() > 0.f) {
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
 
 void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
 {
-	if (nullptr == currentAnimation) {
-		return;
-	}
-
 	playbackTime = currentAnimation->getLength();
-	if (playbackTime > 0.f) {
+	if (nullptr != currentAnimation && playbackTime > 0.f) {
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
@@ -453,11 +445,7 @@ void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
 		playbackTime = 0.f;
 	}
 
-	if (nullptr == currentAnimation) {
-		return;
-	}
-
-	if (currentAnimation->getLength() > 0.f) {
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
@@ -467,7 +455,6 @@ void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
 	if (nullptr == currentAnimation) {
 		return;
 	}
-
 	const float length = currentAnimation->getLength();
 
 	playbackTime += playbackDelta;
