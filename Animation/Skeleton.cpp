@@ -34,7 +34,7 @@ void Skeleton::render() const
 		model_matrix = glm::scale(model_matrix, scale);
 		GLUtils::defaultProgram->setUniform("model", model_matrix);
 
-		Render::sphere();
+		Render::cube();
 	});
 }
 
