@@ -35,7 +35,7 @@ GUI::GUI()
 	, playbackNextButton(sfg::Button::Create(">"))
 	, playbackLastButton(sfg::Button::Create(">>"))
 	, playbackDeltaScale(sfg::Scale::Create(1.f / 1000.f, 1.f, 1.f / 1000.f))
-	, startLayeringButton(sfg::Button::Create("Record New Layer"))
+	, startLayeringButton(sfg::Button::Create("Create New Layer"))
 	, animLayersComboBox(sfg::ComboBox::Create())
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
@@ -84,7 +84,6 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	liveSkeletonVisibleCheckButton->SetActive(true);
 
 	animLayersComboBox->AppendItem("base");
-	animLayersComboBox->AppendItem("blend");
 	animLayersComboBox->SelectItem(0);
 
 	const sf::Uint32 colspan = 6;
