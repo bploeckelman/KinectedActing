@@ -278,10 +278,9 @@ void GLWindow::updateRecording()
 	size_t numKeyFrames = saveKeyFrame(now, currentAnimation);
 
 	// Update gui label text
-	std::stringstream ss;
-	ss << "Saved " << numKeyFrames << " key frames\n"
-	   << "Mem usage: " << animation->_calcMemoryUsage() << " bytes\n";
-	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(ss.str()));
+	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
+		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n";
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(text));
 }
 
 void GLWindow::recordLayer()
