@@ -211,6 +211,13 @@ void GUI::setProgressFraction( const float fraction )
 	playbackProgressBar->SetFraction(frac);
 }
 
+void GUI::appendLayerItem( const std::string& text )
+{
+	animLayersComboBox->AppendItem(text);
+	size_t index = animLayersComboBox->GetItemCount();
+	animLayersComboBox->SelectItem(index - 1);
+}
+
 void GUI::onRecordStartButtonClick()
 {
 	msg::gDispatcher.dispatchMessage(msg::StartRecordingMessage());

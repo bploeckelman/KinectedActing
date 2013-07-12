@@ -36,6 +36,7 @@ void GUIWindow::init()
 	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL,   this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_PROGRESS, this);
 	msg::gDispatcher.registerHandler(msg::SET_INFO_LABEL,        this);
+	msg::gDispatcher.registerHandler(msg::ADD_LAYER_ITEM,        this);
 }
 
 void GUIWindow::update()
@@ -68,4 +69,9 @@ void GUIWindow::process( const msg::PlaybackSetProgressMessage *message )
 void GUIWindow::process( const msg::SetInfoLabelMessage *message )
 {
 	gui.setInfoLabel(message->text);
+}
+
+void GUIWindow::process( const msg::AddLayerItemMessage *message )
+{
+	gui.appendLayerItem(message->item);
 }

@@ -45,6 +45,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, layering(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
+	, layerID(0)
 	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
@@ -296,7 +297,20 @@ void GLWindow::recordLayer()
 
 	layering = true;
 	std::cout << "now layering...\n";
-	// TODO : create new animation layer, save name, add to gui combo box
+	// TODO : start countdown timer
+
+	// Create a new animation layer
+	const std::string layerName = "layer " + std::to_string(++layerID);
+
+	animLayer[layerName] = std::unique_ptr<Animation>(new Animation(layerID, layerName));
+	Animation *newLayer = animLayer[layerName].get();
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		newLayer->createBoneTrack(boneID);
+	}
+	currentAnimation = newLayer;
+
+	// Update ui layer combo box
+	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
 }
 
 size_t GLWindow::saveKeyFrame( float now, Animation *animation)

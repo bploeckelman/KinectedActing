@@ -21,6 +21,7 @@ public: // External interface
 	void setRecordingLabel(const std::string& text);
 	void setInfoLabel(const std::string& text);
 	void setProgressFraction(const float fraction);
+	void appendLayerItem(const std::string& text);
 
 	bool isLiveSkeletonVisible() const;
 

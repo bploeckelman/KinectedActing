@@ -58,6 +58,8 @@ private:
 	float playbackTime;
 	float playbackDelta;
 
+	unsigned char layerID;
+
 	sf::Time animTimer;
 
 	tdogl::Camera camera;

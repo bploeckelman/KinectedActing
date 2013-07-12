@@ -22,6 +22,7 @@ public:
 	void process(const msg::SetRecordingLabelMessage   *message);
 	void process(const msg::PlaybackSetProgressMessage *message);
 	void process(const msg::SetInfoLabelMessage        *message);
+	void process(const msg::AddLayerItemMessage        *message);
 
 private:
 	GUI gui;
