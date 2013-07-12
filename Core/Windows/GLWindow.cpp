@@ -100,6 +100,7 @@ void GLWindow::update()
 	updateCamera();
 	updateTextures();
 	updateRecording();
+	updatePlayback();
 
 	if (nullptr == currentAnimation) {
 		return;
@@ -230,23 +231,6 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
-	if (nullptr == currentAnimation) {
-		return;
-	}
-
-	if (playbackRunning) {
-		const float anim_length = currentAnimation->getLength();
-
-		playbackTime += playbackDelta;
-		if (playbackTime > anim_length) {
-			playbackTime = 0.f;
-		}
-
-		if (anim_length > 0.f) {
-			currentAnimation->apply(skeleton.get(), playbackTime);
-		}
-	}
-
 	// Select animation to save keyframe to
 	Animation *animation = nullptr;
 	     if (recording) animation = animLayer["base"].get();
@@ -267,6 +251,23 @@ void GLWindow::updateRecording()
 	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
 		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n";
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(text));
+}
+
+void GLWindow::updatePlayback()
+{
+	if (!playbackRunning || nullptr == currentAnimation) {
+		return;
+	}
+
+	const float anim_length = currentAnimation->getLength();
+	playbackTime += playbackDelta;
+	if (playbackTime > anim_length) {
+		playbackTime = 0.f;
+	}
+
+	if (anim_length > 0.f) {
+		currentAnimation->apply(skeleton.get(), playbackTime);
+	}
 }
 
 void GLWindow::recordLayer()
@@ -391,6 +392,7 @@ void GLWindow::process( const msg::StartRecordingMessage *message )
 void GLWindow::process( const msg::StopRecordingMessage *message )
 {
 	recording = false;
+	layering = false;
 }
 
 void GLWindow::process( const msg::ClearRecordingMessage *message )
@@ -495,7 +497,9 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 
 	// Restart playback timer and apply animation to skeleton viz
 	animTimer = sf::Time::Zero;
-	if (nullptr != currentAnimation) {
-		currentAnimation->apply(skeleton.get(), animTimer.asSeconds());
+	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		playbackTime = 0.f;
+		playbackRunning = false;
+		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }

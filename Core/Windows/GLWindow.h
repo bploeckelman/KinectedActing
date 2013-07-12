@@ -30,6 +30,7 @@ private:
 	void handleEvents();
 	void updateCamera();
 	void updateRecording();
+	void updatePlayback();
 	void updateTextures();
 	void recordLayer();
 	void loadTextures();
