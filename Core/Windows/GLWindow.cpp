@@ -163,7 +163,7 @@ void GLWindow::resetCamera()
 	camera.setFieldOfView(66.f);
 	camera.setNearAndFarPlanes(0.1f, 100.f);
 	camera.setPosition(glm::vec3(0, 1, 3));
-	camera.offsetOrientation(33.f, 0.f);
+	camera.offsetOrientation(33.f - camera.verticalAngle(), -camera.horizontalAngle());
 }
 
 void GLWindow::handleEvents()
