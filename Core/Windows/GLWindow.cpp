@@ -65,21 +65,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
 
 	resetCamera();
-
-	msg::gDispatcher.registerHandler(msg::START_SKELETON_RECORDING, this);
-	msg::gDispatcher.registerHandler(msg::STOP_SKELETON_RECORDING,  this);
-	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
-	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
-	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
-	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
-	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
-	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
+	registerMessageHandlers();
 }
 
 GLWindow::~GLWindow()
@@ -373,6 +359,28 @@ void GLWindow::loadTextures()
 		                 , capsuleImage.getSize().x, capsuleImage.getSize().y
 		                 , (unsigned char *) capsuleImage.getPixelsPtr()
 						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
+}
+
+
+// ----------------------------------------------------------------------------
+// Message processing methods -------------------------------------------------
+// ----------------------------------------------------------------------------
+void GLWindow::registerMessageHandlers()
+{
+	msg::gDispatcher.registerHandler(msg::START_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::STOP_SKELETON_RECORDING,  this);
+	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_NEXT_FRAME,      this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_START,           this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_STOP,            this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
+	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
+	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
 }
 
 void GLWindow::process( const msg::StartRecordingMessage *message )

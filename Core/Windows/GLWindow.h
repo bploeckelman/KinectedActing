@@ -25,21 +25,6 @@ public:
 	void update();
 	void render();
 
-	void process(const msg::StartRecordingMessage    *message);
-	void process(const msg::StopRecordingMessage     *message);
-	void process(const msg::ClearRecordingMessage   *message);
-	void process(const msg::ShowLiveSkeletonMessage *message);
-	void process(const msg::HideLiveSkeletonMessage *message);
-	void process(const msg::PlaybackFirstFrameMessage *message);
-	void process(const msg::PlaybackLastFrameMessage  *message);
-	void process(const msg::PlaybackPrevFrameMessage  *message);
-	void process(const msg::PlaybackNextFrameMessage  *message);
-	void process(const msg::PlaybackStartMessage      *message);
-	void process(const msg::PlaybackStopMessage       *message);
-	void process(const msg::PlaybackSetDeltaMessage   *message);
-	void process(const msg::StartLayeringMessage      *message);
-	void process(const msg::LayerSelectMessage        *message);
-
 private:
 	void resetCamera();
 	void handleEvents();
@@ -50,6 +35,7 @@ private:
 	void loadTextures();
 	size_t saveKeyFrame(float now, Animation *animation);
 
+private:
 	bool liveSkeletonVisible;
 	bool playbackRunning;
 	bool recording;
@@ -73,5 +59,24 @@ private:
 
 	Animation *currentAnimation;
 	std::map< std::string, std::unique_ptr<Animation> > animLayer;
+
+	// Message processing methods ----------------------------
+	void registerMessageHandlers();
+
+public:
+	void process(const msg::StartRecordingMessage     *message);
+	void process(const msg::StopRecordingMessage      *message);
+	void process(const msg::ClearRecordingMessage     *message);
+	void process(const msg::ShowLiveSkeletonMessage   *message);
+	void process(const msg::HideLiveSkeletonMessage   *message);
+	void process(const msg::PlaybackFirstFrameMessage *message);
+	void process(const msg::PlaybackLastFrameMessage  *message);
+	void process(const msg::PlaybackPrevFrameMessage  *message);
+	void process(const msg::PlaybackNextFrameMessage  *message);
+	void process(const msg::PlaybackStartMessage      *message);
+	void process(const msg::PlaybackStopMessage       *message);
+	void process(const msg::PlaybackSetDeltaMessage   *message);
+	void process(const msg::StartLayeringMessage      *message);
+	void process(const msg::LayerSelectMessage        *message);
 
 };

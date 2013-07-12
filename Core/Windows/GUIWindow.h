@@ -19,14 +19,18 @@ public:
 	GUI& getGUI();
 	const GUI& getGUI() const;
 
+private:
+	GUI gui;
+
+	// Message processing methods ----------------------------
+	void registerMessageHandlers();
+
+public:
 	void process(const msg::SetRecordingLabelMessage   *message);
 	void process(const msg::PlaybackSetProgressMessage *message);
 	void process(const msg::SetInfoLabelMessage        *message);
 	void process(const msg::AddLayerItemMessage        *message);
 
-private:
-	GUI gui;
-	
 };
 
 
