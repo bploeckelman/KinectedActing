@@ -35,6 +35,7 @@ private:
 	void recordLayer();
 	void loadTextures();
 	size_t saveKeyFrame(float now, Animation *animation);
+	void saveBlendKeyFrame(float now, Animation *animation);
 
 private:
 	bool liveSkeletonVisible;

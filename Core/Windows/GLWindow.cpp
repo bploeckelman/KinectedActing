@@ -247,6 +247,16 @@ void GLWindow::updateRecording()
 
 	size_t numKeyFrames = saveKeyFrame(now, currentAnimation);
 
+	if (layering) {
+		if (now < animLayer["base"]->getLength()) {
+			saveBlendKeyFrame(now, animLayer["blend"].get());
+		} else {
+			msg::StopRecordingMessage msg;
+			process(&msg);
+			MessageBoxA(NULL, "Done recording layer", "Done", MB_OK);
+		}
+	}
+
 	// Update gui label text
 	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
 		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n";
@@ -265,7 +275,9 @@ void GLWindow::updatePlayback()
 		playbackTime = 0.f;
 	}
 
-	if (anim_length > 0.f) {
+	if (layering) {
+		animLayer["blend"]->apply(skeleton.get(), playbackTime);
+	} else if (anim_length > 0.f) {
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
 }
@@ -282,6 +294,7 @@ void GLWindow::recordLayer()
 	}
 
 	layering = true;
+	animTimer = sf::Time::Zero;
 	std::cout << "now layering...\n";
 	// TODO : start countdown timer
 
@@ -333,6 +346,40 @@ size_t GLWindow::saveKeyFrame( float now, Animation *animation)
 	}
 
 	return numKeyFrames;
+}
+
+void GLWindow::saveBlendKeyFrame( float now, Animation *animation )
+{
+	Animation *base = animLayer["base"].get();
+	Animation *blend = animLayer["blend"].get();
+	BoneAnimationTrack *baseTrack = nullptr;
+	BoneAnimationTrack *animTrack = nullptr;
+	BoneAnimationTrack *blendTrack = nullptr;
+	TransformKeyFrame baseKeyFrame(now, 0);
+	TransformKeyFrame animKeyFrame1(now, 0);
+	TransformKeyFrame animKeyFrame2(now - playbackDelta, 0);
+
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		baseTrack = base->getBoneTrack(boneID);
+		animTrack = currentAnimation->getBoneTrack(boneID);
+		blendTrack = blend->getBoneTrack(boneID);
+		if (nullptr == baseTrack || nullptr == animTrack || nullptr == blendTrack) continue;
+
+		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(now));
+		if (nullptr == blendTKF) continue;
+
+		baseTrack->getInterpolatedKeyFrame(now, &baseKeyFrame);
+		animTrack->getInterpolatedKeyFrame(now, &animKeyFrame1);
+		animTrack->getInterpolatedKeyFrame(now - playbackDelta, &animKeyFrame2);
+
+		const glm::vec3 basePos(baseKeyFrame.getTranslation());
+		const glm::vec3 animPos1(animKeyFrame1.getTranslation());
+		const glm::vec3 animPos2(animKeyFrame2.getTranslation());
+
+		blendTKF->setTranslation(glm::vec3(basePos + (animPos1 - animPos2)));
+		blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
+		blendTKF->setScale(glm::vec3(1,1,1));
+	}
 }
 
 void GLWindow::loadTextures()

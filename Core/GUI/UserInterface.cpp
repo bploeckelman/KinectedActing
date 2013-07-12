@@ -84,6 +84,7 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	liveSkeletonVisibleCheckButton->SetActive(true);
 
 	animLayersComboBox->AppendItem("base");
+	animLayersComboBox->AppendItem("blend");
 	animLayersComboBox->SelectItem(0);
 
 	const sf::Uint32 colspan = 6;
