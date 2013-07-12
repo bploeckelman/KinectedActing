@@ -51,7 +51,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
 	, gridTexture(nullptr)
-	, capsuleTexture(nullptr)
+	, redTileTexture(nullptr)
 	, skeleton(nullptr)
 	, currentAnimation(nullptr)
 	, animLayer()
@@ -148,7 +148,7 @@ void GLWindow::render()
 
 	// Draw current animation layer
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
-		glBindTexture(GL_TEXTURE_2D, capsuleTexture->object());
+		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 	}
 
@@ -354,11 +354,11 @@ void GLWindow::loadTextures()
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
 
-	sf::Image capsuleImage(GetImage("capsule.png"));
-	capsuleTexture = std::unique_ptr<tdogl::Texture>(
+	sf::Image redTileImage(GetImage("red-tiles.png"));
+	redTileTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
-		                 , capsuleImage.getSize().x, capsuleImage.getSize().y
-		                 , (unsigned char *) capsuleImage.getPixelsPtr()
+		                 , redTileImage.getSize().x, redTileImage.getSize().y
+		                 , (unsigned char *) redTileImage.getPixelsPtr()
 						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
 }
 

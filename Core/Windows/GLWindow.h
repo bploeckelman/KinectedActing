@@ -54,7 +54,7 @@ private:
 	std::unique_ptr<tdogl::Texture> colorTexture;
 	std::unique_ptr<tdogl::Texture> depthTexture;
 	std::unique_ptr<tdogl::Texture> gridTexture;
-	std::unique_ptr<tdogl::Texture> capsuleTexture;
+	std::unique_ptr<tdogl::Texture> redTileTexture;
 
 	std::unique_ptr<Skeleton>  skeleton;
 
