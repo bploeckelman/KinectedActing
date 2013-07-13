@@ -37,9 +37,10 @@ PlaneMesh::PlaneMesh( const std::string& name
 		v[3] = (x + (width  / 2.f)) / width;
 		v[4] = (z + (height / 2.f)) / height;
 		// x,y,z normal (world up +y)
-		v[5] = 0.f;
-		v[6] = 1.f;
-		v[7] = 0.f;
+		glm::vec3 n = glm::normalize(glm::vec3(x / width, 1.f, z / height));
+		v[5] = n.x;
+		v[6] = n.y;
+		v[7] = n.z;
 
 		v += 8; // next vertex
 	}
