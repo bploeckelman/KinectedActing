@@ -8,10 +8,10 @@
 #include "RenderUtils.h"
 #include "GLUtils.h"
 #include "Shaders/Program.h"
-#include "Scene/Objects/CubeMesh.h"
-#include "Scene/Objects/PlaneMesh.h"
-#include "Scene/Objects/SphereMesh.h"
-#include "Scene/Objects/CapsuleMesh.h"
+#include "Scene/Meshes/CubeMesh.h"
+#include "Scene/Meshes/PlaneMesh.h"
+#include "Scene/Meshes/SphereMesh.h"
+#include "Scene/Meshes/CapsuleMesh.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
