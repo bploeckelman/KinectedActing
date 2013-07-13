@@ -34,6 +34,9 @@
     <Filter Include="Core\Messages">
       <UniqueIdentifier>{5f8ca540-f1ac-4a39-86fb-4a28a3e7dbb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Shaders">
+      <UniqueIdentifier>{5361ed6a-580b-4400-b8d0-62cd9ce46960}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -189,17 +192,17 @@
   <ItemGroup>
     <None Include="readme.md" />
     <None Include=".gitignore" />
-    <None Include="Shaders\default.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\default.frag">
+      <Filter>Shaders\Shaders</Filter>
     </None>
-    <None Include="Shaders\default.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\default.vert">
+      <Filter>Shaders\Shaders</Filter>
     </None>
-    <None Include="Shaders\simple.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\simple.frag">
+      <Filter>Shaders\Shaders</Filter>
     </None>
-    <None Include="Shaders\simple.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\simple.vert">
+      <Filter>Shaders\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

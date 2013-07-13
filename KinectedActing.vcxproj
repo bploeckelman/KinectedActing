@@ -147,10 +147,10 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="readme.md" />
-    <None Include="Shaders\default.frag" />
-    <None Include="Shaders\default.vert" />
-    <None Include="Shaders\simple.frag" />
-    <None Include="Shaders\simple.vert" />
+    <None Include="Shaders\Shaders\default.frag" />
+    <None Include="Shaders\Shaders\default.vert" />
+    <None Include="Shaders\Shaders\simple.frag" />
+    <None Include="Shaders\Shaders\simple.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
