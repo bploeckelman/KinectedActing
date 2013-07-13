@@ -40,6 +40,7 @@ static glm::vec2 mouse_pos_current;
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
+	, bonePathsVisible(false)
 	, playbackRunning(false)
 	, recording(false)
 	, layering(false)
@@ -150,9 +151,37 @@ void GLWindow::render()
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		if (bonePathsVisible) {
+			// Get a bone track, just right hand for now
+			auto boneTrack = currentAnimation->getBoneTrack(EBoneID::HAND_RIGHT);
+			auto numKeyFrames = boneTrack->getNumKeyFrames();
+			auto keyFrames = boneTrack->getKeyFrames();
+
+			// Get all translation vectors for this track
+			static std::vector<glm::vec3> vertices;
+			vertices.resize(numKeyFrames);
+
+			unsigned int i = 0;
+			std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
+				vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+			});
+
+			// Draw the path
+			GLUtils::defaultProgram->setUniform("model", glm::mat4());
+			const GLuint vertexAttribLoc = GLUtils::defaultProgram->attrib("vertex");
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray(vertexAttribLoc);
+			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
+			glDrawArrays(GL_LINE_STRIP, 0, numKeyFrames);
+			glDisableVertexAttribArray(vertexAttribLoc);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
 	}
 
-	GLUtils::defaultProgram->stopUsing();
+	glUseProgram(0);
 
 	window.display();
 }
@@ -429,6 +458,8 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
 	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
 	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
+	msg::gDispatcher.registerHandler(msg::SHOW_BONE_PATH,           this);
+	msg::gDispatcher.registerHandler(msg::HIDE_BONE_PATH,           this);
 }
 
 void GLWindow::process( const msg::StartRecordingMessage *message )
@@ -549,4 +580,14 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 		playbackRunning = false;
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
+}
+
+void GLWindow::process( const msg::ShowBonePathMessage *message )
+{
+	bonePathsVisible = true;
+}
+
+void GLWindow::process( const msg::HideBonePathMessage *message )
+{
+	bonePathsVisible = false;
 }

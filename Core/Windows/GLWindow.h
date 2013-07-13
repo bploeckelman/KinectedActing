@@ -39,6 +39,7 @@ private:
 
 private:
 	bool liveSkeletonVisible;
+	bool bonePathsVisible;
 	bool playbackRunning;
 	bool recording;
 	bool layering;
@@ -80,5 +81,7 @@ public:
 	void process(const msg::PlaybackSetDeltaMessage   *message);
 	void process(const msg::StartLayeringMessage      *message);
 	void process(const msg::LayerSelectMessage        *message);
+	void process(const msg::ShowBonePathMessage       *message);
+	void process(const msg::HideBonePathMessage       *message);
 
 };
