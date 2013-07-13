@@ -113,6 +113,7 @@ void GLWindow::update()
 
 }
 
+float dt = 0.f;
 void GLWindow::render()
 {
 	window.setActive();
@@ -125,13 +126,16 @@ void GLWindow::render()
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
-	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+	dt += app.getDeltaTime().asSeconds();
+	GLUtils::defaultProgram->setUniform("light", glm::vec3(glm::cos(dt), 1 + glm::sin(dt), glm::sin(dt)));
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
