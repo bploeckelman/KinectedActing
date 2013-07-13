@@ -169,13 +169,19 @@ void GLWindow::render()
 			});
 
 			// Draw the path
-			GLUtils::defaultProgram->setUniform("model", glm::mat4());
-			const GLuint vertexAttribLoc = GLUtils::defaultProgram->attrib("vertex");
+			GLUtils::simpleProgram->use();
+			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0,0,1));
+			GLUtils::simpleProgram->setUniform("model", glm::mat4());
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableVertexAttribArray(vertexAttribLoc);
 			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
+
 			glDrawArrays(GL_LINE_STRIP, 0, numKeyFrames);
+
 			glDisableVertexAttribArray(vertexAttribLoc);
 			glDisableClientState(GL_VERTEX_ARRAY);
 		}

@@ -17,8 +17,11 @@ namespace GLUtils
 {
 	const std::string default_vertex_shader("Shaders/default.vert");
 	const std::string default_fragment_shader("Shaders/default.frag");
+	const std::string simple_vertex_shader("Shaders/simple.vert");
+	const std::string simple_fragment_shader("Shaders/simple.frag");
 
 	extern tdogl::Program *defaultProgram;
+	extern tdogl::Program *simpleProgram;
 
 	void init();
 	void cleanup();

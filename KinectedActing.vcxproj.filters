@@ -195,5 +195,11 @@
     <None Include="Shaders\default.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\simple.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
