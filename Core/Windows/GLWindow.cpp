@@ -453,7 +453,7 @@ void GLWindow::loadTextures()
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
 
-	sf::Image redTileImage(GetImage("red-tiles.png"));
+	sf::Image redTileImage(GetImage("texture.png"));
 	redTileTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
 		                 , redTileImage.getSize().x, redTileImage.getSize().y

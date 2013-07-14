@@ -103,10 +103,10 @@ SphereMesh::SphereMesh( const std::string& name )
 	std::vector<GLushort>::iterator i = begin(indexData);
 	for(unsigned int r = 0; r < num_slices - 1; r++)
 	for(unsigned int s = 0; s < num_stacks - 1; s++) {
-		*i++ = r * num_stacks + s;
-		*i++ = r * num_stacks + (s+1);
-		*i++ = (r+1) * num_stacks + (s+1);
 		*i++ = (r+1) * num_stacks + s;
+		*i++ = (r+1) * num_stacks + (s+1);
+		*i++ = r * num_stacks + (s+1);
+		*i++ = r * num_stacks + s;
 	}		
 
 	// Create index buffer object and transfer data
