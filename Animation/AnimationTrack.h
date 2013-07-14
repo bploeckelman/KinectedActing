@@ -92,6 +92,8 @@ public:
 	*/
 	virtual KeyFrame* getKeyFrame( unsigned int index ) const;
 
+	virtual const std::vector<KeyFrame*>& getKeyFrames() const;
+
 	/**
 	* Gets the number of key-frames in this animation track.
 	*/
@@ -160,3 +162,4 @@ protected:
 
 
 inline Animation* AnimationTrack::getAnimation() const { return mAnim; }
+inline const std::vector<KeyFrame*>& AnimationTrack::getKeyFrames() const { return mKeyFrames; }

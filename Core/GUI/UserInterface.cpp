@@ -34,11 +34,12 @@ GUI::GUI()
 	, playbackStartButton(sfg::Button::Create("Start"))
 	, playbackNextButton(sfg::Button::Create(">"))
 	, playbackLastButton(sfg::Button::Create(">>"))
-	, playbackDeltaScale(sfg::Scale::Create(0.01111111f, 0.06666666f, 0.0002222222f))
+	, playbackDeltaScale(sfg::Scale::Create(0.00000111f, 0.1f, 0.0000222222f))
 	, startLayeringButton(sfg::Button::Create("Create New Layer"))
 	, animLayersComboBox(sfg::ComboBox::Create())
 	, infoLabel(sfg::Label::Create(""))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
+	, renderPathCheckButton(sfg::CheckButton::Create("Draw bone path"))
 {}
 
 GUI::~GUI()
@@ -82,6 +83,7 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 
 	playbackDeltaScale->SetValue(1.f / 60.f);
 	liveSkeletonVisibleCheckButton->SetActive(true);
+	renderPathCheckButton->SetActive(false);
 
 	animLayersComboBox->AppendItem("base");
 	animLayersComboBox->AppendItem("blend");
@@ -129,6 +131,9 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 13,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 13, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
+	table->SetRowSpacing(13, 5.f);
+	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
 	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
@@ -151,6 +156,7 @@ void GUI::connectSignals()
 	recordClearButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordClearButtonClick, this);
 
 	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
+	renderPathCheckButton         ->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onRenderPathCheckButtonClick,          this);
 
 	playbackProgressBar   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackProgressBarClick,    this);
 	playbackFirstButton   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackFirstButtonClick,    this);
@@ -287,4 +293,14 @@ void GUI::onAnimLayersComboBoxSelect()
 {
 	const std::string layerName = animLayersComboBox->GetSelectedText();
 	msg::gDispatcher.dispatchMessage(msg::LayerSelectMessage(layerName));
+}
+
+void GUI::onRenderPathCheckButtonClick()
+{
+	const bool active = renderPathCheckButton->IsActive();
+	if (active) {
+		msg::gDispatcher.dispatchMessage(msg::ShowBonePathMessage());
+	} else {
+		msg::gDispatcher.dispatchMessage(msg::HideBonePathMessage());
+	}
 }

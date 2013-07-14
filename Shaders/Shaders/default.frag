@@ -2,6 +2,7 @@
 
 uniform sampler2D tex;
 uniform vec2 texscale;
+uniform vec3 light;
 
 in vec3 fragVertex;
 in vec2 fragTexCoord;
@@ -11,5 +12,7 @@ out vec4 finalColor;
 
 void main()
 {
-	finalColor = texture(tex, texscale * fragTexCoord);
+	vec3 lightDir = normalize(light);
+	float d = max(0.0, dot(fragNormal, lightDir));
+	finalColor = d * texture(tex, texscale * fragTexCoord);
 }

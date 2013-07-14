@@ -40,6 +40,7 @@ static glm::vec2 mouse_pos_current;
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
+	, bonePathsVisible(false)
 	, playbackRunning(false)
 	, recording(false)
 	, layering(false)
@@ -112,6 +113,7 @@ void GLWindow::update()
 
 }
 
+float dt = 0.f;
 void GLWindow::render()
 {
 	window.setActive();
@@ -124,19 +126,23 @@ void GLWindow::render()
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
-	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+	dt += app.getDeltaTime().asSeconds() / 3.f;
+	const glm::vec3 lightPos(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	GLUtils::defaultProgram->setUniform("light", lightPos);
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(10,10));
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
 	Render::plane();
 
 	// Draw live skeleton
@@ -150,9 +156,55 @@ void GLWindow::render()
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		if (bonePathsVisible) {
+			// Get a bone track, just right hand for now
+			auto boneTrack = currentAnimation->getBoneTrack(EBoneID::HAND_RIGHT);
+			auto numKeyFrames = boneTrack->getNumKeyFrames();
+			auto keyFrames = boneTrack->getKeyFrames();
+
+			// Get all translation vectors for this track
+			static std::vector<glm::vec3> vertices;
+			vertices.resize(numKeyFrames);
+
+			unsigned int i = 0;
+			std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
+				vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+			});
+
+			// Draw the path
+			GLUtils::simpleProgram->use();
+			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0,0,1));
+			GLUtils::simpleProgram->setUniform("model", glm::mat4());
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray(vertexAttribLoc);
+			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
+
+			glDrawArrays(GL_LINE_STRIP, 0, numKeyFrames);
+
+			glDisableVertexAttribArray(vertexAttribLoc);
+			glDisableClientState(GL_VERTEX_ARRAY);
+		}
 	}
 
-	GLUtils::defaultProgram->stopUsing();
+	// Draw light
+	GLUtils::simpleProgram->use();
+	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
+	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
+	glm::mat4 model;
+	model = glm::translate(glm::mat4(), lightPos);
+	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	GLUtils::simpleProgram->setUniform("model", model);
+	Render::cube();
+
+
+	glUseProgram(0);
 
 	window.display();
 }
@@ -401,7 +453,7 @@ void GLWindow::loadTextures()
 		                 , (unsigned char *) gridImage.getPixelsPtr()
 		                 , GL_NEAREST, GL_REPEAT));
 
-	sf::Image redTileImage(GetImage("red-tiles.png"));
+	sf::Image redTileImage(GetImage("texture.png"));
 	redTileTexture = std::unique_ptr<tdogl::Texture>(
 		new tdogl::Texture(tdogl::Texture::Format::RGBA
 		                 , redTileImage.getSize().x, redTileImage.getSize().y
@@ -429,6 +481,8 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
 	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
 	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
+	msg::gDispatcher.registerHandler(msg::SHOW_BONE_PATH,           this);
+	msg::gDispatcher.registerHandler(msg::HIDE_BONE_PATH,           this);
 }
 
 void GLWindow::process( const msg::StartRecordingMessage *message )
@@ -549,4 +603,14 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 		playbackRunning = false;
 		currentAnimation->apply(skeleton.get(), playbackTime);
 	}
+}
+
+void GLWindow::process( const msg::ShowBonePathMessage *message )
+{
+	bonePathsVisible = true;
+}
+
+void GLWindow::process( const msg::HideBonePathMessage *message )
+{
+	bonePathsVisible = false;
 }

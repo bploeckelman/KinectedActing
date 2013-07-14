@@ -47,6 +47,8 @@ namespace msg
 		, ADD_LAYER_ITEM
 		// Misc
 		, SET_INFO_LABEL
+		, SHOW_BONE_PATH
+		, HIDE_BONE_PATH
 	};
 
 	// ------------------------------------------------------------------------
@@ -201,6 +203,16 @@ namespace msg
 		const std::string item;
 	};
 	// ------------------------------------------------------------------------
+	class ShowBonePathMessage : public Message
+	{
+	public: ShowBonePathMessage() : Message(SHOW_BONE_PATH) {}
+	};
+	// ------------------------------------------------------------------------
+	class HideBonePathMessage : public Message
+	{
+	public: HideBonePathMessage() : Message(HIDE_BONE_PATH) {}
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -237,6 +249,8 @@ namespace msg
 		virtual void process(const LayerSelectMessage         *message) {}
 		virtual void process(const AddLayerItemMessage        *message) {}
 		virtual void process(const SetInfoLabelMessage        *message) {}
+		virtual void process(const ShowBonePathMessage        *message) {}
+		virtual void process(const HideBonePathMessage        *message) {}
 	};
 
 

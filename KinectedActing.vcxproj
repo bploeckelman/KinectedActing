@@ -106,11 +106,12 @@
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
     <ClCompile Include="Scene\Camera.cpp" />
-    <ClCompile Include="Scene\Objects\CapsuleMesh.cpp" />
-    <ClCompile Include="Scene\Objects\CubeMesh.cpp" />
-    <ClCompile Include="Scene\Objects\Mesh.cpp" />
-    <ClCompile Include="Scene\Objects\PlaneMesh.cpp" />
-    <ClCompile Include="Scene\Objects\SphereMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CapsuleMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CubeMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CylinderMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\Mesh.cpp" />
+    <ClCompile Include="Scene\Meshes\PlaneMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\SphereMesh.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Shaders\Program.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
@@ -133,11 +134,12 @@
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Kinect\KinectDevice.h" />
     <ClInclude Include="Scene\Camera.h" />
-    <ClInclude Include="Scene\Objects\CapsuleMesh.h" />
-    <ClInclude Include="Scene\Objects\CubeMesh.h" />
-    <ClInclude Include="Scene\Objects\Mesh.h" />
-    <ClInclude Include="Scene\Objects\PlaneMesh.h" />
-    <ClInclude Include="Scene\Objects\SphereMesh.h" />
+    <ClInclude Include="Scene\Meshes\CapsuleMesh.h" />
+    <ClInclude Include="Scene\Meshes\CubeMesh.h" />
+    <ClInclude Include="Scene\Meshes\CylinderMesh.h" />
+    <ClInclude Include="Scene\Meshes\Mesh.h" />
+    <ClInclude Include="Scene\Meshes\PlaneMesh.h" />
+    <ClInclude Include="Scene\Meshes\SphereMesh.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
     <ClInclude Include="Util\CatmullRomSpline.h" />
@@ -147,8 +149,10 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="readme.md" />
-    <None Include="Shaders\default.frag" />
-    <None Include="Shaders\default.vert" />
+    <None Include="Shaders\Shaders\default.frag" />
+    <None Include="Shaders\Shaders\default.vert" />
+    <None Include="Shaders\Shaders\simple.frag" />
+    <None Include="Shaders\Shaders\simple.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

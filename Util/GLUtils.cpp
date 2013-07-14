@@ -14,6 +14,7 @@ using namespace std;
 
 
 tdogl::Program *GLUtils::defaultProgram = nullptr;
+tdogl::Program *GLUtils::simpleProgram = nullptr;
 
 tdogl::Program *createShaderProgram(const string& vertexShaderFilename, const string& fragmentShaderFilename);
 
@@ -47,15 +48,17 @@ void GLUtils::init()
 	try {
 		cout << "Creating default shader program...\n";
 		defaultProgram = createShaderProgram(default_vertex_shader, default_fragment_shader);
+		cout << "Creating simple shader program...\n";
+		simpleProgram = createShaderProgram(simple_vertex_shader, simple_fragment_shader);
 	} catch(const exception& e) {
-		cerr << "Failed to create shader program from '" << default_vertex_shader << "' and '" << default_fragment_shader << "'\n"
-	         << "Exception: " << e.what();
+		cerr << "Failed to create shader program\n Exception: " << e.what();
 		exit(EXIT_FAILURE);
 	}
 }
 
 void GLUtils::cleanup()
 {
+	delete simpleProgram;
 	delete defaultProgram;
 }
 

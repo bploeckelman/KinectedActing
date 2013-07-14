@@ -47,6 +47,7 @@ private:
 	void onPlaybackDeltaScaleClick();
 	void onStartLayeringButtonClick();
 	void onAnimLayersComboBoxSelect();
+	void onRenderPathCheckButtonClick();
 
 private:
 	sfg::SFGUI sfgui;
@@ -82,6 +83,9 @@ private:
 
 	sfg::Button::Ptr startLayeringButton;
 	sfg::ComboBox::Ptr animLayersComboBox;
+
+	sfg::CheckButton::Ptr renderPathCheckButton;
+	// TODO : add check/toggle buttons for all joints
 
 	sfg::Label::Ptr infoLabel;
 

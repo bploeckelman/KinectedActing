@@ -1,83 +1,54 @@
 #include <gl/glew.h>
 
-#include "SphereMesh.h"
+#include "PlaneMesh.h"
 #include "Mesh.h"
 #include "Util/GLUtils.h"
 #include "Shaders/Program.h"
 
+#include <algorithm>
 #include <vector>
 #include <string>
-
-// TODO : make the c'tor params once a Mesh caching structure is in place
-static const unsigned short num_slices = 20;
-static const unsigned short num_stacks = 20;
-
-/************************************************************************/
-/* Vertex and index data generation code from:
-/* http://stackoverflow.com/a/5989676/2171891
-/************************************************************************/
+#include <cassert>
 
 
-SphereMesh::SphereMesh( const std::string& name )
+PlaneMesh::PlaneMesh( const std::string& name
+					, float width/*=1.f */
+					, float height/*=1.f */
+					, float spacing/*=0.1f*/ )
 {
+	assert(width > 0.f && height > 0.f && spacing > 0.f);
+
 	this->name = name;
+	const unsigned int rows = static_cast<unsigned int>((height / spacing) + 1);
+	const unsigned int cols = static_cast<unsigned int>((width  / spacing) + 1);
 
-	const float R = 1.f / (float)(num_slices - 1);
-	const float S = 1.f / (float)(num_stacks - 1);
-	const float radius = 1.f;
-	const float PI = glm::pi<float>();
+	// Generate vertex buffer data
+	const size_t numverts = rows * cols;
+	const size_t vsize = 8 * numverts; // floats: 3 vertex, 2 texture, 3 normal
+	vertexData.resize(vsize);
+	auto v = begin(vertexData);
+	for (float z = -height / 2.f; z <= height / 2.f; z += spacing)
+	for (float x = -width  / 2.f; x <= width  / 2.f; x += spacing) {
+		// x,y,z vertex
+		v[0] = x;
+		v[1] = 0.f;
+		v[2] = z;
+		// s,t texcoord [0..1]
+		v[3] = (x + (width  / 2.f)) / width;
+		v[4] = (z + (height / 2.f)) / height;
+		// x,y,z normal (world up +y)
+		glm::vec3 n = glm::normalize(glm::vec3(x / width, 1.f, z / height));
+		v[5] = n.x;
+		v[6] = n.y;
+		v[7] = n.z;
 
-	// Create vertex array data
-	const size_t num_vertices = num_slices * num_stacks;
-	std::vector<glm::vec3> verts(num_vertices);
-	std::vector<glm::vec3> normals(num_vertices);
-	std::vector<glm::vec2> texcoords(num_vertices);
-
-	auto v = begin(verts);
-	auto n = begin(normals);
-	auto t = begin(texcoords);
-
-	for(unsigned short r = 0; r < num_slices; ++r)
-	for(unsigned short s = 0; s < num_stacks; ++s) {
-		const float y = sin( -PI/2.f + PI * r * R );
-		const float x = cos(  2*PI * s * S ) * sin( PI * r * R );
-		const float z = sin(  2*PI * s * S ) * sin( PI * r * R );
-
-		*v++ = glm::vec3(x,y,z) * radius;
-		*n++ = glm::vec3(x,y,z);
-		*t++ = glm::vec2(s*S, r*R);
-	}
-
-	// Interleave vertex buffer data
-	vertexData.resize(8 * num_vertices); // num floats: 3 vertex, 2 texcoord, 3 normal
-
-	auto d = begin(vertexData);
-
-	v = begin(verts);
-	n = begin(normals);
-	t = begin(texcoords);
-
-	for (size_t i = 0; i < vertexData.size(); i += 8) {
-		// Location 0 - vertices
-		vertexData[i + 0] = v->x;
-		vertexData[i + 1] = v->y;
-		vertexData[i + 2] = v->z;
-		// Location 1 - texcoords
-		vertexData[i + 3] = t->s;
-		vertexData[i + 4] = t->t;
-		// Location 2 - normals
-		vertexData[i + 5] = n->x;
-		vertexData[i + 6] = n->y;
-		vertexData[i + 7] = n->z;
-
-		// next set of vectors
-		++v; ++n; ++t;
+		v += 8; // next vertex
 	}
 
 	// Create vertex buffer object and transfer data
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertexData.size(), &vertexData[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vsize, &vertexData[0], GL_STATIC_DRAW);
 
 	// Enable and set up vertex attributes
 	const GLuint vertexAttribLoc   = GLUtils::defaultProgram->attrib("vertex");
@@ -99,30 +70,31 @@ SphereMesh::SphereMesh( const std::string& name )
 	glDisableVertexAttribArray(vertexAttribLoc);
 
 	// Generate index buffer data
-	indexData.resize(num_slices * num_stacks * 4);
-	std::vector<GLushort>::iterator i = begin(indexData);
-	for(unsigned int r = 0; r < num_slices - 1; r++)
-	for(unsigned int s = 0; s < num_stacks - 1; s++) {
-		*i++ = r * num_stacks + s;
-		*i++ = r * num_stacks + (s+1);
-		*i++ = (r+1) * num_stacks + (s+1);
-		*i++ = (r+1) * num_stacks + s;
-	}		
+	// Note: CCW winding, extra vertices add degenerate triangles between rows
+	for (unsigned int r = 0, i = 0; r < rows - 1; ++r) {
+		indexData.push_back(r * cols);
+		for (unsigned int c = 0; c < cols; ++c) {
+			indexData.push_back((r + 1) * cols + c);
+			indexData.push_back(r * cols + c);
+		}
+		indexData.push_back((r + 1) * cols + (cols - 1));
+	}
+	const size_t isize = indexData.size();
 
 	// Create index buffer object and transfer data
 	glGenBuffers(1, &indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indexData.size(), &indexData[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * isize, &indexData[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-SphereMesh::~SphereMesh()
+PlaneMesh::~PlaneMesh()
 {
 	// Nothing to do, super class cleans everything up...
 }
 
-void SphereMesh::render() const
+void PlaneMesh::render() const
 {
 	// Have to do things the old fashioned way until I figure out whats up with the VAO
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -142,7 +114,7 @@ void SphereMesh::render() const
 	glVertexAttribPointer(normalAttribLoc, 3, GL_FLOAT, GL_TRUE,  stride, normal_offset);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glDrawElements(GL_QUADS, indexData.size(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLE_STRIP, indexData.size(), GL_UNSIGNED_SHORT, 0);
 
 	glDisableVertexAttribArray(normalAttribLoc);
 	glDisableVertexAttribArray(texcoordAttribLoc);
