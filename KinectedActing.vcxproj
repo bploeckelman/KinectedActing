@@ -57,6 +57,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
+      <BrowseInformation>true</BrowseInformation>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -64,6 +66,9 @@
       <AdditionalLibraryDirectories>$(GLEW)\lib;$(SFML)\lib\Debug;$(SFGUI)\lib;$(KINECTSDK10_DIR)\lib\x86\</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glu32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfgui-d.lib;opengl32.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -75,6 +80,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(GLEW)\include;$(GLM);$(SFML)\include;$(SFGUI)\include;$(KINECTSDK10_DIR)\inc</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,12 +99,19 @@
     <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\GUI\UserInterface.cpp" />
     <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="Core\Messages\Messages.cpp" />
     <ClCompile Include="Core\Resources\ImageManager.cpp" />
     <ClCompile Include="Core\Resources\Texture.cpp" />
     <ClCompile Include="Core\Windows\GLWindow.cpp" />
     <ClCompile Include="Core\Windows\GUIWindow.cpp" />
     <ClCompile Include="Kinect\KinectDevice.cpp" />
     <ClCompile Include="Scene\Camera.cpp" />
+    <ClCompile Include="Scene\Meshes\CapsuleMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CubeMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CylinderMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\Mesh.cpp" />
+    <ClCompile Include="Scene\Meshes\PlaneMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\SphereMesh.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
     <ClCompile Include="Shaders\Program.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
@@ -113,6 +126,7 @@
     <ClInclude Include="Animation\TransformKeyFrame.h" />
     <ClInclude Include="Core\App.h" />
     <ClInclude Include="Core\GUI\UserInterface.h" />
+    <ClInclude Include="Core\Messages\Messages.h" />
     <ClInclude Include="Core\Resources\ImageManager.h" />
     <ClInclude Include="Core\Resources\Texture.h" />
     <ClInclude Include="Core\Windows\GLWindow.h" />
@@ -120,6 +134,12 @@
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Kinect\KinectDevice.h" />
     <ClInclude Include="Scene\Camera.h" />
+    <ClInclude Include="Scene\Meshes\CapsuleMesh.h" />
+    <ClInclude Include="Scene\Meshes\CubeMesh.h" />
+    <ClInclude Include="Scene\Meshes\CylinderMesh.h" />
+    <ClInclude Include="Scene\Meshes\Mesh.h" />
+    <ClInclude Include="Scene\Meshes\PlaneMesh.h" />
+    <ClInclude Include="Scene\Meshes\SphereMesh.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
     <ClInclude Include="Util\CatmullRomSpline.h" />
@@ -129,8 +149,10 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="readme.md" />
-    <None Include="Shaders\default.frag" />
-    <None Include="Shaders\default.vert" />
+    <None Include="Shaders\Shaders\default.frag" />
+    <None Include="Shaders\Shaders\default.vert" />
+    <None Include="Shaders\Shaders\simple.frag" />
+    <None Include="Shaders\Shaders\simple.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

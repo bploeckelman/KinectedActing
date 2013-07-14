@@ -49,6 +49,10 @@ Texture::Texture(const Format& format, const GLsizei width, const GLsizei height
 	glTexImage2D(GL_TEXTURE_2D, 0,
 				 TextureFormatForBitmapFormat(format, true), (GLsizei) width, (GLsizei) height, 0,
 				 TextureFormatForBitmapFormat(format, false), GL_UNSIGNED_BYTE, (GLvoid *) pixels);
+	if (minMagFilter == GL_NEAREST_MIPMAP_NEAREST || minMagFilter == GL_NEAREST_MIPMAP_LINEAR
+	 || minMagFilter == GL_LINEAR_MIPMAP_NEAREST  || minMagFilter == GL_LINEAR_MIPMAP_LINEAR) {
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -1,5 +1,6 @@
 #include "Core/App.h"
 #include "GUIWindow.h"
+#include "Core/Messages/Messages.h"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ static const sf::Uint32 style    = sf::Style::None;
 
 GUIWindow::GUIWindow(const std::string& title, App& app)
 	: Window(title, app)
-	, gui(*this)
+	, gui()
 {
 	videoMode = sf::VideoMode(window_width
 	                        , sf::VideoMode::getDesktopMode().height - height_offset
@@ -22,6 +23,8 @@ GUIWindow::GUIWindow(const std::string& title, App& app)
 	window.create(videoMode, title, style);
 	window.setFramerateLimit(framerate_limit);
 	window.setPosition(sf::Vector2i(initial_pos_x, initial_pos_y));
+
+	registerMessageHandlers();
 }
 
 GUIWindow::~GUIWindow()
@@ -29,7 +32,7 @@ GUIWindow::~GUIWindow()
 
 void GUIWindow::init()
 {
-	gui.initialize();
+	gui.initialize(window);
 	gui.setKinectIdLabel(app.getKinect().getDeviceId());
 }
 
@@ -46,6 +49,38 @@ void GUIWindow::render()
 {
 	window.setActive();
 	window.clear(sf::Color::Black);
-	gui.render();
+	gui.render(window);
 	window.display();
+}
+
+
+// ----------------------------------------------------------------------------
+// Message processing methods -------------------------------------------------
+// ----------------------------------------------------------------------------
+void GUIWindow::registerMessageHandlers()
+{
+	msg::gDispatcher.registerHandler(msg::SET_RECORDING_LABEL,   this);
+	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_PROGRESS, this);
+	msg::gDispatcher.registerHandler(msg::SET_INFO_LABEL,        this);
+	msg::gDispatcher.registerHandler(msg::ADD_LAYER_ITEM,        this);
+}
+
+void GUIWindow::process( const msg::SetRecordingLabelMessage *message )
+{
+	gui.setRecordingLabel(message->text);
+}
+
+void GUIWindow::process( const msg::PlaybackSetProgressMessage *message )
+{
+	gui.setProgressFraction(message->progress);
+}
+
+void GUIWindow::process( const msg::SetInfoLabelMessage *message )
+{
+	gui.setInfoLabel(message->text);
+}
+
+void GUIWindow::process( const msg::AddLayerItemMessage *message )
+{
+	gui.appendLayerItem(message->item);
 }

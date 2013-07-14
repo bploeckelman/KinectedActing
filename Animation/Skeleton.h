@@ -34,6 +34,7 @@ enum EBoneID
 	COUNT           = 20
 };
 
+typedef std::map<EBoneID, EBoneID> BoneJointPairs;
 
 class Bone
 {
@@ -55,6 +56,8 @@ public:
 class Skeleton
 {
 public:
+	static const BoneJointPairs jointPairs;
+
 	Skeleton();
 	~Skeleton();
 

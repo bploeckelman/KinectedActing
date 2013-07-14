@@ -3,20 +3,24 @@
 /* ------
 /* A namespace containing functions for rendering various things 
 /************************************************************************/
+#include <GL/glew.h>
+
 #include "RenderUtils.h"
 #include "GLUtils.h"
 #include "Shaders/Program.h"
-//#include "ImageManager.h"
+#include "Scene/Meshes/CubeMesh.h"
+#include "Scene/Meshes/PlaneMesh.h"
+#include "Scene/Meshes/SphereMesh.h"
+#include "Scene/Meshes/CapsuleMesh.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <GL/glew.h>
 
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <memory>
 
 using glm::vec3;
 using glm::vec4;
@@ -32,6 +36,11 @@ const GLfloat buffer_data[] = {
 	  1.0f,  1.0f, 0.0f,   0.0f, 0.0f,//    0.0f, 0.0f, 1.0f,
 	  1.0f, -1.0f, 0.0f,   0.0f, 1.0f //,    0.0f, 0.0f, 1.0f
 };
+
+std::unique_ptr<CubeMesh> cubeMesh;
+std::unique_ptr<PlaneMesh> planeMesh;
+std::unique_ptr<SphereMesh> sphereMesh;
+std::unique_ptr<CapsuleMesh> capsuleMesh;
 
 
 void loadBufferObjects()
@@ -49,20 +58,19 @@ void loadBufferObjects()
 	// Enable and set up vertex attributes
 	const GLuint vertexAttribLoc   = GLUtils::defaultProgram->attrib("vertex");
 	const GLuint texcoordAttribLoc = GLUtils::defaultProgram->attrib("texcoord");
-	//const GLuint normalAttribLoc = GLUtils::defaultProgram->attrib("normal");
+	const GLuint normalAttribLoc = GLUtils::defaultProgram->attrib("normal");
 	glEnableVertexAttribArray(vertexAttribLoc);
 	glEnableVertexAttribArray(texcoordAttribLoc);
-	//glEnableVertexAttribArray(normalAttribLoc);
+	glEnableVertexAttribArray(normalAttribLoc);
 
-	const GLsizei stride = 5 * sizeof(GLfloat);
-	//const GLsizei stride = 8 * sizeof(GLfloat);
+	const GLsizei stride = 8 * sizeof(GLfloat);
 	const GLvoid *tex_coord_offset = (const GLvoid *) (3 * sizeof(GLfloat));
-	//const GLvoid *normal_offset = (const GLvoid *) (5 * sizeof(GLfloat));
+	const GLvoid *normal_offset = (const GLvoid *) (5 * sizeof(GLfloat));
 	glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, stride, 0);
 	glVertexAttribPointer(texcoordAttribLoc, 2, GL_FLOAT, GL_TRUE, stride, tex_coord_offset);
-	//glVertexAttribPointer(normalAttribLoc, 3, GL_FLOAT, GL_TRUE, stride, normal_offset);
+	glVertexAttribPointer(normalAttribLoc, 3, GL_FLOAT, GL_TRUE, stride, normal_offset);
 
-	//glDisableVertexAttribArray(normalAttribLoc);
+	glDisableVertexAttribArray(normalAttribLoc);
 	glDisableVertexAttribArray(texcoordAttribLoc);
 	glDisableVertexAttribArray(vertexAttribLoc);
 
@@ -72,12 +80,18 @@ void loadBufferObjects()
 
 void Render::init()
 {
-	loadBufferObjects();
+	//loadBufferObjects();
+
+	cubeMesh = std::unique_ptr<CubeMesh>(new CubeMesh("cube"));
+	planeMesh = std::unique_ptr<PlaneMesh>(new PlaneMesh("plane"));
+	sphereMesh = std::unique_ptr<SphereMesh>(new SphereMesh("sphere"));
+	capsuleMesh = std::unique_ptr<CapsuleMesh>(new CapsuleMesh("capsule"));
+	cylinderMesh = std::unique_ptr<CylinderMesh>(new CylinderMesh("cylinder"));
 }
 
 void Render::cleanup()
 {
-	glDeleteBuffers(1, &quad_vbo);
+	//glDeleteBuffers(1, &quad_vbo);
 	//glDeleteVertexArrays(1, &quad_vao);
 }
 
@@ -114,6 +128,31 @@ void Render::quad()
 	glDisableVertexAttribArray(texcoordAttribLoc);
 	glDisableVertexAttribArray(vertAttribLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Render::cube() 
+{
+	cubeMesh->render();
+}
+
+void Render::sphere()
+{
+	sphereMesh->render();
+}
+
+void Render::plane()
+{
+	planeMesh->render();
+}
+
+void Render::capsule()
+{
+	capsuleMesh->render();
+}
+
+void Render::cylinder()
+{
+	cylinderMesh->render();
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )
@@ -180,35 +219,4 @@ void Render::basis( const float scale/*=1.f */
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);
-}
-
-void Render::ground( const float alpha )
-{
-	static const float Y = 0.f;
-	static const float R = 10.5f;
-
-	//glDisable(GL_LIGHTING);
-	//glDisable(GL_CULL_FACE);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//texture.bind(&texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	//const float radius = 100.f;
-	glBegin(GL_TRIANGLE_STRIP);
-		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(0.f, 0.f); glVertex3f( R, Y,  R);
-		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(100.f, 0.f); glVertex3f( R, Y, -R);
-		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(0.f, 100.f); glVertex3f(-R, Y,  R);
-		/*glNormal3f(0, 1, 0);*/ glTexCoord2f(100.f, 100.f); glVertex3f(-R, Y, -R);
-	glEnd();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-
-	//glDisable(GL_BLEND);
-	//glEnable(GL_CULL_FACE);
-	//glEnable(GL_LIGHTING);
 }

@@ -28,6 +28,15 @@
     <Filter Include="Animation">
       <UniqueIdentifier>{6e556407-b0a6-4cee-a7ef-1b07135751f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Messages">
+      <UniqueIdentifier>{5f8ca540-f1ac-4a39-86fb-4a28a3e7dbb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Shaders">
+      <UniqueIdentifier>{5361ed6a-580b-4400-b8d0-62cd9ce46960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\Meshes">
+      <UniqueIdentifier>{214ce361-52b7-4943-96a4-718f4bb1daa4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Main.cpp">
@@ -80,6 +89,27 @@
     </ClCompile>
     <ClCompile Include="Animation\Skeleton.cpp">
       <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Messages\Messages.cpp">
+      <Filter>Core\Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\CapsuleMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\CubeMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\Mesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\PlaneMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\SphereMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Meshes\CylinderMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,15 +173,42 @@
     <ClInclude Include="Animation\Skeleton.h">
       <Filter>Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Messages\Messages.h">
+      <Filter>Core\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\CapsuleMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\CubeMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\Mesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\PlaneMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\SphereMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\CylinderMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.md" />
     <None Include=".gitignore" />
-    <None Include="Shaders\default.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\default.frag">
+      <Filter>Shaders\Shaders</Filter>
     </None>
-    <None Include="Shaders\default.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\Shaders\default.vert">
+      <Filter>Shaders\Shaders</Filter>
+    </None>
+    <None Include="Shaders\Shaders\simple.frag">
+      <Filter>Shaders\Shaders</Filter>
+    </None>
+    <None Include="Shaders\Shaders\simple.vert">
+      <Filter>Shaders\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

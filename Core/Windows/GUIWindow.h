@@ -1,11 +1,12 @@
 #pragma once
 #include "Window.h"
 #include "Core/GUI/UserInterface.h"
+#include "Core/Messages/Messages.h"
 
 #include <string>
 
 
-class GUIWindow : public Window
+class GUIWindow : public Window, msg::Handler
 {
 public:
 	GUIWindow(const std::string& title, App& app);
@@ -20,7 +21,16 @@ public:
 
 private:
 	GUI gui;
-	
+
+	// Message processing methods ----------------------------
+	void registerMessageHandlers();
+
+public:
+	void process(const msg::SetRecordingLabelMessage   *message);
+	void process(const msg::PlaybackSetProgressMessage *message);
+	void process(const msg::SetInfoLabelMessage        *message);
+	void process(const msg::AddLayerItemMessage        *message);
+
 };
 
 

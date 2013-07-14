@@ -42,6 +42,7 @@ public:
 	const byte *getDepthData() const;
 	const Skeleton *getLiveSkeleton() const;
 	const NUI_SKELETON_FRAME& getSkeletonFrame() const;
+	const NUI_SKELETON_BONE_ORIENTATION *getOrientations() const;
 
 	bool isInitialized() const;
 	bool isSeatedModeEnabled() const;
@@ -72,6 +73,7 @@ private:
 	Skeleton *liveSkeleton;
 	NUI_SKELETON_FRAME skeletonFrame;
 	NUI_SKELETON_DATA *skeletonData;
+	NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
 	DWORD  skeletonTrackingFlags;
 
 	HANDLE nextColorFrameEvent;
@@ -87,7 +89,8 @@ inline const std::string& KinectDevice::getDeviceId() const { return deviceId; }
 inline const byte *KinectDevice::getColorData() const { return colorData; }
 inline const byte *KinectDevice::getDepthData() const { return depthData; }
 inline const Skeleton *KinectDevice::getLiveSkeleton() const { return liveSkeleton; }
-inline const NUI_SKELETON_FRAME& KinectDevice:: getSkeletonFrame() const { return skeletonFrame; }
+inline const NUI_SKELETON_FRAME& KinectDevice::getSkeletonFrame() const { return skeletonFrame; }
+inline const NUI_SKELETON_BONE_ORIENTATION *KinectDevice::getOrientations() const { return boneOrientations; }
 
 inline bool KinectDevice::isInitialized()       const { return (nullptr != sensor); }
 inline bool KinectDevice::isSeatedModeEnabled() const { return (0 != (skeletonTrackingFlags & NUI_SKELETON_FRAME_FLAG_SEATED_SUPPORT_ENABLED)); }

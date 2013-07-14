@@ -26,6 +26,8 @@ public:
 	const sf::RenderWindow& getWindow() const;
 
 protected:
+	virtual void registerMessageHandlers() = 0;
+
 	App& app;
 	std::string title;
 	sf::VideoMode videoMode;

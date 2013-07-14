@@ -1,12 +1,14 @@
 #include "App.h"
 #include "Util/GLUtils.h"
 #include "Util/RenderUtils.h"
+#include "Messages/Messages.h"
 
 #include <iostream>
 
 
 App::App()
 	: done(false)
+	, timer()
 	, kinect()
 	, guiWindow("GUI", *this)
 	, glWindow("OpenGL Window", *this)
@@ -16,6 +18,10 @@ App::App()
 
 	guiWindow.init();
 	glWindow.init();
+
+	msg::gDispatcher.registerHandler(msg::QUIT_PROGRAM,             this);
+	msg::gDispatcher.registerHandler(msg::START_KINECT_DEVICE,      this);
+	msg::gDispatcher.registerHandler(msg::STOP_KINECT_DEVICE,       this);
 }
 
 App::~App()
@@ -41,5 +47,25 @@ void App::run()
 
 		guiWindow.render();
 		glWindow.render();
+
+		timer.restart();
 	}
+}
+
+void App::process( const msg::QuitProgramMessage* message )
+{
+	guiWindow.getWindow().close();
+	glWindow.getWindow().close();
+}
+
+void App::process( const msg::StartKinectDeviceMessage* message )
+{
+	kinect.init();
+	guiWindow.getGUI().setKinectIdLabel(kinect.getDeviceId());
+}
+
+void App::process( const msg::StopKinectDeviceMessage* message )
+{
+	kinect.shutdown();
+	guiWindow.getGUI().setKinectIdLabel("[ offline ]");
 }

@@ -296,14 +296,24 @@ HRESULT KinectDevice::processSkeletonData()
 		return E_FAIL;
 	}
 
+	// Get bone orientations
+	hr = NuiSkeletonCalculateBoneOrientations(skeletonData, boneOrientations);
+	if (FAILED(hr)) {
+		return hr;
+	}
+
 	// Apply skeleton data to live Skeleton object
 	for (unsigned short boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		Bone *bone = liveSkeleton->getBone(boneID);
 		if (nullptr == bone) continue;
 
-		const Vector4& t = skeletonData->SkeletonPositions[boneID];
-		bone->translation = glm::vec3(t.x, t.y, t.z);
-		bone->rotation = glm::quat(); // TODO
+		const Vector4& p = skeletonData->SkeletonPositions[boneID];
+		bone->translation = glm::vec3(p.x, p.y, p.z);
+
+		const Vector4& o = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
+		bone->rotation = glm::quat(o.w, o.x, o.y, o.z);
+
+		// Scale is constant
 		bone->scale = glm::vec3(1,1,1);
 	}
 

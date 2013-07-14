@@ -86,6 +86,7 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 		}
 		else // if( mAnim->getKFInterpolationMethod() == KFInterp_Spline )
 		{
+			// TODO : spline interpolation is broken
 			if( mTransSpline.getNumControlPoints() <= 0 )
 				// interpolation splines not built yet, build them now
 				_buildInterpSplines();
