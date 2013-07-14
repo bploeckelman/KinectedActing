@@ -13,25 +13,25 @@
 
 const BoneJointPairs Skeleton::jointPairs([]() {
 	BoneJointPairs bones;
-	bones[HEAD          ] = SHOULDER_CENTER;
-	bones[SHOULDER_LEFT ] = SHOULDER_CENTER;
-	bones[SHOULDER_RIGHT] = SHOULDER_CENTER;
-	bones[ELBOW_LEFT    ] = SHOULDER_LEFT;
-	bones[ELBOW_RIGHT   ] = SHOULDER_RIGHT;
-	bones[WRIST_LEFT    ] = ELBOW_LEFT;
-	bones[WRIST_RIGHT   ] = ELBOW_RIGHT;
-	bones[HAND_LEFT     ] = WRIST_LEFT;
-	bones[HAND_RIGHT    ] = WRIST_RIGHT;
-	bones[SPINE         ] = SHOULDER_CENTER;
-	bones[HIP_CENTER    ] = SPINE;
-	bones[HIP_LEFT      ] = HIP_CENTER;
-	bones[HIP_RIGHT     ] = HIP_CENTER;
-	bones[KNEE_LEFT     ] = HIP_LEFT;
-	bones[KNEE_RIGHT    ] = HIP_RIGHT;
-	bones[ANKLE_LEFT    ] = KNEE_LEFT;
-	bones[ANKLE_RIGHT   ] = KNEE_RIGHT;
-	bones[FOOT_LEFT     ] = ANKLE_LEFT;
-	bones[FOOT_RIGHT    ] = ANKLE_RIGHT;
+	bones[SHOULDER_CENTER] = HEAD;
+	bones[SHOULDER_LEFT  ] = SHOULDER_CENTER;
+	bones[SHOULDER_RIGHT ] = SHOULDER_CENTER;
+	bones[ELBOW_LEFT     ] = SHOULDER_LEFT;
+	bones[ELBOW_RIGHT    ] = SHOULDER_RIGHT;
+	bones[WRIST_LEFT     ] = ELBOW_LEFT;
+	bones[WRIST_RIGHT    ] = ELBOW_RIGHT;
+	bones[HAND_LEFT      ] = WRIST_LEFT;
+	bones[HAND_RIGHT     ] = WRIST_RIGHT;
+	bones[SPINE          ] = SHOULDER_CENTER;
+	bones[HIP_CENTER     ] = SPINE;
+	bones[HIP_LEFT       ] = HIP_CENTER;
+	bones[HIP_RIGHT      ] = HIP_CENTER;
+	bones[KNEE_LEFT      ] = HIP_LEFT;
+	bones[KNEE_RIGHT     ] = HIP_RIGHT;
+	bones[ANKLE_LEFT     ] = KNEE_LEFT;
+	bones[ANKLE_RIGHT    ] = KNEE_RIGHT;
+	bones[FOOT_LEFT      ] = ANKLE_LEFT;
+	bones[FOOT_RIGHT     ] = ANKLE_RIGHT;
 	return bones;
 }());
 
