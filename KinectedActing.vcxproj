@@ -108,6 +108,7 @@
     <ClCompile Include="Scene\Camera.cpp" />
     <ClCompile Include="Scene\Meshes\CapsuleMesh.cpp" />
     <ClCompile Include="Scene\Meshes\CubeMesh.cpp" />
+    <ClCompile Include="Scene\Meshes\CylinderMesh.cpp" />
     <ClCompile Include="Scene\Meshes\Mesh.cpp" />
     <ClCompile Include="Scene\Meshes\PlaneMesh.cpp" />
     <ClCompile Include="Scene\Meshes\SphereMesh.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="Scene\Camera.h" />
     <ClInclude Include="Scene\Meshes\CapsuleMesh.h" />
     <ClInclude Include="Scene\Meshes\CubeMesh.h" />
+    <ClInclude Include="Scene\Meshes\CylinderMesh.h" />
     <ClInclude Include="Scene\Meshes\Mesh.h" />
     <ClInclude Include="Scene\Meshes\PlaneMesh.h" />
     <ClInclude Include="Scene\Meshes\SphereMesh.h" />

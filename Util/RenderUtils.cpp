@@ -86,6 +86,7 @@ void Render::init()
 	planeMesh = std::unique_ptr<PlaneMesh>(new PlaneMesh("plane"));
 	sphereMesh = std::unique_ptr<SphereMesh>(new SphereMesh("sphere"));
 	capsuleMesh = std::unique_ptr<CapsuleMesh>(new CapsuleMesh("capsule"));
+	cylinderMesh = std::unique_ptr<CylinderMesh>(new CylinderMesh("cylinder"));
 }
 
 void Render::cleanup()
@@ -147,6 +148,11 @@ void Render::plane()
 void Render::capsule()
 {
 	capsuleMesh->render();
+}
+
+void Render::cylinder()
+{
+	cylinderMesh->render();
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )
