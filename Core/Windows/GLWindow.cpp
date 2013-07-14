@@ -134,14 +134,15 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	dt += app.getDeltaTime().asSeconds();
-	GLUtils::defaultProgram->setUniform("light", glm::vec3(glm::cos(dt), 1 + glm::sin(dt), glm::sin(dt)));
+	dt += app.getDeltaTime().asSeconds() / 3.f;
+	const glm::vec3 lightPos(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	GLUtils::defaultProgram->setUniform("light", lightPos);
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(10,10));
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
 	Render::plane();
 
 	// Draw live skeleton
@@ -190,6 +191,18 @@ void GLWindow::render()
 			glDisableClientState(GL_VERTEX_ARRAY);
 		}
 	}
+
+	// Draw light
+	GLUtils::simpleProgram->use();
+	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
+	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
+	glm::mat4 model;
+	model = glm::translate(glm::mat4(), lightPos);
+	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	GLUtils::simpleProgram->setUniform("model", model);
+	Render::cube();
+
 
 	glUseProgram(0);
 
