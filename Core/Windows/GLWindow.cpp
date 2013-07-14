@@ -170,7 +170,9 @@ void GLWindow::render()
 
 			unsigned int i = 0;
 			std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
-				vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+				if (keyframe->getTime() < playbackTime) {
+					vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+				}
 			});
 
 			// Draw the path
@@ -185,7 +187,7 @@ void GLWindow::render()
 			glEnableVertexAttribArray(vertexAttribLoc);
 			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
 
-			glDrawArrays(GL_LINE_STRIP, 0, numKeyFrames);
+			glDrawArrays(GL_LINE_STRIP, 0, i);
 
 			glDisableVertexAttribArray(vertexAttribLoc);
 			glDisableClientState(GL_VERTEX_ARRAY);
