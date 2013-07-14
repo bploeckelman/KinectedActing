@@ -154,6 +154,26 @@ void GLWindow::render()
 
 	// Draw current animation layer
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		GLUtils::simpleProgram->use();
+		GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+		GLUtils::simpleProgram->setUniform("color", glm::vec4(0.2f, 1.f, 0.2f, 1.f));
+
+		TransformKeyFrame kf(animTimer.asSeconds(), 0);
+		currentAnimation->getBoneTrack(HAND_RIGHT)->getInterpolatedKeyFrame(playbackTime, &kf);
+		const float s = 0.025f;
+		const glm::vec3 scale(s,s,s);
+		const glm::vec3 headPos = kf.getTranslation();
+		GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), headPos), scale * 1.5f));
+		glCullFace(GL_FRONT);
+		Render::sphere();
+		glCullFace(GL_BACK);
+
+		GLUtils::defaultProgram->use();
+		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
+		GLUtils::defaultProgram->setUniform("light", lightPos);
+		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+		GLUtils::defaultProgram->setUniform("tex", 0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 
