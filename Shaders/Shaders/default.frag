@@ -15,6 +15,7 @@ uniform struct Light {
 in vec3 fragVertex;
 in vec2 fragTexCoord;
 in vec3 fragNormal;
+in vec4 fragColor;
 
 out vec4 finalColor;
 
@@ -33,9 +34,10 @@ void main()
 	float distanceToLight = length(light.position - surfacePos);
 	float attenuation = 1.0 / (1.0 + light.attenuation * pow(distanceToLight, 2));
 
-	vec3 linearColor = ambient + attenuation * diffuse;
+	vec3 linearColor = ambient + attenuation * diffuse * fragColor;
 
 	vec3 gamma = vec3(1.0 / 2.2);
 
-	finalColor = vec4(pow(linearColor, gamma), surfaceColor.a);
+	float alpha = max(0.0, min(fragColor.a, surfaceColor.a));
+	finalColor = vec4(pow(linearColor, gamma), alpha);
 }

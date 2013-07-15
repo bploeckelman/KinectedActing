@@ -158,6 +158,7 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
 	GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
 	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
@@ -168,7 +169,7 @@ void GLWindow::render()
 
 
 	// Draw live skeleton
-	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
+	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	if (liveSkeletonVisible) {
 		app.getKinect().getLiveSkeleton()->render();
@@ -196,13 +197,14 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
 		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
 		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 		GLUtils::defaultProgram->setUniform("tex", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw bone paths
 		if (bonePathsVisible) {
 			// Get a bone track, just right hand for now
 			auto boneTrack = currentAnimation->getBoneTrack(EBoneID::HAND_RIGHT);
@@ -211,6 +213,7 @@ void GLWindow::render()
 
 			// Get all translation vectors for this track
 			static std::vector<glm::vec3> vertices;
+			vertices.clear();
 			vertices.resize(numKeyFrames);
 
 			unsigned int i = 0;
@@ -221,21 +224,8 @@ void GLWindow::render()
 			});
 
 			// Draw the path
-			GLUtils::simpleProgram->use();
-			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-			GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0,0,1));
-			GLUtils::simpleProgram->setUniform("model", glm::mat4());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-			const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(vertexAttribLoc);
-			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
-
-			glDrawArrays(GL_LINE_STRIP, 0, i);
-
-			glDisableVertexAttribArray(vertexAttribLoc);
-			glDisableClientState(GL_VERTEX_ARRAY);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,1));
+			Render::pipe(vertices);
 		}
 	}
 
@@ -253,7 +243,6 @@ void GLWindow::render()
 	GLUtils::simpleProgram->setUniform("color", glm::vec4(1));
 	GLUtils::simpleProgram->setUniform("model", glm::mat4());
 	Render::axis();
-
 
 	glUseProgram(0);
 
