@@ -37,6 +37,16 @@ static const int initial_pos_y   = 5;
 static glm::vec2 mouse_pos_current;
 
 
+struct Light
+{
+	glm::vec3 position;
+	glm::vec3 intensities;
+	float attenuation;
+	float ambientCoefficient;
+};
+static struct Light light0;
+
+
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
@@ -92,6 +102,11 @@ void GLWindow::init()
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animLayer["blend"]->createBoneTrack(boneID);
 	}
+
+	light0.position = glm::vec3(0,1,0);
+	light0.intensities = glm::vec3(1,1,1);
+	light0.attenuation = 0.01f;
+	light0.ambientCoefficient = 0.01f;
 }
 
 void GLWindow::update()
@@ -135,8 +150,11 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	dt += app.getDeltaTime().asSeconds() / 3.f;
-	const glm::vec3 lightPos(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
-	GLUtils::defaultProgram->setUniform("light", lightPos);
+	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	GLUtils::defaultProgram->setUniform("light.position", light0.position);
+	GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
+	GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
@@ -170,7 +188,10 @@ void GLWindow::render()
 
 		GLUtils::defaultProgram->use();
 		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
-		GLUtils::defaultProgram->setUniform("light", lightPos);
+		GLUtils::defaultProgram->setUniform("light.position", light0.position);
+		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
+		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
 		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 		GLUtils::defaultProgram->setUniform("tex", 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -220,11 +241,10 @@ void GLWindow::render()
 	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
 	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	glm::mat4 model;
-	model = glm::translate(glm::mat4(), lightPos);
-	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	model = glm::translate(glm::mat4(), light0.position);
+	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	GLUtils::simpleProgram->setUniform("model", model);
-	Render::cube();
-
+	Render::sphere();
 
 	glUseProgram(0);
 
