@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include "Scene/Meshes/AxisMesh.h"
 #include "Scene/Meshes/CubeMesh.h"
 #include "Scene/Meshes/PlaneMesh.h"
 #include "Scene/Meshes/SphereMesh.h"
@@ -19,6 +20,7 @@
 
 namespace Render
 {
+	static std::unique_ptr<AxisMesh> axisMesh;
 	static std::unique_ptr<CubeMesh> cubeMesh;
 	static std::unique_ptr<PlaneMesh> planeMesh;
 	static std::unique_ptr<SphereMesh> sphereMesh;
@@ -32,6 +34,9 @@ namespace Render
 
 	// Draw a basic quad
 	void quad();
+
+	// Draw an x,y,z axis
+	void axis();
 
 	// Draw a cube
 	void cube();

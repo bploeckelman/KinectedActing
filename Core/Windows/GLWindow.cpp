@@ -141,6 +141,9 @@ void GLWindow::render()
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
 	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -162,6 +165,7 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
 	Render::plane();
+
 
 	// Draw live skeleton
 	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
@@ -239,12 +243,17 @@ void GLWindow::render()
 	GLUtils::simpleProgram->use();
 	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
 	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
-	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	glm::mat4 model;
 	model = glm::translate(glm::mat4(), light0.position);
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	GLUtils::simpleProgram->setUniform("model", model);
 	Render::sphere();
+
+	// Draw an orientation axis at the origin
+	GLUtils::simpleProgram->setUniform("color", glm::vec4(1));
+	GLUtils::simpleProgram->setUniform("model", glm::mat4());
+	Render::axis();
+
 
 	glUseProgram(0);
 
