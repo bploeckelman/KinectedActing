@@ -8,6 +8,7 @@
 
 #include <glm/glm.hpp>
 
+#include <vector>
 #include <memory>
 
 #include "Scene/Meshes/AxisMesh.h"
@@ -52,6 +53,10 @@ namespace Render
 
 	// Draw a cylinder
 	void cylinder();
+
+	// Draw a pipe composed of spheres at the given points and cylinders between them
+	void pipe(const std::vector<glm::vec3>& points
+	        , const glm::vec3& scale=glm::vec3(0.005f));
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

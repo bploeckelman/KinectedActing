@@ -20,6 +20,7 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 
@@ -213,6 +214,45 @@ void Render::capsule()
 void Render::cylinder()
 {
 	cylinderMesh->render();
+}
+
+void Render::pipe( const std::vector<glm::vec3>& points, const glm::vec3& scale )
+{
+	if (points.empty()) return;
+	const glm::vec3 y(0,1,0);
+
+	glm::mat4 model(1.f);
+	glm::vec3 previousPoint(points.front());
+
+	std::for_each(begin(points), end(points), [&](const glm::vec3& point) {
+		// Draw point
+		model = glm::translate(glm::mat4(), point);
+		model = glm::scale(model, scale);
+		GLUtils::defaultProgram->setUniform("model", model);
+		Render::sphere();
+
+		// Draw cylinder
+		const glm::vec3& point1 = previousPoint;
+		const glm::vec3& point2 = point;
+
+		if (point1 != glm::vec3(0) && point2 != glm::vec3(0)) {
+			// Calculate orientation and position for cylinder connecting bone1 and bone2
+			const float dist = glm::distance(point1, point2);
+			const glm::vec3 diff = point2 - point1;
+			const glm::vec3 forward = glm::normalize(diff);
+			const glm::vec3 axis = glm::cross(y, forward);
+			const float angle = glm::degrees(acos(glm::dot(y, forward)));
+
+			// Calculate the model matrix for this cylinder using the orientation and position
+			model = glm::rotate(glm::translate(glm::mat4(), point1), angle, axis);
+			model = glm::scale(model, scale * glm::vec3(1,0,1) + glm::vec3(0,dist,0));
+			GLUtils::defaultProgram->setUniform("model", model);
+
+			Render::cylinder();
+		}
+
+		previousPoint = point;
+	});
 }
 
 void Render::pyramid( const vec3& pos, const float radius, const float height )
