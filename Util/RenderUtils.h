@@ -8,8 +8,10 @@
 
 #include <glm/glm.hpp>
 
+#include <vector>
 #include <memory>
 
+#include "Scene/Meshes/AxisMesh.h"
 #include "Scene/Meshes/CubeMesh.h"
 #include "Scene/Meshes/PlaneMesh.h"
 #include "Scene/Meshes/SphereMesh.h"
@@ -19,6 +21,7 @@
 
 namespace Render
 {
+	static std::unique_ptr<AxisMesh> axisMesh;
 	static std::unique_ptr<CubeMesh> cubeMesh;
 	static std::unique_ptr<PlaneMesh> planeMesh;
 	static std::unique_ptr<SphereMesh> sphereMesh;
@@ -32,6 +35,9 @@ namespace Render
 
 	// Draw a basic quad
 	void quad();
+
+	// Draw an x,y,z axis
+	void axis();
 
 	// Draw a cube
 	void cube();
@@ -47,6 +53,10 @@ namespace Render
 
 	// Draw a cylinder
 	void cylinder();
+
+	// Draw a pipe composed of spheres at the given points and cylinders between them
+	void pipe(const std::vector<glm::vec3>& points
+	        , const glm::vec3& scale=glm::vec3(0.005f));
 
 	// Draw the specified plane as a quad with the specified radius
 	//static void plane(const Plane& plane, const float radius=10.f);

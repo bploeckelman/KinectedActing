@@ -37,6 +37,16 @@ static const int initial_pos_y   = 5;
 static glm::vec2 mouse_pos_current;
 
 
+struct Light
+{
+	glm::vec3 position;
+	glm::vec3 intensities;
+	float attenuation;
+	float ambientCoefficient;
+};
+static struct Light light0;
+
+
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
 	, liveSkeletonVisible(true)
@@ -92,6 +102,11 @@ void GLWindow::init()
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animLayer["blend"]->createBoneTrack(boneID);
 	}
+
+	light0.position = glm::vec3(0,1,0);
+	light0.intensities = glm::vec3(1,1,1);
+	light0.attenuation = 0.01f;
+	light0.ambientCoefficient = 0.01f;
 }
 
 void GLWindow::update()
@@ -126,6 +141,10 @@ void GLWindow::render()
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
+	glLineWidth(5.f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
 	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,29 +154,65 @@ void GLWindow::render()
 	GLUtils::defaultProgram->setUniform("tex", 0);
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	dt += app.getDeltaTime().asSeconds() / 3.f;
-	const glm::vec3 lightPos(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
-	GLUtils::defaultProgram->setUniform("light", lightPos);
+	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	GLUtils::defaultProgram->setUniform("light.position", light0.position);
+	GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
+	GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
+	GLUtils::defaultProgram->setUniform("useLighting", 1);
 	Render::plane();
 
+	// Draw an orientation axis at the origin
+	GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	GLUtils::defaultProgram->setUniform("useLighting", 0);
+	Render::axis();
+
 	// Draw live skeleton
-	glBindTexture(GL_TEXTURE_2D, colorTexture->object());
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	if (liveSkeletonVisible) {
+		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
 	// Draw current animation layer
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
+		GLUtils::simpleProgram->use();
+		GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+		GLUtils::simpleProgram->setUniform("color", glm::vec4(0.2f, 1.f, 0.2f, 1.f));
+
+		TransformKeyFrame kf(animTimer.asSeconds(), 0);
+		currentAnimation->getBoneTrack(HAND_RIGHT)->getInterpolatedKeyFrame(playbackTime, &kf);
+		const float s = 0.025f;
+		const glm::vec3 scale(s,s,s);
+		const glm::vec3 headPos = kf.getTranslation();
+		GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), headPos), scale * 1.5f));
+		glCullFace(GL_FRONT);
+		Render::sphere();
+		glCullFace(GL_BACK);
+
+		GLUtils::defaultProgram->use();
+		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
+		GLUtils::defaultProgram->setUniform("light.position", light0.position);
+		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
+		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
+		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+		GLUtils::defaultProgram->setUniform("tex", 0);
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw bone paths
 		if (bonePathsVisible) {
 			// Get a bone track, just right hand for now
 			auto boneTrack = currentAnimation->getBoneTrack(EBoneID::HAND_RIGHT);
@@ -166,29 +221,20 @@ void GLWindow::render()
 
 			// Get all translation vectors for this track
 			static std::vector<glm::vec3> vertices;
+			vertices.clear();
 			vertices.resize(numKeyFrames);
 
 			unsigned int i = 0;
 			std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
-				vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+				if (keyframe->getTime() < playbackTime) {
+					vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+				}
 			});
 
 			// Draw the path
-			GLUtils::simpleProgram->use();
-			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-			GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0,0,1));
-			GLUtils::simpleProgram->setUniform("model", glm::mat4());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-			const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableVertexAttribArray(vertexAttribLoc);
-			glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, 0, glm::value_ptr(vertices[0]));
-
-			glDrawArrays(GL_LINE_STRIP, 0, numKeyFrames);
-
-			glDisableVertexAttribArray(vertexAttribLoc);
-			glDisableClientState(GL_VERTEX_ARRAY);
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
+			Render::pipe(vertices);
 		}
 	}
 
@@ -196,13 +242,11 @@ void GLWindow::render()
 	GLUtils::simpleProgram->use();
 	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
 	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
-	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	glm::mat4 model;
-	model = glm::translate(glm::mat4(), lightPos);
-	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	model = glm::translate(glm::mat4(), light0.position);
+	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	GLUtils::simpleProgram->setUniform("model", model);
-	Render::cube();
-
+	Render::sphere();
 
 	glUseProgram(0);
 
