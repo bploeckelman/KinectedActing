@@ -111,6 +111,9 @@
     <ClCompile Include="Scene\Meshes\CylinderMesh.cpp">
       <Filter>Scene\Meshes</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\Meshes\AxisMesh.cpp">
+      <Filter>Scene\Meshes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -192,6 +195,9 @@
       <Filter>Scene\Meshes</Filter>
     </ClInclude>
     <ClInclude Include="Scene\Meshes\CylinderMesh.h">
+      <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Meshes\AxisMesh.h">
       <Filter>Scene\Meshes</Filter>
     </ClInclude>
   </ItemGroup>
