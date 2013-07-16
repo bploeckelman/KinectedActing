@@ -141,6 +141,7 @@ void GLWindow::render()
 	glDepthMask(GL_TRUE);
 	glDepthRange(0.0f, 1.0f);
 
+	glLineWidth(5.f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -165,13 +166,19 @@ void GLWindow::render()
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
+	GLUtils::defaultProgram->setUniform("useLighting", 1);
 	Render::plane();
 
+	// Draw an orientation axis at the origin
+	GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	GLUtils::defaultProgram->setUniform("useLighting", 0);
+	Render::axis();
 
 	// Draw live skeleton
 	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	if (liveSkeletonVisible) {
+		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
@@ -200,6 +207,7 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 		GLUtils::defaultProgram->setUniform("tex", 0);
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
@@ -224,7 +232,8 @@ void GLWindow::render()
 			});
 
 			// Draw the path
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,1));
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
 			Render::pipe(vertices);
 		}
 	}
@@ -238,11 +247,6 @@ void GLWindow::render()
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	GLUtils::simpleProgram->setUniform("model", model);
 	Render::sphere();
-
-	// Draw an orientation axis at the origin
-	GLUtils::simpleProgram->setUniform("color", glm::vec4(1));
-	GLUtils::simpleProgram->setUniform("model", glm::mat4());
-	Render::axis();
 
 	glUseProgram(0);
 

@@ -50,8 +50,8 @@ Skeleton::~Skeleton()
 void Skeleton::render() const
 {
 	const float s = 0.025f;
-	const glm::vec3 scale(s,s,s);
-	const glm::vec3 zero(0,0,0);
+	const glm::vec3 scale(s);
+	const glm::vec3 zero(0);
 	const glm::vec3 y(0,1,0); // world up
 
 	glm::mat4 model_matrix;
@@ -63,12 +63,22 @@ void Skeleton::render() const
 			model_matrix = glm::translate(glm::mat4(), bone.translation);
 			model_matrix = glm::scale(model_matrix, scale);
 			GLUtils::defaultProgram->setUniform("model", model_matrix);
+			GLUtils::defaultProgram->setUniform("useLighting", 1);
 
 			Render::sphere();
+
+			model_matrix = glm::translate(glm::mat4(), bone.translation);
+			model_matrix = model_matrix * glm::mat4_cast(bone.rotation);
+			model_matrix = glm::scale(model_matrix, glm::vec3(0.1));
+			GLUtils::defaultProgram->setUniform("model", model_matrix);
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+
+			Render::axis();
 		}
 	});
 
 	// Render bones
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
 	std::for_each(begin(jointPairs), end(jointPairs), [&](const BoneJointPairs::value_type& joints) {
 		// Get the two joints for this bone
 		const Bone& bone1 = bones.at(joints.first);

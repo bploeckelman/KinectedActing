@@ -138,9 +138,9 @@ void Render::quad()
 void Render::axis()
 {
 	// render as lines
-	//axisMesh->render();
+	axisMesh->render();
 
-	//*
+	/*
 	const float s = 0.02f;
 	const vec3 scale(s);
 
@@ -188,7 +188,7 @@ void Render::axis()
 	GLUtils::simpleProgram->setUniform("model", model);
 	GLUtils::simpleProgram->setUniform("color", vec4(0,0,1,1));
 	sphereMesh->render();
-	//*/
+	*/
 }
 
 void Render::cube() 
@@ -227,7 +227,7 @@ void Render::pipe( const std::vector<glm::vec3>& points, const glm::vec3& scale 
 	std::for_each(begin(points), end(points), [&](const glm::vec3& point) {
 		// Draw point
 		model = glm::translate(glm::mat4(), point);
-		model = glm::scale(model, scale);
+		model = glm::scale(model, scale * 1.25f);
 		GLUtils::defaultProgram->setUniform("model", model);
 		Render::sphere();
 

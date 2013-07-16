@@ -40,35 +40,20 @@ AxisMesh::AxisMesh( const std::string& name )
 
 	// Enable and set up vertex attributes
 	const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
-	const GLuint colorAttribLoc  = GLUtils::simpleProgram->attrib("color");
+	//const GLuint colorAttribLoc  = GLUtils::simpleProgram->attrib("color");
 	glEnableVertexAttribArray(vertexAttribLoc);
-	glEnableVertexAttribArray(colorAttribLoc);
+	//glEnableVertexAttribArray(colorAttribLoc);
 
 	const GLsizei stride = 7 * sizeof(GLfloat);
-	const GLvoid *color_offset = (const GLvoid *) (3 * sizeof(GLfloat));
+	//const GLvoid *color_offset = (const GLvoid *) (3 * sizeof(GLfloat));
 	glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, stride, 0);
-	glVertexAttribPointer(colorAttribLoc,  4, GL_FLOAT, GL_FALSE, stride, color_offset);
+	//glVertexAttribPointer(colorAttribLoc,  4, GL_FLOAT, GL_FALSE, stride, color_offset);
 
-	glDisableVertexAttribArray(colorAttribLoc);
+	//glDisableVertexAttribArray(colorAttribLoc);
 	glDisableVertexAttribArray(vertexAttribLoc);
 
-	// Generate index buffer data
-	//const size_t numfaces = 6;
-	//const size_t isize = 6 * numfaces;
-	//GLushort idata[isize] = {
-	//	0,  1,  2,     2,  1,  3,
-	//	4,  5,  6,     6,  5,  7,
-	//	8, 10,  9,     9, 10, 11,
-	//	12, 13, 14,    14, 13, 15,
-	//	16, 17, 18,    18, 17, 19,
-	//	20, 21, 22,    22, 21, 23
-	//};
-	//indexData.insert(end(indexData), &idata[0], &idata[isize]);
-
-	// Create index buffer object and transfer data
-	glGenBuffers(1, &indexBuffer);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * isize, &indexData[0], GL_STATIC_DRAW);
+	// Create index buffer object and transfer data (index buffer unused)
+	//glGenBuffers(1, &indexBuffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -84,21 +69,26 @@ void AxisMesh::render() const
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 	// Enable and set up vertex attributes
-	const GLuint vertexAttribLoc = GLUtils::simpleProgram->attrib("vertex");
-	const GLuint colorAttribLoc  = GLUtils::simpleProgram->attrib("color");
+	const GLuint vertexAttribLoc = GLUtils::defaultProgram->attrib("vertex");
+	//const GLuint colorAttribLoc  = GLUtils::defaultProgram->attrib("color");
 	glEnableVertexAttribArray(vertexAttribLoc);
-	glEnableVertexAttribArray(colorAttribLoc);
+	//glEnableVertexAttribArray(colorAttribLoc);
 
 	const GLsizei stride = 7 * sizeof(GLfloat);
-	const GLvoid *color_offset = (const GLvoid *) (3 * sizeof(GLfloat));
+	//const GLvoid *color_offset = (const GLvoid *) (3 * sizeof(GLfloat));
 	glVertexAttribPointer(vertexAttribLoc, 3, GL_FLOAT, GL_FALSE, stride, 0);
-	glVertexAttribPointer(colorAttribLoc,  4, GL_FLOAT, GL_FALSE, stride, color_offset);
+	//glVertexAttribPointer(colorAttribLoc,  4, GL_FLOAT, GL_FALSE, stride, color_offset);
 
-	glDrawArrays(GL_LINES, 0, 6);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	//glDrawElements(GL_TRIANGLES, indexData.size(), GL_UNSIGNED_SHORT, 0);
+	// NOTE: this is hacky
+	GLUtils::defaultProgram->setUniform("useLighting", 0);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(1,0,0,1));
+	glDrawArrays(GL_LINES, 0, 2);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,1));
+	glDrawArrays(GL_LINES, 2, 2);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(0,0,1,1));
+	glDrawArrays(GL_LINES, 4, 2);
 
-	glDisableVertexAttribArray(colorAttribLoc);
+	//glDisableVertexAttribArray(colorAttribLoc);
 	glDisableVertexAttribArray(vertexAttribLoc);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
