@@ -276,11 +276,15 @@ HRESULT KinectDevice::processSkeletonData()
 {
 	if (nullptr == sensor) return E_FAIL;
 
+	const NUI_TRANSFORM_SMOOTH_PARAMETERS smoothParams = { 0.7f, 0.3f, 1.f, 1.f, 1.f };
+
 	// Get the next skeleton frame
 	HRESULT hr = sensor->NuiSkeletonGetNextFrame(0, &skeletonFrame);
 	if (FAILED(hr)) {
 		return hr;
 	}
+
+	sensor->NuiTransformSmooth(&skeletonFrame, &smoothParams);
 
 	// Get skeleton data for the first tracked skeleton
 	for (auto data : skeletonFrame.SkeletonData) {
