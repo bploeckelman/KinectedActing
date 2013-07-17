@@ -35,6 +35,11 @@ public:
 	void update();
 
 	void toggleSeatedMode();
+	void setSkeletonSmoothingParms( float smoothing
+	                              , float correction
+	                              , float prediction
+	                              , float jitterRadius
+	                              , float maxDeviationRadius );
 
 	const INuiSensor *getSensor() const;
 	const std::string& getDeviceId() const;
@@ -74,6 +79,7 @@ private:
 	NUI_SKELETON_FRAME skeletonFrame;
 	NUI_SKELETON_DATA *skeletonData;
 	NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
+	NUI_TRANSFORM_SMOOTH_PARAMETERS skeletonSmoothParams;
 	DWORD  skeletonTrackingFlags;
 
 	HANDLE nextColorFrameEvent;
@@ -82,6 +88,15 @@ private:
 
 };
 
+inline void KinectDevice::setSkeletonSmoothingParms( float smoothing
+                                                   , float correction
+                                                   , float prediction
+                                                   , float jitterRadius
+                                                   , float maxDeviationRadius )
+{
+	NUI_TRANSFORM_SMOOTH_PARAMETERS params = { smoothing, correction, prediction, jitterRadius, maxDeviationRadius };
+	skeletonSmoothParams = params;
+}
 
 inline const INuiSensor *KinectDevice::getSensor() const { return sensor; }
 inline const std::string& KinectDevice::getDeviceId() const { return deviceId; }
