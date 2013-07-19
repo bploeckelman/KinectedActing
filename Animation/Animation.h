@@ -39,6 +39,7 @@ public:
 	BoneAnimationTrack* getBoneTrack(unsigned short boneId) const;
 	BoneTrackIterator getBoneTrackIterator();
 	BoneTrackConstIterator getBoneTrackConstIterator() const;
+	const std::map<unsigned short, BoneAnimationTrack*>& getBoneTracks() const;
 
 	KFInterpolationMethod getKFInterpolationMethod() const;
 	void setKFInterpolationMethod(KFInterpolationMethod interpMethod);
@@ -73,3 +74,5 @@ inline KFInterpolationMethod Animation::getKFInterpolationMethod() const { retur
 
 inline int Animation::getFrameRate() const { return mFrameRate; }
 inline void Animation::setFrameRate(int frameRate) { mFrameRate = frameRate; } // TODO : assert(frameRate > 0)
+
+inline const std::map<unsigned short, BoneAnimationTrack*>& Animation::getBoneTracks() const { return mBoneTracks; }

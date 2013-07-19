@@ -7,12 +7,14 @@
 
 #include <string>
 #include <memory>
+#include <list>
 #include <map>
 
 namespace tdogl { class Texture; }
 
 class Animation;
 class Skeleton;
+class Recording;
 
 
 class GLWindow : public Window, msg::Handler
@@ -62,6 +64,8 @@ private:
 
 	Animation *currentAnimation;
 	std::map< std::string, std::unique_ptr<Animation> > animLayer;
+
+	std::list< std::unique_ptr<Recording> > recordings;
 
 	// Message processing methods ----------------------------
 	void registerMessageHandlers();

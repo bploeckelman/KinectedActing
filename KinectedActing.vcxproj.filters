@@ -114,6 +114,12 @@
     <ClCompile Include="Scene\Meshes\AxisMesh.cpp">
       <Filter>Scene\Meshes</Filter>
     </ClCompile>
+    <ClCompile Include="Animation\Recording.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationUtils.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -199,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="Scene\Meshes\AxisMesh.h">
       <Filter>Scene\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Recording.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationUtils.h">
+      <Filter>Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

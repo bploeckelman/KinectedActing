@@ -12,6 +12,8 @@
 #include "Animation/Animation.h"
 #include "Animation/BoneAnimationTrack.h"
 #include "Animation/TransformKeyFrame.h"
+#include "Animation/Recording.h"
+#include "Animation/AnimationUtils.h"
 
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window/Event.hpp>
@@ -66,6 +68,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, skeleton(nullptr)
 	, currentAnimation(nullptr)
 	, animLayer()
+	, recordings()
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -102,6 +105,9 @@ void GLWindow::init()
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		animLayer["blend"]->createBoneTrack(boneID);
 	}
+
+	recordings.push_back(std::unique_ptr<Recording>(new Recording("base", app.getKinect())));
+	recordings.push_back(std::unique_ptr<Recording>(new Recording("blend", app.getKinect())));
 
 	light0.position = glm::vec3(0,1,0);
 	light0.intensities = glm::vec3(1,1,1);
@@ -548,6 +554,8 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 	if (nullptr == currentAnimation) {
 		return;
 	}
+
+	exportAnimationAsBVH(currentAnimation);
 
 	// Clear and recreate all bone tracks
 	currentAnimation->deleteAllBoneTrack();
