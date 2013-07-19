@@ -31,6 +31,7 @@ namespace msg
 		, CLEAR_SKELETON_RECORDING
 		, SAVE_SKELETON_RECORDING
 		, LOAD_SKELETON_RECORDING
+		, EXPORT_SKELETON_BVH
 		, SET_RECORDING_LABEL
 		// Skeleton playback controls
 		, PLAYBACK_START
@@ -96,6 +97,11 @@ namespace msg
 	class ClearRecordingMessage : public Message
 	{
 	public: ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
+	};
+	// ------------------------------------------------------------------------
+	class ExportSkeletonBVHMessage : public Message
+	{
+	public: ExportSkeletonBVHMessage() : Message(EXPORT_SKELETON_BVH) {}
 	};
 	// ------------------------------------------------------------------------
 	class SetRecordingLabelMessage : public Message
@@ -234,6 +240,7 @@ namespace msg
 		virtual void process(const StartRecordingMessage    *message) {}
 		virtual void process(const StopRecordingMessage     *message) {}
 		virtual void process(const ClearRecordingMessage    *message) {}
+		virtual void process(const ExportSkeletonBVHMessage *message) {}
 		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}

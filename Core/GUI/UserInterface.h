@@ -36,6 +36,7 @@ private:
 	void onRecordStartButtonClick();
 	void onRecordStopButtonClick();
 	void onRecordClearButtonClick();
+	void onRecordExportButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
 	void onPlaybackProgressBarClick();
 	void onPlaybackFirstButtonClick();
@@ -70,6 +71,7 @@ private:
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
 	sfg::Button::Ptr recordClearButton;
+	sfg::Button::Ptr recordExportButton;
 
 	sfg::Label::Ptr playbackLabel;
 	sfg::ProgressBar::Ptr playbackProgressBar;

@@ -74,6 +74,7 @@ public:
 	void process(const msg::StartRecordingMessage     *message);
 	void process(const msg::StopRecordingMessage      *message);
 	void process(const msg::ClearRecordingMessage     *message);
+	void process(const msg::ExportSkeletonBVHMessage  *message);
 	void process(const msg::ShowLiveSkeletonMessage   *message);
 	void process(const msg::HideLiveSkeletonMessage   *message);
 	void process(const msg::PlaybackFirstFrameMessage *message);

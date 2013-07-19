@@ -170,13 +170,13 @@ void GLWindow::render()
 
 	// Draw ground plane
 	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
-	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.f, 0.f)));
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.2f, 0.f)));
 	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
 	GLUtils::defaultProgram->setUniform("useLighting", 1);
 	Render::plane();
 
 	// Draw an orientation axis at the origin
-	GLUtils::defaultProgram->setUniform("model", glm::mat4());
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0, -1.2f, 0)));
 	GLUtils::defaultProgram->setUniform("useLighting", 0);
 	Render::axis();
 
@@ -520,6 +520,7 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::START_SKELETON_RECORDING, this);
 	msg::gDispatcher.registerHandler(msg::STOP_SKELETON_RECORDING,  this);
 	msg::gDispatcher.registerHandler(msg::CLEAR_SKELETON_RECORDING, this);
+	msg::gDispatcher.registerHandler(msg::EXPORT_SKELETON_BVH,      this);
 	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
@@ -555,8 +556,6 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 		return;
 	}
 
-	exportAnimationAsBVH(currentAnimation);
-
 	// Clear and recreate all bone tracks
 	currentAnimation->deleteAllBoneTrack();
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
@@ -565,6 +564,21 @@ void GLWindow::process( const msg::ClearRecordingMessage *message )
 
 	// Update gui label
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage("Skeleton Recording:"));
+}
+
+void GLWindow::process( const msg::ExportSkeletonBVHMessage *message )
+{
+	if (nullptr == currentAnimation) return;
+
+	exportAnimationAsBVH(currentAnimation);
+
+	const std::string text = "Exported recording as '" + currentAnimation->getName() + ".bvh'";
+	MessageBoxA(NULL, text.c_str(), "BVH Export", MB_OK);
+}
+
+void GLWindow::process( const msg::HideBonePathMessage *message )
+{
+	bonePathsVisible = false;
 }
 
 void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )
@@ -660,9 +674,4 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 void GLWindow::process( const msg::ShowBonePathMessage *message )
 {
 	bonePathsVisible = true;
-}
-
-void GLWindow::process( const msg::HideBonePathMessage *message )
-{
-	bonePathsVisible = false;
 }
