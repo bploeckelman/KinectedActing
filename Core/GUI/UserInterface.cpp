@@ -39,6 +39,7 @@ GUI::GUI()
 	, startLayeringButton(sfg::Button::Create("Create New Layer"))
 	, animLayersComboBox(sfg::ComboBox::Create())
 	, infoLabel(sfg::Label::Create(""))
+	, seatedModeEnabledButton(sfg::Button::Create("Seated Mode"))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 	, renderPathCheckButton(sfg::CheckButton::Create("Draw bone path"))
 {}
@@ -103,42 +104,44 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->Attach(startKinectButton,    sf::Rect<sf::Uint32>(0, 3, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(stopKinectButton,     sf::Rect<sf::Uint32>(3, 3, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->SetRowSpacing(3, 5.f);
-	table->Attach(liveSkeletonVisibleCheckButton, sf::Rect<sf::Uint32>(0, 4, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(seatedModeEnabledButton,        sf::Rect<sf::Uint32>(0, 4, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(4, 5.f);
+	table->Attach(liveSkeletonVisibleCheckButton, sf::Rect<sf::Uint32>(0, 5, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 
 	recordingLabel->SetText("Skeleton Recording:");
 	recordingLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	table->Attach(recordingLabel,      sf::Rect<sf::Uint32>(0,  5, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
-	table->Attach(animLayersComboBox,  sf::Rect<sf::Uint32>(0,  6, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->SetRowSpacing(6, 2.5f);
-	table->Attach(recordExportButton,  sf::Rect<sf::Uint32>(0,  7, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->SetRowSpacing(7, 5.f);
-	table->Attach(recordStartButton,   sf::Rect<sf::Uint32>(0,  8, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(recordStopButton,    sf::Rect<sf::Uint32>(3,  8, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->SetRowSpacing(8, 2.5f);
-	table->Attach(recordClearButton,   sf::Rect<sf::Uint32>(0,  9, colspan,     1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(recordingLabel,      sf::Rect<sf::Uint32>(0,  6, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(animLayersComboBox,  sf::Rect<sf::Uint32>(0,  7, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(7, 2.5f);
+	table->Attach(recordExportButton,  sf::Rect<sf::Uint32>(0,  8, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(8, 5.f);
+	table->Attach(recordStartButton,   sf::Rect<sf::Uint32>(0,  9, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(recordStopButton,    sf::Rect<sf::Uint32>(3,  9, colspan / 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->SetRowSpacing(9, 2.5f);
-	table->Attach(startLayeringButton, sf::Rect<sf::Uint32>(0, 10, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(recordClearButton,   sf::Rect<sf::Uint32>(0, 10, colspan,     1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(10, 2.5f);
+	table->Attach(startLayeringButton, sf::Rect<sf::Uint32>(0, 11, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	playbackLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0, 11, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
-	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 12, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
-	table->SetRowSpacing(12, 5.f);
-	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackStartButton,    sf::Rect<sf::Uint32>(3, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 13, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0, 12, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
+	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 	table->SetRowSpacing(13, 5.f);
-	sfg::Label::Ptr deltaScaleLabel(sfg::Label::Create("Delta"));
-	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 14,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
-	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 14, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
-
+	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStartButton,    sf::Rect<sf::Uint32>(3, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 14, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->SetRowSpacing(14, 5.f);
-	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 15, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+	sfg::Label::Ptr deltaScaleLabel(sfg::Label::Create("Delta"));
+	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 15,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 15, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+
+	table->SetRowSpacing(15, 5.f);
+	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 16, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 16, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 17, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -159,6 +162,7 @@ void GUI::connectSignals()
 	recordClearButton ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordClearButtonClick,  this);
 	recordExportButton->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onRecordExportButtonClick, this);
 
+	seatedModeEnabledButton       ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onSeatedModeEnabledButtonClick, this);
 	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
 	renderPathCheckButton         ->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onRenderPathCheckButtonClick,          this);
 
@@ -240,6 +244,11 @@ void GUI::onRecordClearButtonClick()
 void GUI::onRecordExportButtonClick()
 {
 	msg::gDispatcher.dispatchMessage(msg::ExportSkeletonBVHMessage());
+}
+
+void GUI::onSeatedModeEnabledButtonClick()
+{
+	msg::gDispatcher.dispatchMessage(msg::ToggleSeatedModeMessage());
 }
 
 void GUI::onLiveSkeletonVisibleCheckButtonClick()

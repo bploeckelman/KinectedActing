@@ -81,6 +81,7 @@ private:
 	NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
 	NUI_TRANSFORM_SMOOTH_PARAMETERS skeletonSmoothParams;
 	DWORD  skeletonTrackingFlags;
+	bool seatedMode;
 
 	HANDLE nextColorFrameEvent;
 	HANDLE nextDepthFrameEvent;
@@ -108,4 +109,4 @@ inline const NUI_SKELETON_FRAME& KinectDevice::getSkeletonFrame() const { return
 inline const NUI_SKELETON_BONE_ORIENTATION *KinectDevice::getOrientations() const { return boneOrientations; }
 
 inline bool KinectDevice::isInitialized()       const { return (nullptr != sensor); }
-inline bool KinectDevice::isSeatedModeEnabled() const { return (0 != (skeletonTrackingFlags & NUI_SKELETON_FRAME_FLAG_SEATED_SUPPORT_ENABLED)); }
+inline bool KinectDevice::isSeatedModeEnabled() const { return seatedMode; }

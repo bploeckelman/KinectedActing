@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const DWORD skeleton_tracking_flags = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
+const DWORD seated_mode_enabled = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
 
 const NUI_TRANSFORM_SMOOTH_PARAMETERS lowSmoothing  = { 0.5f, 0.5f, 0.5f, 0.05f, 0.04f };
 const NUI_TRANSFORM_SMOOTH_PARAMETERS medSmoothing  = { 0.5f, 0.1f, 0.5f, 0.1f , 0.1f  };
@@ -31,8 +31,9 @@ KinectDevice::KinectDevice()
 	, liveSkeleton(new Skeleton())
 	, skeletonFrame()
 	, skeletonData(nullptr)
-	, skeletonTrackingFlags(skeleton_tracking_flags)
 	, skeletonSmoothParams(medSmoothing)
+	, skeletonTrackingFlags(seated_mode_enabled)
+	, seatedMode(true)
 	, nextColorFrameEvent()
 	, nextDepthFrameEvent()
 	, nextSkeletonFrameEvent()
@@ -154,9 +155,11 @@ void KinectDevice::update()
 void KinectDevice::toggleSeatedMode()
 {
 	if (isSeatedModeEnabled()) {
-		skeletonTrackingFlags |= ~NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		skeletonTrackingFlags = 0;
+		seatedMode = false;
 	} else {
-		skeletonTrackingFlags |= NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		skeletonTrackingFlags = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		seatedMode = true;
 	}
 
 	HRESULT hr = sensor->NuiSkeletonTrackingEnable(nextSkeletonFrameEvent, skeletonTrackingFlags);

@@ -37,6 +37,7 @@ private:
 	void onRecordStopButtonClick();
 	void onRecordClearButtonClick();
 	void onRecordExportButtonClick();
+	void onSeatedModeEnabledButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
 	void onPlaybackProgressBarClick();
 	void onPlaybackFirstButtonClick();
@@ -65,6 +66,7 @@ private:
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::Button::Ptr seatedModeEnabledButton;
 	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
 
 	sfg::Label::Ptr  recordingLabel;

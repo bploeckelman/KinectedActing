@@ -25,6 +25,7 @@ namespace msg
 		, STOP_KINECT_DEVICE
 		, SHOW_LIVE_SKELETON
 		, HIDE_LIVE_SKELETON
+		, TOGGLE_SEATED_MODE
 		// Skeleton recording controls
 		, START_SKELETON_RECORDING
 		, STOP_SKELETON_RECORDING
@@ -122,6 +123,11 @@ namespace msg
 	class HideLiveSkeletonMessage : public Message
 	{
 	public: HideLiveSkeletonMessage() : Message(HIDE_LIVE_SKELETON) {}
+	};
+	// ------------------------------------------------------------------------
+	class ToggleSeatedModeMessage : public Message
+	{
+	public: ToggleSeatedModeMessage() : Message(TOGGLE_SEATED_MODE) {}
 	};
 	// ------------------------------------------------------------------------
 	class PlaybackFirstFrameMessage : public Message
@@ -244,6 +250,7 @@ namespace msg
 		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
+		virtual void process(const ToggleSeatedModeMessage  *message) {}
 		virtual void process(const PlaybackFirstFrameMessage *message) {}
 		virtual void process(const PlaybackLastFrameMessage  *message) {}
 		virtual void process(const PlaybackNextFrameMessage  *message) {}

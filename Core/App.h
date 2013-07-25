@@ -26,6 +26,7 @@ public:
 	void process(const msg::QuitProgramMessage       *message);
 	void process(const msg::StartKinectDeviceMessage *message);
 	void process(const msg::StopKinectDeviceMessage  *message);
+	void process(const msg::ToggleSeatedModeMessage  *message);
 
 private:
 	bool done;
