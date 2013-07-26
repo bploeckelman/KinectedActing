@@ -158,13 +158,14 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 15,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 15, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
-	table->SetRowSpacing(15, 5.f);
-	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 16, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
+	table->SetRowSpacing(15, 20.f);
+	sfg::Label::Ptr boneMaskLabel = sfg::Label::Create("Bone Mask:");
+	boneMaskLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
+	table->Attach(boneMaskLabel, sf::Rect<sf::Uint32>(0, 16, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
 	table->SetColumnSpacing(1, 5.f);
 	table->SetColumnSpacing(3, 5.f);
-	table->SetRowSpacing(16, 20.f);
 	table->Attach(sfg::Label::Create("Left"),  sf::Rect<sf::Uint32>(0, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(headToggleButton,            sf::Rect<sf::Uint32>(2, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(sfg::Label::Create("Right"), sf::Rect<sf::Uint32>(4, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
@@ -195,9 +196,11 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->Attach(ankleRightToggleButton,     sf::Rect<sf::Uint32>(4, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->Attach(footRightToggleButton,      sf::Rect<sf::Uint32>(4, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
+	table->SetRowSpacing(25, 5.f);
+	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 26, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 26, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 27, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -402,8 +405,28 @@ void GUI::onRenderPathCheckButtonClick()
 
 void GUI::onBoneMaskToggleButtonClick()
 {
-	BoneMask boneMask = seated_bone_mask;
-	// TODO : populate boneMask using state of all bone mask toggle buttons
+	BoneMask boneMask = empty_bone_mask;
+
+	if (headToggleButton           ->IsActive()) boneMask.insert(HEAD);
+	if (shoulderCenterToggleButton ->IsActive()) boneMask.insert(SHOULDER_CENTER);
+	if (spineToggleButton          ->IsActive()) boneMask.insert(SPINE);
+	if (hipCenterToggleButton      ->IsActive()) boneMask.insert(HIP_CENTER);
+	if (shoulderLeftToggleButton   ->IsActive()) boneMask.insert(SHOULDER_LEFT);
+	if (elbowLeftToggleButton      ->IsActive()) boneMask.insert(ELBOW_LEFT);
+	if (wristLeftToggleButton      ->IsActive()) boneMask.insert(WRIST_LEFT);
+	if (handLeftToggleButton       ->IsActive()) boneMask.insert(HAND_LEFT);
+	if (shoulderRightToggleButton  ->IsActive()) boneMask.insert(SHOULDER_RIGHT);
+	if (elbowRightToggleButton     ->IsActive()) boneMask.insert(ELBOW_RIGHT);
+	if (wristRightToggleButton     ->IsActive()) boneMask.insert(WRIST_RIGHT);
+	if (handRightToggleButton      ->IsActive()) boneMask.insert(HAND_RIGHT);
+	if (hipLeftToggleButton        ->IsActive()) boneMask.insert(HIP_LEFT);
+	if (kneeLeftToggleButton       ->IsActive()) boneMask.insert(KNEE_LEFT);
+	if (ankleLeftToggleButton      ->IsActive()) boneMask.insert(ANKLE_LEFT);
+	if (footLeftToggleButton       ->IsActive()) boneMask.insert(FOOT_LEFT);
+	if (hipRightToggleButton       ->IsActive()) boneMask.insert(HIP_RIGHT);
+	if (kneeRightToggleButton      ->IsActive()) boneMask.insert(KNEE_RIGHT);
+	if (ankleRightToggleButton     ->IsActive()) boneMask.insert(ANKLE_RIGHT);
+	if (footRightToggleButton      ->IsActive()) boneMask.insert(FOOT_RIGHT);
 
 	msg::gDispatcher.dispatchMessage(msg::UpdateBoneMaskMessage(boneMask));
 }
