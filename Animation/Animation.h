@@ -2,7 +2,10 @@
 
 #include "AnimationTypes.h"
 
+#include <glm/glm.hpp>
+
 #include <string>
+#include <vector>
 #include <map>
 #include <set>
 
@@ -40,6 +43,7 @@ public:
 	BoneTrackIterator getBoneTrackIterator();
 	BoneTrackConstIterator getBoneTrackConstIterator() const;
 	const std::map<unsigned short, BoneAnimationTrack*>& getBoneTracks() const;
+	void getPositions(unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime=-1.f) const;
 
 	KFInterpolationMethod getKFInterpolationMethod() const;
 	void setKFInterpolationMethod(KFInterpolationMethod interpMethod);

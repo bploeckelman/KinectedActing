@@ -1,5 +1,6 @@
 #include "Animation.h"
 #include "BoneAnimationTrack.h"
+#include "TransformKeyFrame.h"
 
 #include "Skeleton.h"
 
@@ -70,6 +71,23 @@ Animation::BoneTrackIterator Animation::getBoneTrackIterator()
 Animation::BoneTrackConstIterator Animation::getBoneTrackConstIterator() const
 {
 	return begin(mBoneTracks);
+}
+
+void Animation::getPositions( unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime/*=-1.f*/ ) const
+{
+	if ( !hasBoneTrack(boneId) )
+		return;
+
+	const auto& track = mBoneTracks.at(boneId);
+	positions.clear();
+	positions.resize(track->getNumKeyFrames());
+
+	unsigned int i = 0;
+	for (const auto& keyframe : track->getKeyFrames()) {
+		if (lastTime == -1.f || keyframe->getTime() < lastTime) {
+			positions[i++] = static_cast<const TransformKeyFrame*>(keyframe)->getTranslation();
+		}
+	}
 }
 
 void Animation::setKFInterpolationMethod(KFInterpolationMethod interpMethod)

@@ -116,6 +116,7 @@ void GLWindow::init()
 	light0.ambientCoefficient = 0.01f;
 }
 
+float dt = 0.f;
 void GLWindow::update()
 {
 	handleEvents();
@@ -124,6 +125,9 @@ void GLWindow::update()
 	updateTextures();
 	updateRecording();
 	updatePlayback();
+
+	dt += app.getDeltaTime().asSeconds() / 3.f;
+	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
 
 	if (nullptr == currentAnimation) {
 		return;
@@ -135,7 +139,7 @@ void GLWindow::update()
 
 }
 
-float dt = 0.f;
+std::vector<glm::vec3> positions; // TODO : temporary for bone path rendering
 void GLWindow::render()
 {
 	window.setActive();
@@ -156,17 +160,16 @@ void GLWindow::render()
 	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Set uniforms
 	GLUtils::defaultProgram->use();
 	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
-	GLUtils::defaultProgram->setUniform("tex", 0);
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	dt += app.getDeltaTime().asSeconds() / 3.f;
-	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
-	GLUtils::defaultProgram->setUniform("light.position", light0.position);
-	GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
-	GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+	GLUtils::defaultProgram->setUniform("light.position",           light0.position);
+	GLUtils::defaultProgram->setUniform("light.intensities",        light0.intensities);
+	GLUtils::defaultProgram->setUniform("light.attenuation",        light0.attenuation);
 	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
 	GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
+	GLUtils::defaultProgram->setUniform("tex", 0);
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw ground plane
@@ -191,22 +194,24 @@ void GLWindow::render()
 
 	// Draw current animation layer
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
-		GLUtils::simpleProgram->use();
-		GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-		GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
+		if (layering || bonePathsVisible) {
+			GLUtils::simpleProgram->use();
+			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
 
-		// Highlight joints that are enabled in the bone mask
-		std::for_each(begin(boneMask), end(boneMask), [&](const BoneMask::key_type& boneID) {
-			TransformKeyFrame kf(animTimer.asSeconds(), 0);
-			currentAnimation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playbackTime, &kf);
-			const float s = 0.025f;
-			const glm::vec3 scale(s,s,s);
-			const glm::vec3 pos = kf.getTranslation();
-			GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), pos), scale * 1.5f));
-			glCullFace(GL_FRONT);
-			Render::sphere();
-			glCullFace(GL_BACK);
-		});
+			// Highlight joints that are enabled in the bone mask
+			std::for_each(begin(boneMask), end(boneMask), [&](const BoneMask::key_type& boneID) {
+				TransformKeyFrame kf(animTimer.asSeconds(), 0);
+				currentAnimation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playbackTime, &kf);
+				const float s = 0.025f;
+				const glm::vec3 scale(s,s,s);
+				const glm::vec3 pos = kf.getTranslation();
+				GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), pos), scale * 1.5f));
+				glCullFace(GL_FRONT);
+				Render::sphere();
+				glCullFace(GL_BACK);
+			});
+		}
 
 		GLUtils::defaultProgram->use();
 		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
@@ -217,35 +222,19 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 		GLUtils::defaultProgram->setUniform("tex", 0);
-		GLUtils::defaultProgram->setUniform("useLighting", 1);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 
 		if (bonePathsVisible) {
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			// TODO : different colors for different joints?
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
+
 			// Draw bone paths for joints that are enabled in the bone mask
 			std::for_each(begin(boneMask), end(boneMask), [&](const BoneMask::key_type& boneID) {
-				// Get a bone track, just right hand for now
-				auto boneTrack    = currentAnimation->getBoneTrack(boneID);
-				auto numKeyFrames = boneTrack->getNumKeyFrames();
-				auto keyFrames    = boneTrack->getKeyFrames();
-
-				// Get all translation vectors for this track
-				static std::vector<glm::vec3> vertices;
-				vertices.clear();
-				vertices.resize(numKeyFrames);
-
-				unsigned int i = 0;
-				std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
-					if (keyframe->getTime() < playbackTime) {
-						vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
-					}
-				});
-
-				// Draw the path
-				GLUtils::defaultProgram->setUniform("useLighting", 0);
-				GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
-				Render::pipe(vertices);
+				currentAnimation->getPositions(boneID, positions, playbackTime);
+				Render::pipe(positions);
 			});
 		}
 	}
