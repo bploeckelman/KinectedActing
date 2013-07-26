@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Animation/AnimationTypes.h"
+
 #include <map>
 
 
@@ -51,6 +53,7 @@ namespace msg
 		, SET_INFO_LABEL
 		, SHOW_BONE_PATH
 		, HIDE_BONE_PATH
+		, UPDATE_BONE_MASK
 	};
 
 	// ------------------------------------------------------------------------
@@ -225,6 +228,16 @@ namespace msg
 	public: HideBonePathMessage() : Message(HIDE_BONE_PATH) {}
 	};
 	// ------------------------------------------------------------------------
+	class UpdateBoneMaskMessage : public Message
+	{
+	public:
+		UpdateBoneMaskMessage(const BoneMask& boneMask)
+			: Message(UPDATE_BONE_MASK)
+			, boneMask(boneMask)
+		{}
+		const BoneMask boneMask;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -265,6 +278,7 @@ namespace msg
 		virtual void process(const SetInfoLabelMessage        *message) {}
 		virtual void process(const ShowBonePathMessage        *message) {}
 		virtual void process(const HideBonePathMessage        *message) {}
+		virtual void process(const UpdateBoneMaskMessage      *message) {}
 	};
 
 

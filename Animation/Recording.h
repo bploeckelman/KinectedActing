@@ -14,7 +14,7 @@ public:
 	~Recording();
 
 	void update(float delta);
-	void apply(Skeleton *skeleton, float time, const std::set<EBoneID>& boneMask=EmptyBoneMask);
+	void apply(Skeleton *skeleton, float time, const std::set<EBoneID>& boneMask=default_bone_mask);
 
 	void showBonePaths();
 	void hideBonePaths();

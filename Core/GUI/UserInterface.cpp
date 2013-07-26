@@ -4,6 +4,7 @@
 
 #include "UserInterface.h"
 #include "Core/Messages/Messages.h"
+#include "Animation/AnimationTypes.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -42,6 +43,26 @@ GUI::GUI()
 	, seatedModeEnabledButton(sfg::Button::Create("Seated Mode"))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
 	, renderPathCheckButton(sfg::CheckButton::Create("Draw bone path"))
+	, headToggleButton(sfg::ToggleButton::Create("head"))
+	, shoulderCenterToggleButton(sfg::ToggleButton::Create("shoulder"))
+	, spineToggleButton(sfg::ToggleButton::Create("spine"))
+	, hipCenterToggleButton(sfg::ToggleButton::Create("hip"))
+	, shoulderLeftToggleButton(sfg::ToggleButton::Create("shoulder"))
+	, elbowLeftToggleButton(sfg::ToggleButton::Create("elbow"))
+	, wristLeftToggleButton(sfg::ToggleButton::Create("wrist"))
+	, handLeftToggleButton(sfg::ToggleButton::Create("hand"))
+	, shoulderRightToggleButton(sfg::ToggleButton::Create("shoulder"))
+	, elbowRightToggleButton(sfg::ToggleButton::Create("elbow"))
+	, wristRightToggleButton(sfg::ToggleButton::Create("wrist"))
+	, handRightToggleButton(sfg::ToggleButton::Create("hand"))
+	, hipLeftToggleButton(sfg::ToggleButton::Create("hip"))
+	, kneeLeftToggleButton(sfg::ToggleButton::Create("knee"))
+	, ankleLeftToggleButton(sfg::ToggleButton::Create("ankle"))
+	, footLeftToggleButton(sfg::ToggleButton::Create("foot"))
+	, hipRightToggleButton(sfg::ToggleButton::Create("hip"))
+	, kneeRightToggleButton(sfg::ToggleButton::Create("knee"))
+	, ankleRightToggleButton(sfg::ToggleButton::Create("ankle"))
+	, footRightToggleButton(sfg::ToggleButton::Create("foot"))
 {}
 
 GUI::~GUI()
@@ -140,8 +161,43 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->SetRowSpacing(15, 5.f);
 	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 16, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
+
+	table->SetColumnSpacing(1, 5.f);
+	table->SetColumnSpacing(3, 5.f);
+	table->SetRowSpacing(16, 20.f);
+	table->Attach(sfg::Label::Create("Left"),  sf::Rect<sf::Uint32>(0, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(headToggleButton,            sf::Rect<sf::Uint32>(2, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(sfg::Label::Create("Right"), sf::Rect<sf::Uint32>(4, 17, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+	table->SetRowSpacing(17, 5.f);
+	table->Attach(shoulderCenterToggleButton, sf::Rect<sf::Uint32>(2, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(spineToggleButton,          sf::Rect<sf::Uint32>(2, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(hipCenterToggleButton,      sf::Rect<sf::Uint32>(2, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+	table->Attach(shoulderLeftToggleButton,   sf::Rect<sf::Uint32>(0, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(elbowLeftToggleButton,      sf::Rect<sf::Uint32>(0, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(wristLeftToggleButton,      sf::Rect<sf::Uint32>(0, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(handLeftToggleButton,       sf::Rect<sf::Uint32>(0, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+	table->Attach(shoulderRightToggleButton,  sf::Rect<sf::Uint32>(4, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(elbowRightToggleButton,     sf::Rect<sf::Uint32>(4, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(wristRightToggleButton,     sf::Rect<sf::Uint32>(4, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(handRightToggleButton,      sf::Rect<sf::Uint32>(4, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+	table->SetRowSpacing(21, 10.f);
+	table->Attach(hipLeftToggleButton,        sf::Rect<sf::Uint32>(0, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(kneeLeftToggleButton,       sf::Rect<sf::Uint32>(0, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(ankleLeftToggleButton,      sf::Rect<sf::Uint32>(0, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(footLeftToggleButton,       sf::Rect<sf::Uint32>(0, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+	table->Attach(hipRightToggleButton,       sf::Rect<sf::Uint32>(4, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(kneeRightToggleButton,      sf::Rect<sf::Uint32>(4, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(ankleRightToggleButton,     sf::Rect<sf::Uint32>(4, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(footRightToggleButton,      sf::Rect<sf::Uint32>(4, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+
+
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 17, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 26, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -177,6 +233,27 @@ void GUI::connectSignals()
 
 	startLayeringButton->GetSignal(sfg::Button::OnLeftClick ).Connect(&GUI::onStartLayeringButtonClick, this);
 	animLayersComboBox ->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onAnimLayersComboBoxSelect, this);
+
+	headToggleButton          ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	shoulderCenterToggleButton->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	spineToggleButton         ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	hipCenterToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	shoulderLeftToggleButton  ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	elbowLeftToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	wristLeftToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	handLeftToggleButton      ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	shoulderRightToggleButton ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	elbowRightToggleButton    ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	wristRightToggleButton    ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	handRightToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	hipLeftToggleButton       ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	kneeLeftToggleButton      ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	ankleLeftToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	footLeftToggleButton      ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	hipRightToggleButton      ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	kneeRightToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	ankleRightToggleButton    ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
+	footRightToggleButton     ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
 }
 
 void GUI::onQuitButtonClick()
@@ -321,4 +398,12 @@ void GUI::onRenderPathCheckButtonClick()
 	} else {
 		msg::gDispatcher.dispatchMessage(msg::HideBonePathMessage());
 	}
+}
+
+void GUI::onBoneMaskToggleButtonClick()
+{
+	BoneMask boneMask = seated_bone_mask;
+	// TODO : populate boneMask using state of all bone mask toggle buttons
+
+	msg::gDispatcher.dispatchMessage(msg::UpdateBoneMaskMessage(boneMask));
 }

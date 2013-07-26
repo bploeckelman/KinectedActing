@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Scene/Camera.h"
 #include "Core/Messages/Messages.h"
+#include "Animation/AnimationTypes.h"
 
 #include <SFML/System/Time.hpp>
 
@@ -62,6 +63,7 @@ private:
 
 	std::unique_ptr<Skeleton>  skeleton;
 
+	BoneMask boneMask;
 	Animation *currentAnimation;
 	std::map< std::string, std::unique_ptr<Animation> > animLayer;
 
@@ -88,5 +90,6 @@ public:
 	void process(const msg::LayerSelectMessage        *message);
 	void process(const msg::ShowBonePathMessage       *message);
 	void process(const msg::HideBonePathMessage       *message);
+	void process(const msg::UpdateBoneMaskMessage     *message);
 
 };

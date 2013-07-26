@@ -50,6 +50,7 @@ private:
 	void onStartLayeringButtonClick();
 	void onAnimLayersComboBoxSelect();
 	void onRenderPathCheckButtonClick();
+	void onBoneMaskToggleButtonClick();
 
 private:
 	sfg::SFGUI sfgui;
@@ -89,7 +90,32 @@ private:
 	sfg::ComboBox::Ptr animLayersComboBox;
 
 	sfg::CheckButton::Ptr renderPathCheckButton;
+
 	// TODO : add check/toggle buttons for all joints
+	sfg::ToggleButton::Ptr headToggleButton;
+	sfg::ToggleButton::Ptr shoulderCenterToggleButton;
+	sfg::ToggleButton::Ptr spineToggleButton;
+	sfg::ToggleButton::Ptr hipCenterToggleButton;
+
+	sfg::ToggleButton::Ptr shoulderLeftToggleButton;
+	sfg::ToggleButton::Ptr elbowLeftToggleButton;
+	sfg::ToggleButton::Ptr wristLeftToggleButton;
+	sfg::ToggleButton::Ptr handLeftToggleButton;
+
+	sfg::ToggleButton::Ptr shoulderRightToggleButton;
+	sfg::ToggleButton::Ptr elbowRightToggleButton;
+	sfg::ToggleButton::Ptr wristRightToggleButton;
+	sfg::ToggleButton::Ptr handRightToggleButton;
+
+	sfg::ToggleButton::Ptr hipLeftToggleButton;
+	sfg::ToggleButton::Ptr kneeLeftToggleButton;
+	sfg::ToggleButton::Ptr ankleLeftToggleButton;
+	sfg::ToggleButton::Ptr footLeftToggleButton;
+
+	sfg::ToggleButton::Ptr hipRightToggleButton;
+	sfg::ToggleButton::Ptr kneeRightToggleButton;
+	sfg::ToggleButton::Ptr ankleRightToggleButton;
+	sfg::ToggleButton::Ptr footRightToggleButton;
 
 	sfg::Label::Ptr infoLabel;
 

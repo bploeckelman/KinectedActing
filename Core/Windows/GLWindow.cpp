@@ -69,6 +69,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, currentAnimation(nullptr)
 	, animLayer()
 	, recordings()
+	, boneMask(default_bone_mask)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -192,17 +193,20 @@ void GLWindow::render()
 	if (nullptr != currentAnimation && currentAnimation->getLength() > 0.f) {
 		GLUtils::simpleProgram->use();
 		GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-		GLUtils::simpleProgram->setUniform("color", glm::vec4(0.2f, 1.f, 0.2f, 1.f));
+		GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
 
-		TransformKeyFrame kf(animTimer.asSeconds(), 0);
-		currentAnimation->getBoneTrack(HAND_RIGHT)->getInterpolatedKeyFrame(playbackTime, &kf);
-		const float s = 0.025f;
-		const glm::vec3 scale(s,s,s);
-		const glm::vec3 headPos = kf.getTranslation();
-		GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), headPos), scale * 1.5f));
-		glCullFace(GL_FRONT);
-		Render::sphere();
-		glCullFace(GL_BACK);
+		// Highlight joints that are enabled in the bone mask
+		std::for_each(begin(boneMask), end(boneMask), [&](const BoneMask::key_type& boneID) {
+			TransformKeyFrame kf(animTimer.asSeconds(), 0);
+			currentAnimation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playbackTime, &kf);
+			const float s = 0.025f;
+			const glm::vec3 scale(s,s,s);
+			const glm::vec3 pos = kf.getTranslation();
+			GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), pos), scale * 1.5f));
+			glCullFace(GL_FRONT);
+			Render::sphere();
+			glCullFace(GL_BACK);
+		});
 
 		GLUtils::defaultProgram->use();
 		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
@@ -218,29 +222,31 @@ void GLWindow::render()
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 		skeleton->render();
 
-		// Draw bone paths
 		if (bonePathsVisible) {
-			// Get a bone track, just right hand for now
-			auto boneTrack = currentAnimation->getBoneTrack(EBoneID::HAND_RIGHT);
-			auto numKeyFrames = boneTrack->getNumKeyFrames();
-			auto keyFrames = boneTrack->getKeyFrames();
+			// Draw bone paths for joints that are enabled in the bone mask
+			std::for_each(begin(boneMask), end(boneMask), [&](const BoneMask::key_type& boneID) {
+				// Get a bone track, just right hand for now
+				auto boneTrack    = currentAnimation->getBoneTrack(boneID);
+				auto numKeyFrames = boneTrack->getNumKeyFrames();
+				auto keyFrames    = boneTrack->getKeyFrames();
 
-			// Get all translation vectors for this track
-			static std::vector<glm::vec3> vertices;
-			vertices.clear();
-			vertices.resize(numKeyFrames);
+				// Get all translation vectors for this track
+				static std::vector<glm::vec3> vertices;
+				vertices.clear();
+				vertices.resize(numKeyFrames);
 
-			unsigned int i = 0;
-			std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
-				if (keyframe->getTime() < playbackTime) {
-					vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
-				}
+				unsigned int i = 0;
+				std::for_each(begin(keyFrames), end(keyFrames), [&](KeyFrame *keyframe) {
+					if (keyframe->getTime() < playbackTime) {
+						vertices[i++] = static_cast<TransformKeyFrame*>(keyframe)->getTranslation();
+					}
+				});
+
+				// Draw the path
+				GLUtils::defaultProgram->setUniform("useLighting", 0);
+				GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
+				Render::pipe(vertices);
 			});
-
-			// Draw the path
-			GLUtils::defaultProgram->setUniform("useLighting", 0);
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
-			Render::pipe(vertices);
 		}
 	}
 
@@ -440,6 +446,7 @@ size_t GLWindow::saveKeyFrame( float now, Animation *animation)
 
 		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
 		const Vector4& orient = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
+		//const Vector4& orient = boneOrientations[boneID].hierarchicalRotation.rotationQuaternion;
 		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
 		keyFrame->setRotation(glm::quat(orient.w, orient.x, orient.y, orient.z));
 		keyFrame->setScale(glm::vec3(1,1,1));
@@ -534,6 +541,7 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
 	msg::gDispatcher.registerHandler(msg::SHOW_BONE_PATH,           this);
 	msg::gDispatcher.registerHandler(msg::HIDE_BONE_PATH,           this);
+	msg::gDispatcher.registerHandler(msg::UPDATE_BONE_MASK,         this);
 }
 
 void GLWindow::process( const msg::StartRecordingMessage *message )
@@ -674,4 +682,9 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 void GLWindow::process( const msg::ShowBonePathMessage *message )
 {
 	bonePathsVisible = true;
+}
+
+void GLWindow::process( const msg::UpdateBoneMaskMessage *message )
+{
+	boneMask = message->boneMask;
 }

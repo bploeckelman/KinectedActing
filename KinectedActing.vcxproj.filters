@@ -120,6 +120,9 @@
     <ClCompile Include="Animation\AnimationUtils.cpp">
       <Filter>Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Animation\AnimationTypes.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -210,6 +213,9 @@
       <Filter>Animation</Filter>
     </ClInclude>
     <ClInclude Include="Animation\AnimationUtils.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationTypes.h">
       <Filter>Animation</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AnimationTypes.h"
+
 #include <string>
 #include <map>
 #include <set>
@@ -12,8 +14,6 @@ enum KFInterpolationMethod
 	KFInterp_Linear,
 	KFInterp_Spline
 };
-
-const std::set<EBoneID> EmptyBoneMask;
 
 
 class Animation
@@ -48,7 +48,7 @@ public:
 	int getFrameRate() const;
 	void setFrameRate(int frameRate);
 
-	void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const std::set<EBoneID> boneMask=EmptyBoneMask) const;
+	void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const BoneMask& boneMask=default_bone_mask) const;
 
 	void computeAnimationBounds(float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ) const;
 
