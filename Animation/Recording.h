@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Animation.h"
+#include "AnimationTypes.h"
 
 #include <memory>
 #include <string>
 
 class KinectDevice;
+class Animation;
+class Skeleton;
 
 class Recording
 {
@@ -14,7 +16,8 @@ public:
 	~Recording();
 
 	void update(float delta);
-	void apply(Skeleton *skeleton, float time, const std::set<EBoneID>& boneMask=default_bone_mask);
+	void apply(Skeleton *skeleton, float time, const BoneMask& boneMask=default_bone_mask);
+	void apply(Skeleton *skeleton, const BoneMask& boneMask=default_bone_mask);
 
 	void showBonePaths();
 	void hideBonePaths();
@@ -22,10 +25,20 @@ public:
 	void startPlayback();
 	void stopPlayback();
 
+	void resetPlaybackTime();
+	void setPlaybackTime(float t);
+	void setPlaybackDelta(float dt);
+	float getPlaybackTime() const;
+
+	void playbackNextFrame();
+	void playbackPreviousFrame();
+
 	void startRecording();
 	void stopRecording();
+	void clearRecording();
 
 	Animation *getAnimation();
+	float getAnimationLength() const;
 
 private:
 	void updateRecording(float delta);
@@ -56,5 +69,9 @@ inline void Recording::startPlayback()  { playback  = true;  }
 inline void Recording::stopPlayback()   { playback  = false; }
 inline void Recording::startRecording() { recording = true;  }
 inline void Recording::stopRecording()  { recording = false; }
+
+inline void Recording::resetPlaybackTime() { playbackTime = 0.f; }
+inline void Recording::setPlaybackDelta(float dt) { playbackDelta = dt; }
+inline float Recording::getPlaybackTime() const { return playbackTime; }
 
 inline Animation *Recording::getAnimation() { return animation.get(); }

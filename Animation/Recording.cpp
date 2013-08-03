@@ -1,5 +1,7 @@
 #include "Recording.h"
 #include "Skeleton.h"
+#include "Animation.h"
+#include "AnimationTypes.h"
 #include "TransformKeyFrame.h"
 #include "BoneAnimationTrack.h"
 #include "Kinect/KinectDevice.h"
@@ -34,18 +36,26 @@ void Recording::update( float delta )
 	updatePlayback(delta);
 }
 
-void Recording::apply( Skeleton *skeleton, float time, const std::set<EBoneID>& boneMask/*=EmptyBoneMask*/ )
+void Recording::apply( Skeleton *skeleton, float time, const BoneMask& boneMask/*=default_bone_mask*/ )
 {
-	animation->apply(skeleton, time, 1.f, 1.f, boneMask);
+	if (getAnimationLength() > 0.f) {
+		animation->apply(skeleton, time, 1.f, 1.f, boneMask);
+	}
+}
+
+void Recording::apply( Skeleton *skeleton, const BoneMask& boneMask/*=default_bone_mask*/ )
+{
+	if (getAnimationLength() > 0.f) {
+		animation->apply(skeleton, playbackTime, 1.f, 1.f, boneMask);
+	}
 }
 
 void Recording::updateRecording( float delta )
 {
-	// Can't save if there's nothing to save to
-	if (nullptr == animation) return;
+	if (!recording) return;
 
 	// Update animation timer for this new keyframe
-	recordingTime += delta;
+	recordingTime += recordingDelta; //delta;
 	size_t numKeyFrames = saveKeyFrame(recordingTime);
 
 	//if (layering) {
@@ -59,9 +69,9 @@ void Recording::updateRecording( float delta )
 	//}
 
 	// Update gui label text
-	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
-		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n";
-	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(text));
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(
+		  "Saved " + std::to_string(numKeyFrames) + " key frames\n"
+		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n" ));
 }
 
 void Recording::updatePlayback( float delta )
@@ -80,13 +90,13 @@ size_t Recording::saveKeyFrame(float now)
 	if (nullptr == animation) return 0;
 
 	// Get the Kinect skeleton data if there is any
-	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
-	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
+	const auto& skeletonFrame    = kinect.getSkeletonFrame();
+	const auto *skeletonData     = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+	const auto *boneOrientations = kinect.getOrientations();
 	if (nullptr == skeletonData) return 0;
 
 	// Update all bone tracks with a new keyframe
-	BoneAnimationTrack *track = nullptr;
+	BoneAnimationTrack *track   = nullptr;
 	TransformKeyFrame *keyFrame = nullptr;
 	size_t numKeyFrames = 0;
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
@@ -97,6 +107,7 @@ size_t Recording::saveKeyFrame(float now)
 		if (nullptr == keyFrame) continue;
 
 		const Vector4& p = skeletonData->SkeletonPositions[boneID];
+		// TODO : save both absolute rotation and hierarchical rotation
 		const Vector4& q = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
 		keyFrame->setTranslation(glm::vec3(p.x, p.y, p.z));
 		keyFrame->setRotation(glm::quat(q.w, q.x, q.y, q.z));
@@ -107,3 +118,40 @@ size_t Recording::saveKeyFrame(float now)
 
 	return numKeyFrames;
 }
+
+void Recording::clearRecording()
+{
+	animation->deleteAllBoneTrack();
+
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animation->createBoneTrack(boneID);
+	}
+
+	playback  = false;
+	recording = false;
+
+	playbackTime  = 0.f;
+	recordingTime = 0.f;
+}
+
+void Recording::setPlaybackTime( float t )
+{
+	playbackTime = glm::clamp<float>(t, 0.f, animation->getLength());
+}
+
+void Recording::playbackNextFrame() {
+	const float length = animation->getLength();
+	playbackTime += playbackDelta;
+	if (playbackTime > length) {
+		playbackTime = length;
+	}
+}
+
+void Recording::playbackPreviousFrame() {
+	playbackTime -= playbackDelta;
+	if (playbackTime < 0.f) {
+		playbackTime = 0.f;
+	}
+}
+
+float Recording::getAnimationLength() const { return ((nullptr == animation) ? 0.f : animation->getLength()); }

@@ -64,10 +64,9 @@ private:
 	std::unique_ptr<Skeleton>  skeleton;
 
 	BoneMask boneMask;
-	Animation *currentAnimation;
-	std::map< std::string, std::unique_ptr<Animation> > animLayer;
 
-	std::list< std::unique_ptr<Recording> > recordings;
+	Recording *currentRecording;
+	std::map< std::string, std::unique_ptr<Recording> > recordings;
 
 	// Message processing methods ----------------------------
 	void registerMessageHandlers();
