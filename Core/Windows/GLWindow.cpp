@@ -126,7 +126,7 @@ void GLWindow::update()
 	currentRecording->apply(skeleton.get());
 
 	// Update gui playback progress bar
-	const float totalLength = currentRecording->getAnimation()->getLength();
+	const float totalLength = currentRecording->getAnimationLength();
 	const float currentTime = currentRecording->getPlaybackTime();
 	const float progress = (totalLength == 0.f) ? 0.f : currentTime / totalLength;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
@@ -325,33 +325,25 @@ void GLWindow::updateTextures()
 
 void GLWindow::updateRecording()
 {
-	// -------------------------------------------------------------------------
-	// -------------------------------------------------------------------------
-	// TODO : switch from currentAnimation to currentRecording -----------------
-	// -------------------------------------------------------------------------
-	// -------------------------------------------------------------------------
-
 	// Select recording to save keyframe to
 	Recording *record = nullptr;
 	if (recording) {
 		record = recordings["base"].get();
 	} else if (layering) {
 		record = currentRecording;
+		record->startRecording();
 	}
 	if (nullptr == record) return;
 
-	// Update animation timer for this new keyframe
-	animTimer += app.getDeltaTime();
-	const float now = animTimer.asSeconds();
-
-	record->update(now);
-	size_t numKeyFrames = record->getAnimation()->getBoneTrack(HEAD)->getNumKeyFrames();
-	//size_t numKeyFrames = saveKeyFrame(now, record->getAnimation());
+	// Save a new keyframe 
+	record->update(app.getDeltaTime().asSeconds());
 
 	if (layering) {
+		const float now = record->getAnimationLength();
 		if (now < recordings["base"]->getAnimationLength()) {
-			// TODO : blend 'current' and 'base' recordings into 'blend'
-			saveBlendKeyFrame(now, recordings["blend"]->getAnimation());
+			// Save a blended keyframe between 'base' and current layer
+			// TODO : get current mapping mode from UI
+			recordings["blend"]->saveBlendFrame(now, *recordings["base"], *record, boneMask, ELayerMappingMode::MAP_ADDITIVE);
 		} else {
 			msg::StopRecordingMessage msg;
 			process(&msg);
@@ -360,8 +352,7 @@ void GLWindow::updateRecording()
 	}
 
 	// Update gui label text
-	const std::string text = "Saved " + std::to_string(numKeyFrames) + " key frames\n"
-		+ "Mem usage: " + std::to_string(record->getAnimation()->_calcMemoryUsage()) + " bytes\n";
+	const std::string text = "Mem usage: " + std::to_string(record->getAnimation()->_calcMemoryUsage()) + " bytes\n";
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(text));
 }
 
@@ -399,90 +390,6 @@ void GLWindow::recordLayer()
 
 	// Update ui layer combo box
 	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
-}
-
-/************************************************************************/
-/************************************************************************/
-/* TODO : can probably remove, should be handled in Recording::update() */
-/************************************************************************/
-/************************************************************************/
-size_t GLWindow::saveKeyFrame( float now, Animation *animation)
-{
-	if (nullptr == animation) {
-		return 0;
-	}
-
-	// Get the Kinect skeleton data if there is any
-	const KinectDevice& kinect = app.getKinect();
-	const NUI_SKELETON_FRAME& skeletonFrame = kinect.getSkeletonFrame();
-	const NUI_SKELETON_DATA *skeletonData = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-	const NUI_SKELETON_BONE_ORIENTATION *boneOrientations = kinect.getOrientations();
-	if (nullptr == skeletonData) return 0;
-
-	// Update all bone tracks with a new keyframe
-	BoneAnimationTrack *track = nullptr;
-	TransformKeyFrame *keyFrame = nullptr;
-	size_t numKeyFrames = 0;
-	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		track = animation->getBoneTrack(boneID);
-		if (nullptr == track) continue;
-
-		keyFrame = static_cast<TransformKeyFrame*>(track->createKeyFrame(now));
-		if (nullptr == keyFrame) continue;
-
-		const Vector4& pos = skeletonData->SkeletonPositions[boneID];
-		const Vector4& orient = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
-		//const Vector4& orient = boneOrientations[boneID].hierarchicalRotation.rotationQuaternion;
-		keyFrame->setTranslation(glm::vec3(pos.x, pos.y, pos.z));
-		keyFrame->setRotation(glm::quat(orient.w, orient.x, orient.y, orient.z));
-		keyFrame->setScale(glm::vec3(1,1,1));
-
-		numKeyFrames += track->getNumKeyFrames();
-	}
-
-	return numKeyFrames;
-}
-
-void GLWindow::saveBlendKeyFrame( float now, Animation *animation )
-{
-	// -------------------------------------------------------------------------
-	// -------------------------------------------------------------------------
-	// TODO : switch from currentAnimation to currentRecording -----------------
-	// -------------------------------------------------------------------------
-	// -------------------------------------------------------------------------
-
-	/*
-	Animation *base = animLayer["base"].get();
-	Animation *blend = animLayer["blend"].get();
-	BoneAnimationTrack *baseTrack = nullptr;
-	BoneAnimationTrack *animTrack = nullptr;
-	BoneAnimationTrack *blendTrack = nullptr;
-	TransformKeyFrame baseKeyFrame(now, 0);
-	TransformKeyFrame animKeyFrame1(now, 0);
-	TransformKeyFrame animKeyFrame2(now - playbackDelta, 0);
-
-	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		baseTrack = base->getBoneTrack(boneID);
-		animTrack = currentAnimation->getBoneTrack(boneID);
-		blendTrack = blend->getBoneTrack(boneID);
-		if (nullptr == baseTrack || nullptr == animTrack || nullptr == blendTrack) continue;
-
-		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(now));
-		if (nullptr == blendTKF) continue;
-
-		baseTrack->getInterpolatedKeyFrame(now, &baseKeyFrame);
-		animTrack->getInterpolatedKeyFrame(now, &animKeyFrame1);
-		animTrack->getInterpolatedKeyFrame(now - playbackDelta, &animKeyFrame2);
-
-		const glm::vec3 basePos(baseKeyFrame.getTranslation());
-		const glm::vec3 animPos1(animKeyFrame1.getTranslation());
-		const glm::vec3 animPos2(animKeyFrame2.getTranslation());
-
-		blendTKF->setTranslation(glm::vec3(basePos + (animPos1 - animPos2)));
-		blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
-		blendTKF->setScale(glm::vec3(1,1,1));
-	}
-	*/
 }
 
 void GLWindow::loadTextures()
@@ -552,7 +459,6 @@ void GLWindow::process( const msg::StopRecordingMessage *message )
 	recording = false;
 	layering = false;
 
-	// TODO : how to handle layering flag?
 	if (nullptr != currentRecording) {
 		currentRecording->stopRecording();
 	}

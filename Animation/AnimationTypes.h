@@ -4,6 +4,13 @@
 #include <set>
 
 
+enum ELayerMappingMode
+{
+	MAP_ABSOLUTE,
+	MAP_ADDITIVE,
+	MAP_TRAJECTORY_RELATIVE
+};
+
 // Same order as Kinect NUI_SKELETON_POSITION_*
 enum EBoneID
 {

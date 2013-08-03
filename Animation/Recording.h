@@ -19,6 +19,12 @@ public:
 	void apply(Skeleton *skeleton, float time, const BoneMask& boneMask=default_bone_mask);
 	void apply(Skeleton *skeleton, const BoneMask& boneMask=default_bone_mask);
 
+	void saveBlendFrame( float time
+	                   , const Recording& base
+	                   , const Recording& layer
+	                   , const BoneMask& boneMask=default_bone_mask
+	                   , const ELayerMappingMode& mappingMode=ELayerMappingMode::MAP_ADDITIVE );
+
 	void showBonePaths();
 	void hideBonePaths();
 
@@ -38,6 +44,7 @@ public:
 	void clearRecording();
 
 	Animation *getAnimation();
+	const Animation *getAnimation() const;
 	float getAnimationLength() const;
 
 private:
@@ -75,3 +82,4 @@ inline void Recording::setPlaybackDelta(float dt) { playbackDelta = dt; }
 inline float Recording::getPlaybackTime() const { return playbackTime; }
 
 inline Animation *Recording::getAnimation() { return animation.get(); }
+inline const Animation *Recording::getAnimation() const { return animation.get(); }

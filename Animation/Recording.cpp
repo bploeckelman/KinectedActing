@@ -50,28 +50,70 @@ void Recording::apply( Skeleton *skeleton, const BoneMask& boneMask/*=default_bo
 	}
 }
 
+void Recording::saveBlendFrame( float time
+                              , const Recording& base
+                              , const Recording& layer
+                              , const BoneMask& boneMask/*=default_bone_mask */
+                              , const ELayerMappingMode& mappingMode/*=ELayerMappingMode::MAP_ADDITIVE*/ )
+{
+	const Animation *baseAnim  = base.getAnimation();
+	const Animation *layerAnim = layer.getAnimation();
+	BoneAnimationTrack *baseTrack  = nullptr;
+	BoneAnimationTrack *layerTrack = nullptr;
+	BoneAnimationTrack *blendTrack = nullptr;
+	TransformKeyFrame baseKeyFrame(time, 0);
+	TransformKeyFrame layerKeyFrame1(time, 0);
+	TransformKeyFrame layerKeyFrame2(time - playbackDelta, 0);
+
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		// If this boneID is not in boneMask, save the non-blended base keyframe
+		if (end(boneMask) == boneMask.find((EBoneID) boneID)) {
+			baseTrack = baseAnim->getBoneTrack(boneID);
+			blendTrack = animation->getBoneTrack(boneID);
+			if (nullptr == baseTrack || nullptr == blendTrack) continue;
+
+			TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
+			if (nullptr == blendTKF) continue;
+
+			baseTrack->getInterpolatedKeyFrame(time, blendTKF);
+
+			continue;
+		}
+
+		// Else this boneID is in boneMask, so save a blended keyframe
+		baseTrack  = baseAnim->getBoneTrack(boneID);
+		layerTrack = layerAnim->getBoneTrack(boneID);
+		blendTrack = animation->getBoneTrack(boneID);
+		if (nullptr == baseTrack || nullptr == layerTrack || nullptr == blendTrack) continue;
+
+		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
+		if (nullptr == blendTKF) continue;
+
+		baseTrack->getInterpolatedKeyFrame(time, &baseKeyFrame);
+		layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
+		layerTrack->getInterpolatedKeyFrame(time - playbackDelta, &layerKeyFrame2);
+
+		const glm::vec3 basePos(baseKeyFrame.getTranslation());
+		const glm::vec3 layerPos1(layerKeyFrame1.getTranslation());
+		const glm::vec3 layerPos2(layerKeyFrame2.getTranslation());
+
+		blendTKF->setTranslation(glm::vec3(basePos + (layerPos1 - layerPos2)));
+		blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
+		blendTKF->setScale(glm::vec3(1,1,1));
+	}
+}
+
 void Recording::updateRecording( float delta )
 {
 	if (!recording) return;
 
 	// Update animation timer for this new keyframe
-	recordingTime += recordingDelta; //delta;
-	size_t numKeyFrames = saveKeyFrame(recordingTime);
-
-	//if (layering) {
-	//	if (now < animLayer["base"]->getLength()) {
-	//		saveBlendKeyFrame(now, animLayer["blend"].get());
-	//	} else {
-	//		msg::StopRecordingMessage msg;
-	//		process(&msg);
-	//		MessageBoxA(NULL, "Done recording layer", "Done", MB_OK);
-	//	}
-	//}
+	recordingTime += recordingDelta;
+	saveKeyFrame(recordingTime);
 
 	// Update gui label text
 	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(
-		  "Saved " + std::to_string(numKeyFrames) + " key frames\n"
-		+ "Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n" ));
+		"Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n" ));
 }
 
 void Recording::updatePlayback( float delta )
