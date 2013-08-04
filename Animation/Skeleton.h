@@ -30,14 +30,18 @@ class Skeleton
 public:
 	static const BoneJointPairs jointPairs;
 
-	bool renderBones;
-	bool renderJoints;
-	bool renderOrientations;
+	bool render_bones;
+	bool render_joints;
+	bool render_orientations;
 
 	Skeleton();
 	~Skeleton();
 
 	void render() const;
+
+	void renderBones() const;
+	void renderJoints() const;
+	void renderOrientations() const;
 
 	Bone* getBone(unsigned short boneID);
 	const Bone* getBone(unsigned short boneID) const;
