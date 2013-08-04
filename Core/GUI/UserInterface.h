@@ -36,6 +36,8 @@ private:
 	void onRecordStartButtonClick();
 	void onRecordStopButtonClick();
 	void onRecordClearButtonClick();
+	void onRecordExportButtonClick();
+	void onSeatedModeEnabledButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
 	void onPlaybackProgressBarClick();
 	void onPlaybackFirstButtonClick();
@@ -47,7 +49,9 @@ private:
 	void onPlaybackDeltaScaleClick();
 	void onStartLayeringButtonClick();
 	void onAnimLayersComboBoxSelect();
+	void onMappingModeComboBoxSelect();
 	void onRenderPathCheckButtonClick();
+	void onBoneMaskToggleButtonClick();
 
 private:
 	sfg::SFGUI sfgui;
@@ -64,12 +68,14 @@ private:
 	sfg::Button::Ptr startKinectButton;
 	sfg::Button::Ptr stopKinectButton;
 
+	sfg::Button::Ptr seatedModeEnabledButton;
 	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
 
 	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;
 	sfg::Button::Ptr recordStopButton;
 	sfg::Button::Ptr recordClearButton;
+	sfg::Button::Ptr recordExportButton;
 
 	sfg::Label::Ptr playbackLabel;
 	sfg::ProgressBar::Ptr playbackProgressBar;
@@ -83,9 +89,35 @@ private:
 
 	sfg::Button::Ptr startLayeringButton;
 	sfg::ComboBox::Ptr animLayersComboBox;
+	sfg::ComboBox::Ptr mappingModesComboBox;
 
 	sfg::CheckButton::Ptr renderPathCheckButton;
+
 	// TODO : add check/toggle buttons for all joints
+	sfg::ToggleButton::Ptr headToggleButton;
+	sfg::ToggleButton::Ptr shoulderCenterToggleButton;
+	sfg::ToggleButton::Ptr spineToggleButton;
+	sfg::ToggleButton::Ptr hipCenterToggleButton;
+
+	sfg::ToggleButton::Ptr shoulderLeftToggleButton;
+	sfg::ToggleButton::Ptr elbowLeftToggleButton;
+	sfg::ToggleButton::Ptr wristLeftToggleButton;
+	sfg::ToggleButton::Ptr handLeftToggleButton;
+
+	sfg::ToggleButton::Ptr shoulderRightToggleButton;
+	sfg::ToggleButton::Ptr elbowRightToggleButton;
+	sfg::ToggleButton::Ptr wristRightToggleButton;
+	sfg::ToggleButton::Ptr handRightToggleButton;
+
+	sfg::ToggleButton::Ptr hipLeftToggleButton;
+	sfg::ToggleButton::Ptr kneeLeftToggleButton;
+	sfg::ToggleButton::Ptr ankleLeftToggleButton;
+	sfg::ToggleButton::Ptr footLeftToggleButton;
+
+	sfg::ToggleButton::Ptr hipRightToggleButton;
+	sfg::ToggleButton::Ptr kneeRightToggleButton;
+	sfg::ToggleButton::Ptr ankleRightToggleButton;
+	sfg::ToggleButton::Ptr footRightToggleButton;
 
 	sfg::Label::Ptr infoLabel;
 

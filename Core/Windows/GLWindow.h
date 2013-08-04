@@ -2,17 +2,20 @@
 #include "Window.h"
 #include "Scene/Camera.h"
 #include "Core/Messages/Messages.h"
+#include "Animation/AnimationTypes.h"
 
 #include <SFML/System/Time.hpp>
 
 #include <string>
 #include <memory>
+#include <list>
 #include <map>
 
 namespace tdogl { class Texture; }
 
 class Animation;
 class Skeleton;
+class Recording;
 
 
 class GLWindow : public Window, msg::Handler
@@ -34,8 +37,6 @@ private:
 	void updateTextures();
 	void recordLayer();
 	void loadTextures();
-	size_t saveKeyFrame(float now, Animation *animation);
-	void saveBlendKeyFrame(float now, Animation *animation);
 
 private:
 	bool liveSkeletonVisible;
@@ -60,8 +61,11 @@ private:
 
 	std::unique_ptr<Skeleton>  skeleton;
 
-	Animation *currentAnimation;
-	std::map< std::string, std::unique_ptr<Animation> > animLayer;
+	BoneMask boneMask;
+	ELayerMappingMode mappingMode;
+
+	Recording *currentRecording;
+	std::map< std::string, std::unique_ptr<Recording> > recordings;
 
 	// Message processing methods ----------------------------
 	void registerMessageHandlers();
@@ -70,6 +74,7 @@ public:
 	void process(const msg::StartRecordingMessage     *message);
 	void process(const msg::StopRecordingMessage      *message);
 	void process(const msg::ClearRecordingMessage     *message);
+	void process(const msg::ExportSkeletonBVHMessage  *message);
 	void process(const msg::ShowLiveSkeletonMessage   *message);
 	void process(const msg::HideLiveSkeletonMessage   *message);
 	void process(const msg::PlaybackFirstFrameMessage *message);
@@ -81,7 +86,9 @@ public:
 	void process(const msg::PlaybackSetDeltaMessage   *message);
 	void process(const msg::StartLayeringMessage      *message);
 	void process(const msg::LayerSelectMessage        *message);
+	void process(const msg::MappingModeSelectMessage  *message);
 	void process(const msg::ShowBonePathMessage       *message);
 	void process(const msg::HideBonePathMessage       *message);
+	void process(const msg::UpdateBoneMaskMessage     *message);
 
 };

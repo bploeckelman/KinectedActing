@@ -94,7 +94,10 @@
   <ItemGroup>
     <ClCompile Include="Animation\Animation.cpp" />
     <ClCompile Include="Animation\AnimationTrack.cpp" />
+    <ClCompile Include="Animation\AnimationTypes.cpp" />
+    <ClCompile Include="Animation\AnimationUtils.cpp" />
     <ClCompile Include="Animation\BoneAnimationTrack.cpp" />
+    <ClCompile Include="Animation\Recording.cpp" />
     <ClCompile Include="Animation\Skeleton.cpp" />
     <ClCompile Include="Core\App.cpp" />
     <ClCompile Include="Core\GUI\UserInterface.cpp" />
@@ -121,8 +124,11 @@
   <ItemGroup>
     <ClInclude Include="Animation\Animation.h" />
     <ClInclude Include="Animation\AnimationTrack.h" />
+    <ClInclude Include="Animation\AnimationTypes.h" />
+    <ClInclude Include="Animation\AnimationUtils.h" />
     <ClInclude Include="Animation\BoneAnimationTrack.h" />
     <ClInclude Include="Animation\KeyFrame.h" />
+    <ClInclude Include="Animation\Recording.h" />
     <ClInclude Include="Animation\Skeleton.h" />
     <ClInclude Include="Animation\TransformKeyFrame.h" />
     <ClInclude Include="Core\App.h" />

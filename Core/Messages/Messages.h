@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Animation/AnimationTypes.h"
+
 #include <map>
 
 
@@ -25,12 +27,14 @@ namespace msg
 		, STOP_KINECT_DEVICE
 		, SHOW_LIVE_SKELETON
 		, HIDE_LIVE_SKELETON
+		, TOGGLE_SEATED_MODE
 		// Skeleton recording controls
 		, START_SKELETON_RECORDING
 		, STOP_SKELETON_RECORDING
 		, CLEAR_SKELETON_RECORDING
 		, SAVE_SKELETON_RECORDING
 		, LOAD_SKELETON_RECORDING
+		, EXPORT_SKELETON_BVH
 		, SET_RECORDING_LABEL
 		// Skeleton playback controls
 		, PLAYBACK_START
@@ -45,10 +49,12 @@ namespace msg
 		, START_LAYERING
 		, LAYER_SELECT
 		, ADD_LAYER_ITEM
+		, MAPPING_MODE_SELECT
 		// Misc
 		, SET_INFO_LABEL
 		, SHOW_BONE_PATH
 		, HIDE_BONE_PATH
+		, UPDATE_BONE_MASK
 	};
 
 	// ------------------------------------------------------------------------
@@ -98,6 +104,11 @@ namespace msg
 	public: ClearRecordingMessage() : Message(CLEAR_SKELETON_RECORDING) {}
 	};
 	// ------------------------------------------------------------------------
+	class ExportSkeletonBVHMessage : public Message
+	{
+	public: ExportSkeletonBVHMessage() : Message(EXPORT_SKELETON_BVH) {}
+	};
+	// ------------------------------------------------------------------------
 	class SetRecordingLabelMessage : public Message
 	{
 	public:
@@ -116,6 +127,11 @@ namespace msg
 	class HideLiveSkeletonMessage : public Message
 	{
 	public: HideLiveSkeletonMessage() : Message(HIDE_LIVE_SKELETON) {}
+	};
+	// ------------------------------------------------------------------------
+	class ToggleSeatedModeMessage : public Message
+	{
+	public: ToggleSeatedModeMessage() : Message(TOGGLE_SEATED_MODE) {}
 	};
 	// ------------------------------------------------------------------------
 	class PlaybackFirstFrameMessage : public Message
@@ -183,6 +199,16 @@ namespace msg
 		const std::string layerName;
 	};
 	// ------------------------------------------------------------------------
+	class MappingModeSelectMessage : public Message
+	{
+	public:
+		MappingModeSelectMessage(const unsigned int mode)
+			: Message(MAPPING_MODE_SELECT)
+			, mode(mode)
+		{}
+		const unsigned int mode;
+	};
+	// ------------------------------------------------------------------------
 	class SetInfoLabelMessage : public Message
 	{
 	public:
@@ -213,6 +239,16 @@ namespace msg
 	public: HideBonePathMessage() : Message(HIDE_BONE_PATH) {}
 	};
 	// ------------------------------------------------------------------------
+	class UpdateBoneMaskMessage : public Message
+	{
+	public:
+		UpdateBoneMaskMessage(const BoneMask& boneMask)
+			: Message(UPDATE_BONE_MASK)
+			, boneMask(boneMask)
+		{}
+		const BoneMask boneMask;
+	};
+	// ------------------------------------------------------------------------
 	//class Message : public Message
 	//{
 	//public: Message() : Message() {}
@@ -234,9 +270,11 @@ namespace msg
 		virtual void process(const StartRecordingMessage    *message) {}
 		virtual void process(const StopRecordingMessage     *message) {}
 		virtual void process(const ClearRecordingMessage    *message) {}
+		virtual void process(const ExportSkeletonBVHMessage *message) {}
 		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
+		virtual void process(const ToggleSeatedModeMessage  *message) {}
 		virtual void process(const PlaybackFirstFrameMessage *message) {}
 		virtual void process(const PlaybackLastFrameMessage  *message) {}
 		virtual void process(const PlaybackNextFrameMessage  *message) {}
@@ -248,9 +286,11 @@ namespace msg
 		virtual void process(const StartLayeringMessage       *message) {}
 		virtual void process(const LayerSelectMessage         *message) {}
 		virtual void process(const AddLayerItemMessage        *message) {}
+		virtual void process(const MappingModeSelectMessage   *message) {}
 		virtual void process(const SetInfoLabelMessage        *message) {}
 		virtual void process(const ShowBonePathMessage        *message) {}
 		virtual void process(const HideBonePathMessage        *message) {}
+		virtual void process(const UpdateBoneMaskMessage      *message) {}
 	};
 
 
