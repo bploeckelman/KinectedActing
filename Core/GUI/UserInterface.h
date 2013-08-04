@@ -49,6 +49,7 @@ private:
 	void onPlaybackDeltaScaleClick();
 	void onStartLayeringButtonClick();
 	void onAnimLayersComboBoxSelect();
+	void onMappingModeComboBoxSelect();
 	void onRenderPathCheckButtonClick();
 	void onBoneMaskToggleButtonClick();
 
@@ -88,6 +89,7 @@ private:
 
 	sfg::Button::Ptr startLayeringButton;
 	sfg::ComboBox::Ptr animLayersComboBox;
+	sfg::ComboBox::Ptr mappingModesComboBox;
 
 	sfg::CheckButton::Ptr renderPathCheckButton;
 

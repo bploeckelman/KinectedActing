@@ -49,6 +49,7 @@ namespace msg
 		, START_LAYERING
 		, LAYER_SELECT
 		, ADD_LAYER_ITEM
+		, MAPPING_MODE_SELECT
 		// Misc
 		, SET_INFO_LABEL
 		, SHOW_BONE_PATH
@@ -198,6 +199,16 @@ namespace msg
 		const std::string layerName;
 	};
 	// ------------------------------------------------------------------------
+	class MappingModeSelectMessage : public Message
+	{
+	public:
+		MappingModeSelectMessage(const unsigned int mode)
+			: Message(MAPPING_MODE_SELECT)
+			, mode(mode)
+		{}
+		const unsigned int mode;
+	};
+	// ------------------------------------------------------------------------
 	class SetInfoLabelMessage : public Message
 	{
 	public:
@@ -275,6 +286,7 @@ namespace msg
 		virtual void process(const StartLayeringMessage       *message) {}
 		virtual void process(const LayerSelectMessage         *message) {}
 		virtual void process(const AddLayerItemMessage        *message) {}
+		virtual void process(const MappingModeSelectMessage   *message) {}
 		virtual void process(const SetInfoLabelMessage        *message) {}
 		virtual void process(const ShowBonePathMessage        *message) {}
 		virtual void process(const HideBonePathMessage        *message) {}

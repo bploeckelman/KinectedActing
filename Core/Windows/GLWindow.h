@@ -62,6 +62,7 @@ private:
 	std::unique_ptr<Skeleton>  skeleton;
 
 	BoneMask boneMask;
+	ELayerMappingMode mappingMode;
 
 	Recording *currentRecording;
 	std::map< std::string, std::unique_ptr<Recording> > recordings;
@@ -85,6 +86,7 @@ public:
 	void process(const msg::PlaybackSetDeltaMessage   *message);
 	void process(const msg::StartLayeringMessage      *message);
 	void process(const msg::LayerSelectMessage        *message);
+	void process(const msg::MappingModeSelectMessage  *message);
 	void process(const msg::ShowBonePathMessage       *message);
 	void process(const msg::HideBonePathMessage       *message);
 	void process(const msg::UpdateBoneMaskMessage     *message);

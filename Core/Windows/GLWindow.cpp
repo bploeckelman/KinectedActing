@@ -69,6 +69,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, currentRecording(nullptr)
 	, recordings()
 	, boneMask(default_bone_mask)
+	, mappingMode(ELayerMappingMode::MAP_ADDITIVE)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);
@@ -342,8 +343,7 @@ void GLWindow::updateRecording()
 		const float now = record->getAnimationLength();
 		if (now < recordings["base"]->getAnimationLength()) {
 			// Save a blended keyframe between 'base' and current layer
-			// TODO : get current mapping mode from UI
-			recordings["blend"]->saveBlendFrame(now, *recordings["base"], *record, boneMask, ELayerMappingMode::MAP_ADDITIVE);
+			recordings["blend"]->saveBlendFrame(now, *recordings["base"], *record, boneMask, mappingMode);
 		} else {
 			msg::StopRecordingMessage msg;
 			process(&msg);
@@ -440,6 +440,7 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_SET_DELTA,       this);
 	msg::gDispatcher.registerHandler(msg::START_LAYERING,           this);
 	msg::gDispatcher.registerHandler(msg::LAYER_SELECT,             this);
+	msg::gDispatcher.registerHandler(msg::MAPPING_MODE_SELECT,      this);
 	msg::gDispatcher.registerHandler(msg::SHOW_BONE_PATH,           this);
 	msg::gDispatcher.registerHandler(msg::HIDE_BONE_PATH,           this);
 	msg::gDispatcher.registerHandler(msg::UPDATE_BONE_MASK,         this);
@@ -577,6 +578,11 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 		currentRecording->apply(skeleton.get());
 		playbackRunning = false;
 	}
+}
+
+void GLWindow::process( const msg::MappingModeSelectMessage *message )
+{
+	mappingMode = (ELayerMappingMode) message->mode;
 }
 
 void GLWindow::process( const msg::ShowBonePathMessage *message )
