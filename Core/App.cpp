@@ -22,6 +22,7 @@ App::App()
 	msg::gDispatcher.registerHandler(msg::QUIT_PROGRAM,             this);
 	msg::gDispatcher.registerHandler(msg::START_KINECT_DEVICE,      this);
 	msg::gDispatcher.registerHandler(msg::STOP_KINECT_DEVICE,       this);
+	msg::gDispatcher.registerHandler(msg::TOGGLE_SEATED_MODE,       this);
 }
 
 App::~App()
@@ -68,4 +69,9 @@ void App::process( const msg::StopKinectDeviceMessage* message )
 {
 	kinect.shutdown();
 	guiWindow.getGUI().setKinectIdLabel("[ offline ]");
+}
+
+void App::process( const msg::ToggleSeatedModeMessage *message )
+{
+	kinect.toggleSeatedMode();
 }

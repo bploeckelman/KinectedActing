@@ -14,11 +14,11 @@
 
 using namespace std;
 
-// Type conversion helper functions
-const string bstr_to_std_string(const BSTR bstr);
-const glm::mat4 matrix4_to_mat4(const Matrix4& m);
+const DWORD seated_mode_enabled = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
 
-const DWORD skeleton_tracking_flags = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
+const NUI_TRANSFORM_SMOOTH_PARAMETERS lowSmoothing  = { 0.5f, 0.5f, 0.5f, 0.05f, 0.04f };
+const NUI_TRANSFORM_SMOOTH_PARAMETERS medSmoothing  = { 0.5f, 0.1f, 0.5f, 0.1f , 0.1f  };
+const NUI_TRANSFORM_SMOOTH_PARAMETERS highSmoothing = { 0.7f, 0.3f, 1.0f, 1.0f , 1.0f  };
 
 
 KinectDevice::KinectDevice()
@@ -31,7 +31,9 @@ KinectDevice::KinectDevice()
 	, liveSkeleton(new Skeleton())
 	, skeletonFrame()
 	, skeletonData(nullptr)
-	, skeletonTrackingFlags(skeleton_tracking_flags)
+	, skeletonSmoothParams(medSmoothing)
+	, skeletonTrackingFlags(seated_mode_enabled)
+	, seatedMode(true)
 	, nextColorFrameEvent()
 	, nextDepthFrameEvent()
 	, nextSkeletonFrameEvent()
@@ -112,7 +114,9 @@ bool KinectDevice::init()
 	}
 
 	// Get the device id for this sensor
-	deviceId = bstr_to_std_string(sensor->NuiDeviceConnectionId());
+	BSTR bstr = sensor->NuiDeviceConnectionId();
+	const wstring wstr(bstr, SysStringLen(bstr));
+	deviceId.assign(begin(wstr), end(wstr));
 	//stringstream ss;
 	//ss << "Initialized Kinect in " << timer.getElapsedTime().asSeconds() << " seconds.\n"
 	//   << "Connection id: [" << deviceId << "]";
@@ -151,9 +155,11 @@ void KinectDevice::update()
 void KinectDevice::toggleSeatedMode()
 {
 	if (isSeatedModeEnabled()) {
-		skeletonTrackingFlags |= ~NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		skeletonTrackingFlags = 0;
+		seatedMode = false;
 	} else {
-		skeletonTrackingFlags |= NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		skeletonTrackingFlags = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
+		seatedMode = true;
 	}
 
 	HRESULT hr = sensor->NuiSkeletonTrackingEnable(nextSkeletonFrameEvent, skeletonTrackingFlags);
@@ -282,6 +288,8 @@ HRESULT KinectDevice::processSkeletonData()
 		return hr;
 	}
 
+	sensor->NuiTransformSmooth(&skeletonFrame, &skeletonSmoothParams);
+
 	// Get skeleton data for the first tracked skeleton
 	for (auto data : skeletonFrame.SkeletonData) {
 		if (data.eTrackingState == NUI_SKELETON_TRACKED) {
@@ -320,56 +328,6 @@ HRESULT KinectDevice::processSkeletonData()
 	return hr;
 }
 
-//{
-	// TODO : how to timestamp?
-
-	// Get data for the first tracked skeleton
-	//const NUI_SKELETON_DATA *skeletonData = nullptr;
-	//for (auto i = 0; i < NUI_SKELETON_COUNT; ++i) {
-	//	if (skeletonFrame.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED) {
-	//		skeletonData = &skeletonFrame.SkeletonData[i];
-	//		break;
-	//	}
-	//}
-	//if (skeletonData == nullptr) {
-	//	//cerr << "Failed to find tracked skeleton from Kinect sensor.\n";
-	//	return;
-	//}
-
-	// Set filtering level
-	//switch (skeleton.getFilterLevel()) {
-	//	case OFF:    break;
-	//	case LOW:    NuiTransformSmooth(&skeletonFrame, constants::joint_smooth_params_low);  break;
-	//	case MEDIUM: NuiTransformSmooth(&skeletonFrame, constants::joint_smooth_params_med);  break;
-	//	case HIGH:   NuiTransformSmooth(&skeletonFrame, constants::joint_smooth_params_high); break;
-	//}
-
-	// Get bone orientations for this skeleton's joints
-	//NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
-	//HRESULT hr = NuiSkeletonCalculateBoneOrientations(skeletonData, boneOrientations);
-	//if (FAILED(hr)) {
-	//	cerr << "Kinect failed to calculate bone orientations.\n";
-	//}
-
-	// For each joint type...
-	//for (auto i = 0; i < NUI_SKELETON_POSITION_COUNT; ++i) {
-	//	// Get joint data in Kinect API form
-	//	const NUI_SKELETON_POSITION_INDEX   positionIndex   = toPositionIndex(i);
-	//	const NUI_SKELETON_BONE_ORIENTATION boneOrientation = boneOrientations[positionIndex];
-	//	const NUI_SKELETON_POSITION_TRACKING_STATE positionTrackingState = skeletonData->eSkeletonPositionTrackingState[positionIndex];
-	//	const Vector4& position = skeletonData->SkeletonPositions[positionIndex];
-	//	const Matrix4& matrix4 = boneOrientation.absoluteRotation.rotationMatrix;
-
-	//	// Update the joint frame entry for this joint type
-	//	Joint& joint = skeleton.getCurrentJointFrame().joints[toJointType(i)];
-	//	joint.position      = glm::vec3(position.x, position.y, position.z);
-	//	joint.orientation   = toMat4(matrix4);;
-	//	joint.type          = toJointType(i);
-	//	joint.trackingState = static_cast<ETrackingState>(positionTrackingState);
-	//}
-//}
-
-
 const NUI_SKELETON_DATA *KinectDevice::getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame)
 {
 	for (int i = 0; i < NUI_SKELETON_COUNT; ++i) {
@@ -380,26 +338,4 @@ const NUI_SKELETON_DATA *KinectDevice::getFirstTrackedSkeletonData(const NUI_SKE
 	}
 
 	return nullptr;
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-// TODO : move these type conversion helpers to a utility namespace
-
-const string bstr_to_std_string( const BSTR bstr )
-{
-	const wstring wstr(bstr, SysStringLen(bstr));
-	string str; str.assign(wstr.begin(), wstr.end());
-	return str;
-}
-
-const glm::mat4 matrix4_to_mat4( const Matrix4& m )
-{
-	return glm::mat4(
-		  m.M11, m.M12, m.M13, m.M14
-		, m.M21, m.M22, m.M23, m.M24
-		, m.M31, m.M32, m.M33, m.M34
-		, m.M41, m.M42, m.M43, m.M44);
 }

@@ -1,6 +1,10 @@
 #include "Animation.h"
 #include "BoneAnimationTrack.h"
+#include "TransformKeyFrame.h"
 
+#include "Skeleton.h"
+
+#include <algorithm>
 
 
 Animation::Animation( unsigned short id, const std::string& name /*, AnimationSetPtr animSet*/ )
@@ -69,6 +73,23 @@ Animation::BoneTrackConstIterator Animation::getBoneTrackConstIterator() const
 	return begin(mBoneTracks);
 }
 
+void Animation::getPositions( unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime/*=-1.f*/ ) const
+{
+	if ( !hasBoneTrack(boneId) )
+		return;
+
+	const auto& track = mBoneTracks.at(boneId);
+	positions.clear();
+	positions.resize(track->getNumKeyFrames());
+
+	unsigned int i = 0;
+	for (const auto& keyframe : track->getKeyFrames()) {
+		if (lastTime == -1.f || keyframe->getTime() < lastTime) {
+			positions[i++] = static_cast<const TransformKeyFrame*>(keyframe)->getTranslation();
+		}
+	}
+}
+
 void Animation::setKFInterpolationMethod(KFInterpolationMethod interpMethod)
 {
 	mInterpMethod = interpMethod;
@@ -97,16 +118,15 @@ float Animation::getLength() const
 	return length;
 }
 
-void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const std::set<EBoneID> boneMask/*=EmptyBoneMask*/ ) const
+void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const BoneMask& boneMask/*=default_bone_mask*/ ) const
 {
 	assert(nullptr != skel);
 
 	// apply bone tracks
-	for(BoneTrackConstIterator bti = begin(mBoneTracks); bti != end(mBoneTracks); ++bti)
-	{
-		const BoneAnimationTrack& bt = *bti->second;
+	std::for_each(begin(boneMask), end(boneMask), [&](const EBoneID& boneID) {
+		const BoneAnimationTrack& bt = *mBoneTracks.at(boneID);
 		bt.apply(skel, time, weight, scale);
-	}
+	});
 }
 
 void Animation::computeAnimationBounds( float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ ) const

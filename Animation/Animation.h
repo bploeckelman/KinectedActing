@@ -1,6 +1,11 @@
 #pragma once
 
+#include "AnimationTypes.h"
+
+#include <glm/glm.hpp>
+
 #include <string>
+#include <vector>
 #include <map>
 #include <set>
 
@@ -12,8 +17,6 @@ enum KFInterpolationMethod
 	KFInterp_Linear,
 	KFInterp_Spline
 };
-
-const std::set<EBoneID> EmptyBoneMask;
 
 
 class Animation
@@ -39,6 +42,8 @@ public:
 	BoneAnimationTrack* getBoneTrack(unsigned short boneId) const;
 	BoneTrackIterator getBoneTrackIterator();
 	BoneTrackConstIterator getBoneTrackConstIterator() const;
+	const std::map<unsigned short, BoneAnimationTrack*>& getBoneTracks() const;
+	void getPositions(unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime=-1.f) const;
 
 	KFInterpolationMethod getKFInterpolationMethod() const;
 	void setKFInterpolationMethod(KFInterpolationMethod interpMethod);
@@ -47,7 +52,7 @@ public:
 	int getFrameRate() const;
 	void setFrameRate(int frameRate);
 
-	void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const std::set<EBoneID> boneMask=EmptyBoneMask) const;
+	void apply(Skeleton* skel, float time, float weight=1.f, float scale=1.f, const BoneMask& boneMask=default_bone_mask) const;
 
 	void computeAnimationBounds(float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ) const;
 
@@ -73,3 +78,5 @@ inline KFInterpolationMethod Animation::getKFInterpolationMethod() const { retur
 
 inline int Animation::getFrameRate() const { return mFrameRate; }
 inline void Animation::setFrameRate(int frameRate) { mFrameRate = frameRate; } // TODO : assert(frameRate > 0)
+
+inline const std::map<unsigned short, BoneAnimationTrack*>& Animation::getBoneTracks() const { return mBoneTracks; }
