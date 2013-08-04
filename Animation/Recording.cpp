@@ -58,48 +58,99 @@ void Recording::saveBlendFrame( float time
 {
 	const Animation *baseAnim  = base.getAnimation();
 	const Animation *layerAnim = layer.getAnimation();
+
 	BoneAnimationTrack *baseTrack  = nullptr;
 	BoneAnimationTrack *layerTrack = nullptr;
 	BoneAnimationTrack *blendTrack = nullptr;
-	TransformKeyFrame baseKeyFrame(time, 0);
-	TransformKeyFrame layerKeyFrame1(time, 0);
-	TransformKeyFrame layerKeyFrame2(time - playbackDelta, 0);
+
+	TransformKeyFrame baseKeyFrame(0.f, 0);
+	TransformKeyFrame layerKeyFrame1(0.f, 0);
+	TransformKeyFrame layerKeyFrame2(0.f, 0);
 
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		// If this boneID is not in boneMask, save the non-blended base keyframe
-		if (end(boneMask) == boneMask.find((EBoneID) boneID)) {
-			baseTrack = baseAnim->getBoneTrack(boneID);
-			blendTrack = animation->getBoneTrack(boneID);
-			if (nullptr == baseTrack || nullptr == blendTrack) continue;
-
-			TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
-			if (nullptr == blendTKF) continue;
-
-			baseTrack->getInterpolatedKeyFrame(time, blendTKF);
-
-			continue;
-		}
-
-		// Else this boneID is in boneMask, so save a blended keyframe
+		// Get this bone's animation track for the base and blend layers
 		baseTrack  = baseAnim->getBoneTrack(boneID);
-		layerTrack = layerAnim->getBoneTrack(boneID);
 		blendTrack = animation->getBoneTrack(boneID);
-		if (nullptr == baseTrack || nullptr == layerTrack || nullptr == blendTrack) continue;
+		if (nullptr == baseTrack || nullptr == blendTrack) continue;
 
+		// Create a new keyframe in this blended recording
 		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
 		if (nullptr == blendTKF) continue;
 
-		baseTrack->getInterpolatedKeyFrame(time, &baseKeyFrame);
-		layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
-		layerTrack->getInterpolatedKeyFrame(time - playbackDelta, &layerKeyFrame2);
+		// If this boneID is not in boneMask, save the base keyframe for this bone
+		if (end(boneMask) == boneMask.find((EBoneID) boneID)) {
+			baseTrack->getInterpolatedKeyFrame(time, blendTKF);
+			continue;
+		}
+		// Else this boneID is in boneMask, save a blended keyframe using the current mapping mode...
 
-		const glm::vec3 basePos(baseKeyFrame.getTranslation());
-		const glm::vec3 layerPos1(layerKeyFrame1.getTranslation());
-		const glm::vec3 layerPos2(layerKeyFrame2.getTranslation());
+		layerTrack = layerAnim->getBoneTrack(boneID);
+		if (nullptr == layerTrack) continue;
 
-		blendTKF->setTranslation(glm::vec3(basePos + (layerPos1 - layerPos2)));
-		blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
-		blendTKF->setScale(glm::vec3(1,1,1));
+		switch (mappingMode)
+		{
+			case MAP_DIRECT:
+			{
+				layerTrack->getInterpolatedKeyFrame(time, blendTKF);
+			}
+			break;
+
+			case MAP_ABSOLUTE:
+			{
+				baseTrack->getInterpolatedKeyFrame(0.f, &baseKeyFrame);
+				layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
+				layerTrack->getInterpolatedKeyFrame(0.f, &layerKeyFrame2);
+
+				const glm::vec3 y0(baseKeyFrame.getTranslation());
+				const glm::vec3 xt(layerKeyFrame1.getTranslation());
+				const glm::vec3 x0(layerKeyFrame2.getTranslation());
+
+				const glm::quat yr0 = baseKeyFrame.getRotation();
+				const glm::quat xrt = layerKeyFrame1.getRotation();
+				const glm::quat inv_xr0 = glm::inverse(layerKeyFrame2.getRotation());
+
+				// Y'(t)= Y0 + (X(t) - X0)
+				blendTKF->setTranslation(glm::vec3(y0 + (xt - x0)));
+				// Yr'(t) = Xr(t) inv(Xr0) Yr0
+				blendTKF->setRotation(xrt * inv_xr0 * yr0);
+				blendTKF->setScale(glm::vec3(1,1,1));
+			}
+			break;
+
+			case MAP_ADDITIVE:
+			{
+				baseTrack->getInterpolatedKeyFrame(time, &baseKeyFrame);
+				layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
+				layerTrack->getInterpolatedKeyFrame(time - playbackDelta, &layerKeyFrame2);
+
+				const glm::vec3 yt(baseKeyFrame.getTranslation());
+				const glm::vec3 xt(layerKeyFrame1.getTranslation());
+				const glm::vec3 xt_dt(layerKeyFrame2.getTranslation());
+
+				// Y'(t) = Y(t) + (X(t) - X(t - dt))
+				blendTKF->setTranslation(glm::vec3(yt + (xt - xt_dt)));
+				blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
+				blendTKF->setScale(glm::vec3(1,1,1));
+			}
+			break;
+
+			case MAP_TRAJECTORY_RELATIVE:
+			{
+				baseTrack->getInterpolatedKeyFrame(0.f, &baseKeyFrame);
+				layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
+				layerTrack->getInterpolatedKeyFrame(0.f, &layerKeyFrame2);
+
+				const glm::vec3 y0(baseKeyFrame.getTranslation());
+				const glm::vec3 xt(layerKeyFrame1.getTranslation());
+				const glm::vec3 x0(layerKeyFrame2.getTranslation());
+
+				// Y'(t) = Y(t) + K(t)*(X(t) - X0)
+				blendTKF->setTranslation(glm::vec3(y0 + (xt - x0)));
+				blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
+				blendTKF->setScale(glm::vec3(1,1,1));
+			}
+			break;
+		}
 	}
 }
 
