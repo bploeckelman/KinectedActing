@@ -30,6 +30,10 @@ class Skeleton
 public:
 	static const BoneJointPairs jointPairs;
 
+	bool renderBones;
+	bool renderJoints;
+	bool renderOrientations;
+
 	Skeleton();
 	~Skeleton();
 

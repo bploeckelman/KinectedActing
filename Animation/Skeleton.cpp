@@ -38,6 +38,9 @@ const BoneJointPairs Skeleton::jointPairs([]() {
 
 Skeleton::Skeleton()
 	: bones()
+	, renderBones(true)
+	, renderJoints(true)
+	, renderOrientations(true)
 {
 	initBones();
 }
@@ -60,46 +63,52 @@ void Skeleton::render() const
 	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
 		const Bone& bone = pair.second;
 		if (bone.translation != zero) {
-			model_matrix = glm::translate(glm::mat4(), bone.translation);
-			model_matrix = glm::scale(model_matrix, scale);
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
-			GLUtils::defaultProgram->setUniform("useLighting", 1);
+			if (renderJoints) {
+				model_matrix = glm::translate(glm::mat4(), bone.translation);
+				model_matrix = glm::scale(model_matrix, scale);
+				GLUtils::defaultProgram->setUniform("model", model_matrix);
+				GLUtils::defaultProgram->setUniform("useLighting", 1);
 
-			Render::sphere();
+				Render::sphere();
+			}
 
-			model_matrix = glm::translate(glm::mat4(), bone.translation);
-			model_matrix = model_matrix * glm::mat4_cast(bone.rotation);
-			model_matrix = glm::scale(model_matrix, glm::vec3(0.1));
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
-			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			if (renderOrientations) {
+				model_matrix = glm::translate(glm::mat4(), bone.translation);
+				model_matrix = model_matrix * glm::mat4_cast(bone.rotation);
+				model_matrix = glm::scale(model_matrix, glm::vec3(0.1));
+				GLUtils::defaultProgram->setUniform("model", model_matrix);
+				GLUtils::defaultProgram->setUniform("useLighting", 0);
 
-			Render::axis();
+				Render::axis();
+			}
 		}
 	});
 
 	// Render bones
+	if (renderBones) {
 		GLUtils::defaultProgram->setUniform("useLighting", 1);
-	std::for_each(begin(jointPairs), end(jointPairs), [&](const BoneJointPairs::value_type& joints) {
-		// Get the two joints for this bone
-		const Bone& bone1 = bones.at(joints.first);
-		const Bone& bone2 = bones.at(joints.second);
+		std::for_each(begin(jointPairs), end(jointPairs), [&](const BoneJointPairs::value_type& joints) {
+			// Get the two joints for this bone
+			const Bone& bone1 = bones.at(joints.first);
+			const Bone& bone2 = bones.at(joints.second);
 
-		if (bone1.translation != zero && bone2.translation != zero) {
-			// Calculate orientation and position for cylinder connecting bone1 and bone2
-			const float dist = glm::distance(bone1.translation, bone2.translation);
-			const glm::vec3 diff = bone2.translation - bone1.translation;
-			const glm::vec3 forward = glm::normalize(diff);
-			const glm::vec3 axis = glm::cross(y, forward);
-			const float angle = glm::degrees(acos(glm::dot(y, forward)));
+			if (bone1.translation != zero && bone2.translation != zero) {
+				// Calculate orientation and position for cylinder connecting bone1 and bone2
+				const float dist = glm::distance(bone1.translation, bone2.translation);
+				const glm::vec3 diff = bone2.translation - bone1.translation;
+				const glm::vec3 forward = glm::normalize(diff);
+				const glm::vec3 axis = glm::cross(y, forward);
+				const float angle = glm::degrees(acos(glm::dot(y, forward)));
 
-			// Calculate the model matrix for this cylinder using the orientation and position
-			model_matrix = glm::rotate(glm::translate(glm::mat4(), bone1.translation), angle, axis);
-			model_matrix = glm::scale(model_matrix, glm::vec3(s,dist,s));
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
+				// Calculate the model matrix for this cylinder using the orientation and position
+				model_matrix = glm::rotate(glm::translate(glm::mat4(), bone1.translation), angle, axis);
+				model_matrix = glm::scale(model_matrix, glm::vec3(s,dist,s));
+				GLUtils::defaultProgram->setUniform("model", model_matrix);
 
-			Render::cylinder();
-		}
-	});
+				Render::cylinder();
+			}
+		});
+	}
 }
 
 void Skeleton::initBones() 
