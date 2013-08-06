@@ -48,6 +48,8 @@ KinectDevice::~KinectDevice()
 
 bool KinectDevice::init()
 {
+	liveSkeleton->render_orientations = false;
+
 	nextColorFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Color Frame Event");
 	nextDepthFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Depth Frame Event");
 	nextSkeletonFrameEvent = CreateEventA(NULL, TRUE, FALSE, "Next Skeleton Frame Event");
