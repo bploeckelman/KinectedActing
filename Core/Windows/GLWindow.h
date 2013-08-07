@@ -44,6 +44,7 @@ private:
 	bool playbackRunning;
 	bool recording;
 	bool layering;
+	bool baseSaved;
 
 	float playbackTime;
 	float playbackDelta;

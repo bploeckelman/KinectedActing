@@ -56,6 +56,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, playbackRunning(false)
 	, recording(false)
 	, layering(false)
+	, baseSaved(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
 	, layerID(0)
@@ -123,6 +124,11 @@ void GLWindow::update()
 	dt += app.getDeltaTime().asSeconds() / 3.f;
 	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
 
+	if (layering) {
+		recordings["blend"]->update(app.getDeltaTime().asSeconds());
+		recordings["blend"]->apply(blendSkeleton.get());
+	}
+
 	// Update current recording
 	if (nullptr == currentRecording) return;
 	currentRecording->update(app.getDeltaTime().asSeconds());
@@ -133,11 +139,6 @@ void GLWindow::update()
 	const float currentTime = currentRecording->getPlaybackTime();
 	const float progress = (totalLength == 0.f) ? 0.f : currentTime / totalLength;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
-
-	if (layering) {
-		recordings["blend"]->update(app.getDeltaTime().asSeconds());
-	}
-
 }
 
 void GLWindow::render()
@@ -248,7 +249,6 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("useLighting", 0);
 		GLUtils::defaultProgram->setUniform("color", glm::vec4(1,1,0,0.8f));
 		GLUtils::defaultProgram->setUniform("model", glm::mat4());
-		recordings["blend"]->apply(blendSkeleton.get(), recordings["blend"]->getAnimationLength());
 		blendSkeleton->render();
 	}
 
@@ -355,8 +355,11 @@ void GLWindow::updateRecording()
 		const float now = record->getAnimationLength();
 		if (now < recordings["base"]->getAnimationLength()) {
 			// Save a blended keyframe between 'base' and current layer
-			recordings["blend"]->saveBlendFrame(now, *recordings["base"], *record, boneMask, mappingMode);
+			recordings["blend"]->saveBlendFrame(now
+				, *recordings[(baseSaved ? "blend" : "base")]
+				, *record, boneMask, mappingMode);
 		} else {
+			baseSaved = true;
 			msg::StopRecordingMessage msg;
 			process(&msg);
 			MessageBoxA(NULL, "Done recording layer", "Done", MB_OK);
