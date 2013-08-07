@@ -50,6 +50,7 @@ private:
 	void onStartLayeringButtonClick();
 	void onAnimLayersComboBoxSelect();
 	void onMappingModeComboBoxSelect();
+	void onFilteringLevelComboBoxSelect();
 	void onRenderPathCheckButtonClick();
 	void onBoneMaskToggleButtonClick();
 
@@ -90,6 +91,7 @@ private:
 	sfg::Button::Ptr startLayeringButton;
 	sfg::ComboBox::Ptr animLayersComboBox;
 	sfg::ComboBox::Ptr mappingModesComboBox;
+	sfg::ComboBox::Ptr filterLevelsComboBox;
 
 	sfg::CheckButton::Ptr renderPathCheckButton;
 

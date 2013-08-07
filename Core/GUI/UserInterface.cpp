@@ -40,6 +40,7 @@ GUI::GUI()
 	, startLayeringButton(sfg::Button::Create("Create New Layer"))
 	, animLayersComboBox(sfg::ComboBox::Create())
 	, mappingModesComboBox(sfg::ComboBox::Create())
+	, filterLevelsComboBox(sfg::ComboBox::Create())
 	, infoLabel(sfg::Label::Create(""))
 	, seatedModeEnabledButton(sfg::Button::Create("Seated Mode"))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
@@ -119,6 +120,11 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	mappingModesComboBox->AppendItem("Trajectory Relative");
 	mappingModesComboBox->SelectItem(2);
 
+	filterLevelsComboBox->AppendItem("Light");
+	filterLevelsComboBox->AppendItem("Medium");
+	filterLevelsComboBox->AppendItem("Heavy");
+	filterLevelsComboBox->SelectItem(1);
+
 	const sf::Uint32 colspan = 6;
 	table->SetColumnSpacings(2.f);
 
@@ -150,66 +156,70 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	table->SetRowSpacing(10, 2.5f);
 	table->Attach(startLayeringButton, sf::Rect<sf::Uint32>(0, 11, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
 	table->SetRowSpacing(11, 2.5f);
-	table->Attach(mappingModesComboBox, sf::Rect<sf::Uint32>(0, 12, colspan    , 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(sfg::Label::Create("Filtering:"), sf::Rect<sf::Uint32>(0, 12,           2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(filterLevelsComboBox,             sf::Rect<sf::Uint32>(2, 12, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(12, 2.5f);
+	table->Attach(sfg::Label::Create("Mapping:"), sf::Rect<sf::Uint32>(0, 13,           2, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(mappingModesComboBox,           sf::Rect<sf::Uint32>(2, 13, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	playbackLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0, 13, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
-	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
-	table->SetRowSpacing(14, 5.f);
-	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackStartButton,    sf::Rect<sf::Uint32>(3, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 15, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackLabel,       sf::Rect<sf::Uint32>(0, 14, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.));
+	table->Attach(playbackProgressBar, sf::Rect<sf::Uint32>(0, 15, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 	table->SetRowSpacing(15, 5.f);
+	table->Attach(playbackFirstButton,    sf::Rect<sf::Uint32>(0, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackPreviousButton, sf::Rect<sf::Uint32>(1, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStopButton,     sf::Rect<sf::Uint32>(2, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackStartButton,    sf::Rect<sf::Uint32>(3, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackNextButton,     sf::Rect<sf::Uint32>(4, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(playbackLastButton,     sf::Rect<sf::Uint32>(5, 16, 1, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(16, 5.f);
 	sfg::Label::Ptr deltaScaleLabel(sfg::Label::Create("Delta"));
-	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 16,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
-	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 16, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+	table->Attach(deltaScaleLabel,    sf::Rect<sf::Uint32>(0, 17,           2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+	table->Attach(playbackDeltaScale, sf::Rect<sf::Uint32>(2, 17, colspan - 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
 
-	table->SetRowSpacing(16, 20.f);
+	table->SetRowSpacing(17, 20.f);
 	sfg::Label::Ptr boneMaskLabel = sfg::Label::Create("Bone Mask:");
 	boneMaskLabel->SetAlignment(sf::Vector2f(0.f, 0.75f));
-	table->Attach(boneMaskLabel, sf::Rect<sf::Uint32>(0, 17, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
+	table->Attach(boneMaskLabel, sf::Rect<sf::Uint32>(0, 18, 2, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 2.f));
 
 	table->SetColumnSpacing(1, 5.f);
 	table->SetColumnSpacing(3, 5.f);
-	table->Attach(sfg::Label::Create("Left"),  sf::Rect<sf::Uint32>(0, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(headToggleButton,            sf::Rect<sf::Uint32>(2, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(sfg::Label::Create("Right"), sf::Rect<sf::Uint32>(4, 18, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(sfg::Label::Create("Left"),  sf::Rect<sf::Uint32>(0, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(headToggleButton,            sf::Rect<sf::Uint32>(2, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(sfg::Label::Create("Right"), sf::Rect<sf::Uint32>(4, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->SetRowSpacing(18, 5.f);
-	table->Attach(shoulderCenterToggleButton, sf::Rect<sf::Uint32>(2, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(spineToggleButton,          sf::Rect<sf::Uint32>(2, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(hipCenterToggleButton,      sf::Rect<sf::Uint32>(2, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(19, 5.f);
+	table->Attach(shoulderCenterToggleButton, sf::Rect<sf::Uint32>(2, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(spineToggleButton,          sf::Rect<sf::Uint32>(2, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(hipCenterToggleButton,      sf::Rect<sf::Uint32>(2, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->Attach(shoulderLeftToggleButton,   sf::Rect<sf::Uint32>(0, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(elbowLeftToggleButton,      sf::Rect<sf::Uint32>(0, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(wristLeftToggleButton,      sf::Rect<sf::Uint32>(0, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(handLeftToggleButton,       sf::Rect<sf::Uint32>(0, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(shoulderLeftToggleButton,   sf::Rect<sf::Uint32>(0, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(elbowLeftToggleButton,      sf::Rect<sf::Uint32>(0, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(wristLeftToggleButton,      sf::Rect<sf::Uint32>(0, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(handLeftToggleButton,       sf::Rect<sf::Uint32>(0, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->Attach(shoulderRightToggleButton,  sf::Rect<sf::Uint32>(4, 19, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(elbowRightToggleButton,     sf::Rect<sf::Uint32>(4, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(wristRightToggleButton,     sf::Rect<sf::Uint32>(4, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(handRightToggleButton,      sf::Rect<sf::Uint32>(4, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(shoulderRightToggleButton,  sf::Rect<sf::Uint32>(4, 20, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(elbowRightToggleButton,     sf::Rect<sf::Uint32>(4, 21, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(wristRightToggleButton,     sf::Rect<sf::Uint32>(4, 22, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(handRightToggleButton,      sf::Rect<sf::Uint32>(4, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->SetRowSpacing(22, 10.f);
-	table->Attach(hipLeftToggleButton,        sf::Rect<sf::Uint32>(0, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(kneeLeftToggleButton,       sf::Rect<sf::Uint32>(0, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(ankleLeftToggleButton,      sf::Rect<sf::Uint32>(0, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(footLeftToggleButton,       sf::Rect<sf::Uint32>(0, 26, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(23, 10.f);
+	table->Attach(hipLeftToggleButton,        sf::Rect<sf::Uint32>(0, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(kneeLeftToggleButton,       sf::Rect<sf::Uint32>(0, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(ankleLeftToggleButton,      sf::Rect<sf::Uint32>(0, 26, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(footLeftToggleButton,       sf::Rect<sf::Uint32>(0, 27, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->Attach(hipRightToggleButton,       sf::Rect<sf::Uint32>(4, 23, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(kneeRightToggleButton,      sf::Rect<sf::Uint32>(4, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(ankleRightToggleButton,     sf::Rect<sf::Uint32>(4, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
-	table->Attach(footRightToggleButton,      sf::Rect<sf::Uint32>(4, 26, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(hipRightToggleButton,       sf::Rect<sf::Uint32>(4, 24, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(kneeRightToggleButton,      sf::Rect<sf::Uint32>(4, 25, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(ankleRightToggleButton,     sf::Rect<sf::Uint32>(4, 26, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->Attach(footRightToggleButton,      sf::Rect<sf::Uint32>(4, 27, colspan/3, 1), sfg::Table::FILL, sfg::Table::FILL);
 
-	table->SetRowSpacing(26, 5.f);
-	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 27, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
+	table->SetRowSpacing(27, 5.f);
+	table->Attach(renderPathCheckButton, sf::Rect<sf::Uint32>(0, 28, colspan, 1), sfg::Table::FILL, sfg::Table::FILL);
 
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
-	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 28, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
+	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 29, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
@@ -243,9 +253,10 @@ void GUI::connectSignals()
 	playbackLastButton    ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackLastButtonClick,     this);
 	playbackDeltaScale    ->GetSignal(sfg::Scale::OnLeftClick ).Connect(&GUI::onPlaybackDeltaScaleClick,     this);
 
-	startLayeringButton ->GetSignal(sfg::Button::OnLeftClick ).Connect(&GUI::onStartLayeringButtonClick,  this);
-	animLayersComboBox  ->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onAnimLayersComboBoxSelect,  this);
-	mappingModesComboBox->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onMappingModeComboBoxSelect, this);
+	startLayeringButton ->GetSignal(sfg::Button::OnLeftClick ).Connect(&GUI::onStartLayeringButtonClick,     this);
+	animLayersComboBox  ->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onAnimLayersComboBoxSelect,     this);
+	mappingModesComboBox->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onMappingModeComboBoxSelect,    this);
+	filterLevelsComboBox->GetSignal(sfg::ComboBox::OnSelect  ).Connect(&GUI::onFilteringLevelComboBoxSelect, this);
 
 	headToggleButton          ->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
 	shoulderCenterToggleButton->GetSignal(sfg::ToggleButton::OnLeftClick).Connect(&GUI::onBoneMaskToggleButtonClick, this);
@@ -407,6 +418,12 @@ void GUI::onMappingModeComboBoxSelect()
 {
 	const auto mode = mappingModesComboBox->GetSelectedItem();
 	msg::gDispatcher.dispatchMessage(msg::MappingModeSelectMessage(mode));
+}
+
+void GUI::onFilteringLevelComboBoxSelect()
+{
+	const std::string level = filterLevelsComboBox->GetSelectedText();
+	msg::gDispatcher.dispatchMessage(msg::FilterLevelSelectMessage(level));
 }
 
 void GUI::onRenderPathCheckButtonClick()

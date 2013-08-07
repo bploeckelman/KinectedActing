@@ -40,6 +40,7 @@ public:
 	                              , float prediction
 	                              , float jitterRadius
 	                              , float maxDeviationRadius );
+	void setSkeletonSmoothingLevel(const std::string& level);
 
 	const INuiSensor *getSensor() const;
 	const std::string& getDeviceId() const;

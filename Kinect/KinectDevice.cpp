@@ -16,9 +16,9 @@ using namespace std;
 
 const DWORD seated_mode_enabled = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
 
-const NUI_TRANSFORM_SMOOTH_PARAMETERS lowSmoothing  = { 0.5f, 0.5f, 0.5f, 0.05f, 0.04f };
-const NUI_TRANSFORM_SMOOTH_PARAMETERS medSmoothing  = { 0.5f, 0.1f, 0.5f, 0.1f , 0.1f  };
-const NUI_TRANSFORM_SMOOTH_PARAMETERS highSmoothing = { 0.7f, 0.3f, 1.0f, 1.0f , 1.0f  };
+const NUI_TRANSFORM_SMOOTH_PARAMETERS lightSmoothing  = { 0.5f, 0.5f, 0.5f, 0.05f, 0.04f };
+const NUI_TRANSFORM_SMOOTH_PARAMETERS mediumSmoothing = { 0.5f, 0.1f, 0.5f, 0.1f , 0.1f  };
+const NUI_TRANSFORM_SMOOTH_PARAMETERS heavySmoothing  = { 0.7f, 0.3f, 1.0f, 1.0f , 1.0f  };
 
 
 KinectDevice::KinectDevice()
@@ -31,7 +31,7 @@ KinectDevice::KinectDevice()
 	, liveSkeleton(new Skeleton())
 	, skeletonFrame()
 	, skeletonData(nullptr)
-	, skeletonSmoothParams(medSmoothing)
+	, skeletonSmoothParams(mediumSmoothing)
 	, skeletonTrackingFlags(seated_mode_enabled)
 	, seatedMode(true)
 	, nextColorFrameEvent()
@@ -340,4 +340,11 @@ const NUI_SKELETON_DATA *KinectDevice::getFirstTrackedSkeletonData(const NUI_SKE
 	}
 
 	return nullptr;
+}
+
+void KinectDevice::setSkeletonSmoothingLevel( const std::string& level )
+{
+	     if (level == "Light")  skeletonSmoothParams = lightSmoothing;
+	else if (level == "Medium") skeletonSmoothParams = mediumSmoothing;
+	else if (level == "Heavy")  skeletonSmoothParams = heavySmoothing;
 }

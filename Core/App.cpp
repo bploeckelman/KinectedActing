@@ -23,6 +23,7 @@ App::App()
 	msg::gDispatcher.registerHandler(msg::START_KINECT_DEVICE,      this);
 	msg::gDispatcher.registerHandler(msg::STOP_KINECT_DEVICE,       this);
 	msg::gDispatcher.registerHandler(msg::TOGGLE_SEATED_MODE,       this);
+	msg::gDispatcher.registerHandler(msg::FILTER_LEVEL_SELECT,      this);
 }
 
 App::~App()
@@ -74,4 +75,9 @@ void App::process( const msg::StopKinectDeviceMessage* message )
 void App::process( const msg::ToggleSeatedModeMessage *message )
 {
 	kinect.toggleSeatedMode();
+}
+
+void App::process( const msg::FilterLevelSelectMessage *message )
+{
+	kinect.setSkeletonSmoothingLevel(message->level);
 }
