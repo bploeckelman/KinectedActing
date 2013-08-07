@@ -50,8 +50,6 @@ private:
 
 	unsigned char layerID;
 
-	sf::Time animTimer;
-
 	tdogl::Camera camera;
 
 	std::unique_ptr<tdogl::Texture> colorTexture;
@@ -59,7 +57,8 @@ private:
 	std::unique_ptr<tdogl::Texture> gridTexture;
 	std::unique_ptr<tdogl::Texture> redTileTexture;
 
-	std::unique_ptr<Skeleton>  skeleton;
+	std::unique_ptr<Skeleton> selectedSkeleton;
+	std::unique_ptr<Skeleton> blendSkeleton;
 
 	BoneMask boneMask;
 	ELayerMappingMode mappingMode;
