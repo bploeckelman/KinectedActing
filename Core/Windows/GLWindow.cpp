@@ -134,6 +134,10 @@ void GLWindow::update()
 	const float progress = (totalLength == 0.f) ? 0.f : currentTime / totalLength;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
 
+	if (layering) {
+		recordings["blend"]->update(app.getDeltaTime().asSeconds());
+	}
+
 }
 
 void GLWindow::render()
@@ -394,6 +398,9 @@ void GLWindow::recordLayer()
 	const std::string layerName = "layer " + std::to_string(++layerID);
 	recordings[layerName] = std::unique_ptr<Recording>(new Recording(layerName, app.getKinect()));
 	currentRecording = recordings[layerName].get();
+
+	recordings["blend"]->setPlaybackTime(0.f);
+	recordings["blend"]->startPlayback();
 
 	// Update ui layer combo box
 	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
