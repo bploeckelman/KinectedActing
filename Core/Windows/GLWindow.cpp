@@ -122,9 +122,10 @@ void GLWindow::update()
 	updatePlayback();
 
 	dt += app.getDeltaTime().asSeconds() / 3.f;
-	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	light0.position = glm::vec3(0);//1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
 
 	if (layering) {
+		recordings["blend"]->setPlaybackDelta(1 / 60.f);//app.getDeltaTime().asSeconds());
 		recordings["blend"]->update(app.getDeltaTime().asSeconds());
 		recordings["blend"]->apply(blendSkeleton.get());
 	}
@@ -157,8 +158,8 @@ void GLWindow::render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
-	glClearColor(0,0,0,1);
+	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	//glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Set uniforms
@@ -203,7 +204,7 @@ void GLWindow::render()
 			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
 			// Draw bone paths for joints that are enabled in the bone mask ----
 			GLUtils::defaultProgram->setUniform("useLighting", 0);
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.7f));
 			for (const auto& boneID : boneMask) {
 				animation->getPositions(boneID, positions, currentRecording->getPlaybackTime());
 				Render::pipe(positions);
@@ -213,7 +214,7 @@ void GLWindow::render()
 			// Highlight joints that are enabled in the bone mask --------------
 			GLUtils::simpleProgram->use();
 			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.85f));
 			for (const auto& boneID : boneMask) {
 				TransformKeyFrame kf(playback_time, 0);
 				animation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playback_time, &kf);
@@ -250,6 +251,30 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("color", glm::vec4(1,1,0,0.8f));
 		GLUtils::defaultProgram->setUniform("model", glm::mat4());
 		blendSkeleton->render();
+
+		if (bonePathsVisible) {
+			const Animation *animation = recordings["blend"]->getAnimation();
+			const float blend_playback_time = recordings["blend"]->getPlaybackTime();
+
+			std::vector<glm::vec3> positions;
+
+			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
+			// Draw bone paths for joints that are enabled in the bone mask ----
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 1.f, 0.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, blend_playback_time);
+				Render::pipe(positions);
+			}
+
+			animation = recordings["base"]->getAnimation();
+			const float base_playback_time = recordings["base"]->getPlaybackTime();
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0.f, 0.f, 1.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, base_playback_time);
+				Render::pipe(positions);
+			}
+		}
 	}
 
 	// Draw light --------------------------------------------------------------
