@@ -44,13 +44,12 @@ private:
 	bool playbackRunning;
 	bool recording;
 	bool layering;
+	bool baseSaved;
 
 	float playbackTime;
 	float playbackDelta;
 
 	unsigned char layerID;
-
-	sf::Time animTimer;
 
 	tdogl::Camera camera;
 
@@ -59,7 +58,8 @@ private:
 	std::unique_ptr<tdogl::Texture> gridTexture;
 	std::unique_ptr<tdogl::Texture> redTileTexture;
 
-	std::unique_ptr<Skeleton>  skeleton;
+	std::unique_ptr<Skeleton> selectedSkeleton;
+	std::unique_ptr<Skeleton> blendSkeleton;
 
 	BoneMask boneMask;
 	ELayerMappingMode mappingMode;

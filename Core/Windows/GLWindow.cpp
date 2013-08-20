@@ -56,16 +56,17 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, playbackRunning(false)
 	, recording(false)
 	, layering(false)
+	, baseSaved(false)
 	, playbackTime(0)
 	, playbackDelta(1.f / 60.f)
 	, layerID(0)
-	, animTimer(sf::Time::Zero)
 	, camera()
 	, colorTexture(nullptr)
 	, depthTexture(nullptr)
 	, gridTexture(nullptr)
 	, redTileTexture(nullptr)
-	, skeleton(nullptr)
+	, selectedSkeleton(nullptr)
+	, blendSkeleton(nullptr)
 	, currentRecording(nullptr)
 	, recordings()
 	, boneMask(default_bone_mask)
@@ -94,7 +95,9 @@ void GLWindow::init()
 
 	loadTextures();
 
-	skeleton = std::unique_ptr<Skeleton>(new Skeleton());
+	selectedSkeleton = std::unique_ptr<Skeleton>(new Skeleton());
+	blendSkeleton = std::unique_ptr<Skeleton>(new Skeleton());
+	blendSkeleton->render_orientations = false;
 
 	recordings["base"]  = std::unique_ptr<Recording>(new Recording("base",  app.getKinect()));
 	recordings["blend"] = std::unique_ptr<Recording>(new Recording("blend", app.getKinect()));
@@ -119,19 +122,24 @@ void GLWindow::update()
 	updatePlayback();
 
 	dt += app.getDeltaTime().asSeconds() / 3.f;
-	light0.position = glm::vec3(1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+	light0.position = glm::vec3(0);//1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
+
+	if (layering) {
+		recordings["blend"]->setPlaybackDelta(1 / 60.f);//app.getDeltaTime().asSeconds());
+		recordings["blend"]->update(app.getDeltaTime().asSeconds());
+		recordings["blend"]->apply(blendSkeleton.get());
+	}
 
 	// Update current recording
 	if (nullptr == currentRecording) return;
 	currentRecording->update(app.getDeltaTime().asSeconds());
-	currentRecording->apply(skeleton.get());
+	currentRecording->apply(selectedSkeleton.get());
 
 	// Update gui playback progress bar
 	const float totalLength = currentRecording->getAnimationLength();
 	const float currentTime = currentRecording->getPlaybackTime();
 	const float progress = (totalLength == 0.f) ? 0.f : currentTime / totalLength;
 	msg::gDispatcher.dispatchMessage(msg::PlaybackSetProgressMessage(progress));
-
 }
 
 void GLWindow::render()
@@ -150,8 +158,8 @@ void GLWindow::render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
-	glClearColor(0,0,0,1);
+	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	//glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Set uniforms
@@ -179,24 +187,24 @@ void GLWindow::render()
 	Render::axis();
 
 	// Draw live skeleton ------------------------------------------------------
-	glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
 	if (liveSkeletonVisible) {
-		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-		GLUtils::defaultProgram->setUniform("useLighting", 1);
+		GLUtils::defaultProgram->setUniform("useLighting", 0);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.6f));
 		app.getKinect().getLiveSkeleton()->render();
 	}
 
 	// Draw current animation layer --------------------------------------------
-	if (nullptr != currentRecording && currentRecording->getAnimationLength() > 0.f) {
+	if (!layering && nullptr != currentRecording && currentRecording->getAnimationLength() > 0.f) {
 		if (bonePathsVisible) {
 			const Animation *animation = currentRecording->getAnimation();
 			const float playback_time  = currentRecording->getPlaybackTime();
 
 			std::vector<glm::vec3> positions;
 
+			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
 			// Draw bone paths for joints that are enabled in the bone mask ----
 			GLUtils::defaultProgram->setUniform("useLighting", 0);
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.75f));
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.7f));
 			for (const auto& boneID : boneMask) {
 				animation->getPositions(boneID, positions, currentRecording->getPlaybackTime());
 				Render::pipe(positions);
@@ -206,7 +214,7 @@ void GLWindow::render()
 			// Highlight joints that are enabled in the bone mask --------------
 			GLUtils::simpleProgram->use();
 			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 1.f));
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.85f));
 			for (const auto& boneID : boneMask) {
 				TransformKeyFrame kf(playback_time, 0);
 				animation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playback_time, &kf);
@@ -228,23 +236,52 @@ void GLWindow::render()
 		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
 		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
 		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
 		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
 		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
 		GLUtils::defaultProgram->setUniform("tex", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
-		skeleton->render();
+		selectedSkeleton->render();
+	}
+
+	// Draw blend layer --------------------------------------------------------
+	if (layering) {
+		GLUtils::defaultProgram->setUniform("useLighting", 0);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(1,1,0,0.8f));
+		GLUtils::defaultProgram->setUniform("model", glm::mat4());
+		blendSkeleton->render();
+
+		if (bonePathsVisible) {
+			const Animation *animation = recordings["blend"]->getAnimation();
+			const float blend_playback_time = recordings["blend"]->getPlaybackTime();
+
+			std::vector<glm::vec3> positions;
+
+			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
+			// Draw bone paths for joints that are enabled in the bone mask ----
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 1.f, 0.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, blend_playback_time);
+				Render::pipe(positions);
+			}
+
+			animation = recordings["base"]->getAnimation();
+			const float base_playback_time = recordings["base"]->getPlaybackTime();
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0.f, 0.f, 1.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, base_playback_time);
+				Render::pipe(positions);
+			}
+		}
 	}
 
 	// Draw light --------------------------------------------------------------
 	GLUtils::simpleProgram->use();
 	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
 	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
-
-	glm::mat4 model;
-	model = glm::translate(glm::mat4(), light0.position);
-	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
-	GLUtils::simpleProgram->setUniform("model", model);
+	GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), light0.position), glm::vec3(0.01f)));
 	Render::sphere();
 
 	glUseProgram(0);
@@ -343,8 +380,11 @@ void GLWindow::updateRecording()
 		const float now = record->getAnimationLength();
 		if (now < recordings["base"]->getAnimationLength()) {
 			// Save a blended keyframe between 'base' and current layer
-			recordings["blend"]->saveBlendFrame(now, *recordings["base"], *record, boneMask, mappingMode);
+			recordings["blend"]->saveBlendFrame(now
+				, *recordings[(baseSaved ? "blend" : "base")]
+				, *record, boneMask, mappingMode);
 		} else {
+			baseSaved = true;
 			msg::StopRecordingMessage msg;
 			process(&msg);
 			MessageBoxA(NULL, "Done recording layer", "Done", MB_OK);
@@ -361,9 +401,9 @@ void GLWindow::updatePlayback()
 	if (!playbackRunning || nullptr == currentRecording) return;
 
 	if (layering) {
-		recordings["blend"]->apply(skeleton.get());
+		recordings["blend"]->apply(selectedSkeleton.get());
 	} else if (currentRecording->getAnimationLength() > 0.f) {
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -379,7 +419,6 @@ void GLWindow::recordLayer()
 	}
 
 	layering = true;
-	animTimer = sf::Time::Zero;
 	// TODO : start countdown timer
 	MessageBoxA(NULL, "Start recording a new layer...", "New Layer", MB_OK);
 
@@ -387,6 +426,9 @@ void GLWindow::recordLayer()
 	const std::string layerName = "layer " + std::to_string(++layerID);
 	recordings[layerName] = std::unique_ptr<Recording>(new Recording(layerName, app.getKinect()));
 	currentRecording = recordings[layerName].get();
+
+	recordings["blend"]->setPlaybackTime(0.f);
+	recordings["blend"]->startPlayback();
 
 	// Update ui layer combo box
 	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
@@ -503,7 +545,7 @@ void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
 {
 	if (nullptr != currentRecording) {
 		currentRecording->resetPlaybackTime();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -511,7 +553,7 @@ void GLWindow::process( const msg::PlaybackLastFrameMessage *message )
 {
 	if (nullptr != currentRecording) {
 		currentRecording->setPlaybackTime(currentRecording->getAnimationLength());
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -519,7 +561,7 @@ void GLWindow::process( const msg::PlaybackPrevFrameMessage *message )
 {
 	if (nullptr != currentRecording) {
 		currentRecording->playbackPreviousFrame();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -527,7 +569,7 @@ void GLWindow::process( const msg::PlaybackNextFrameMessage *message )
 {
 	if (nullptr != currentRecording) {
 		currentRecording->playbackNextFrame();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -537,7 +579,7 @@ void GLWindow::process( const msg::PlaybackStartMessage *message )
 
 	if (nullptr != currentRecording) {
 		currentRecording->startPlayback();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -547,7 +589,7 @@ void GLWindow::process( const msg::PlaybackStopMessage *message )
 
 	if (nullptr != currentRecording) {
 		currentRecording->stopPlayback();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 	}
 }
 
@@ -571,11 +613,9 @@ void GLWindow::process( const msg::LayerSelectMessage *message )
 	auto it = recordings.find(message->layerName);
 	currentRecording = (end(recordings) != it) ? it->second.get() : nullptr;
 
-	// Restart playback timer and apply animation to skeleton viz
-	animTimer = sf::Time::Zero;
 	if (nullptr != currentRecording) {
 		currentRecording->resetPlaybackTime();
-		currentRecording->apply(skeleton.get());
+		currentRecording->apply(selectedSkeleton.get());
 		playbackRunning = false;
 	}
 }

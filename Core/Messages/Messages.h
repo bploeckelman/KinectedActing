@@ -49,6 +49,7 @@ namespace msg
 		, START_LAYERING
 		, LAYER_SELECT
 		, ADD_LAYER_ITEM
+		, FILTER_LEVEL_SELECT
 		, MAPPING_MODE_SELECT
 		// Misc
 		, SET_INFO_LABEL
@@ -209,6 +210,16 @@ namespace msg
 		const unsigned int mode;
 	};
 	// ------------------------------------------------------------------------
+	class FilterLevelSelectMessage : public Message
+	{
+	public:
+		FilterLevelSelectMessage(const std::string& level)
+			: Message(FILTER_LEVEL_SELECT)
+			, level(level)
+		{}
+		const std::string level;
+	};
+	// ------------------------------------------------------------------------
 	class SetInfoLabelMessage : public Message
 	{
 	public:
@@ -287,6 +298,7 @@ namespace msg
 		virtual void process(const LayerSelectMessage         *message) {}
 		virtual void process(const AddLayerItemMessage        *message) {}
 		virtual void process(const MappingModeSelectMessage   *message) {}
+		virtual void process(const FilterLevelSelectMessage   *message) {}
 		virtual void process(const SetInfoLabelMessage        *message) {}
 		virtual void process(const ShowBonePathMessage        *message) {}
 		virtual void process(const HideBonePathMessage        *message) {}

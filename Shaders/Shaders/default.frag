@@ -23,7 +23,7 @@ out vec4 finalColor;
 void main()
 {
 	if (useLighting == 0) {
-		finalColor = fragColor * texture(tex, texscale * fragTexCoord);
+		finalColor = fragColor;
 		return;
 	}
 

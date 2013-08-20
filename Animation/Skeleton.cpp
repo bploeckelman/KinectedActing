@@ -10,6 +10,10 @@
 #include <algorithm>
 #include <map>
 
+const float s = 0.025f;
+const glm::vec3 scale(s);
+const glm::vec3 zero(0);
+const glm::vec3 y(0,1,0); // world up
 
 const BoneJointPairs Skeleton::jointPairs([]() {
 	BoneJointPairs bones;
@@ -38,6 +42,9 @@ const BoneJointPairs Skeleton::jointPairs([]() {
 
 Skeleton::Skeleton()
 	: bones()
+	, render_bones(true)
+	, render_joints(true)
+	, render_orientations(true)
 {
 	initBones();
 }
@@ -49,36 +56,15 @@ Skeleton::~Skeleton()
 
 void Skeleton::render() const
 {
-	const float s = 0.025f;
-	const glm::vec3 scale(s);
-	const glm::vec3 zero(0);
-	const glm::vec3 y(0,1,0); // world up
+	if (render_bones)        renderBones();
+	if (render_joints)       renderJoints();
+	if (render_orientations) renderOrientations();
+}
 
-	glm::mat4 model_matrix;
+void Skeleton::renderBones() const
+{
+	glm::mat4 model;
 
-	// Render joints
-	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
-		const Bone& bone = pair.second;
-		if (bone.translation != zero) {
-			model_matrix = glm::translate(glm::mat4(), bone.translation);
-			model_matrix = glm::scale(model_matrix, scale);
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
-			GLUtils::defaultProgram->setUniform("useLighting", 1);
-
-			Render::sphere();
-
-			model_matrix = glm::translate(glm::mat4(), bone.translation);
-			model_matrix = model_matrix * glm::mat4_cast(bone.rotation);
-			model_matrix = glm::scale(model_matrix, glm::vec3(0.1));
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
-			GLUtils::defaultProgram->setUniform("useLighting", 0);
-
-			Render::axis();
-		}
-	});
-
-	// Render bones
-		GLUtils::defaultProgram->setUniform("useLighting", 1);
 	std::for_each(begin(jointPairs), end(jointPairs), [&](const BoneJointPairs::value_type& joints) {
 		// Get the two joints for this bone
 		const Bone& bone1 = bones.at(joints.first);
@@ -86,18 +72,48 @@ void Skeleton::render() const
 
 		if (bone1.translation != zero && bone2.translation != zero) {
 			// Calculate orientation and position for cylinder connecting bone1 and bone2
-			const float dist = glm::distance(bone1.translation, bone2.translation);
-			const glm::vec3 diff = bone2.translation - bone1.translation;
+			const float dist        = glm::distance(bone1.translation, bone2.translation);
+			const glm::vec3 diff    = bone2.translation - bone1.translation;
 			const glm::vec3 forward = glm::normalize(diff);
-			const glm::vec3 axis = glm::cross(y, forward);
-			const float angle = glm::degrees(acos(glm::dot(y, forward)));
+			const glm::vec3 axis    = glm::cross(y, forward);
+			const float angle       = glm::degrees(acos(glm::dot(y, forward)));
 
 			// Calculate the model matrix for this cylinder using the orientation and position
-			model_matrix = glm::rotate(glm::translate(glm::mat4(), bone1.translation), angle, axis);
-			model_matrix = glm::scale(model_matrix, glm::vec3(s,dist,s));
-			GLUtils::defaultProgram->setUniform("model", model_matrix);
+			model = glm::rotate(glm::translate(glm::mat4(), bone1.translation), angle, axis);
+			model = glm::scale(model, glm::vec3(s,dist,s));
+			GLUtils::defaultProgram->setUniform("model", model);
 
 			Render::cylinder();
+		}
+	});
+}
+
+void Skeleton::renderJoints() const
+{
+	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
+		const Bone& bone = pair.second;
+
+		if (bone.translation != zero) {
+			GLUtils::defaultProgram->setUniform("model",
+				glm::scale(glm::translate(glm::mat4(), bone.translation), scale));
+			Render::sphere();
+		}
+	});
+}
+
+void Skeleton::renderOrientations() const
+{
+	glm::mat4 model;
+
+	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
+		const Bone& bone = pair.second;
+		if (bone.translation != zero) {
+			model = glm::translate(glm::mat4(), bone.translation);
+			model = model * glm::mat4_cast(bone.rotation);
+			model = glm::scale(model, glm::vec3(0.1));
+			GLUtils::defaultProgram->setUniform("model", model);
+
+			Render::axis();
 		}
 	});
 }
