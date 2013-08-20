@@ -67,6 +67,15 @@ void Recording::saveBlendFrame( float time
 	TransformKeyFrame layerKeyFrame1(0.f, 0);
 	TransformKeyFrame layerKeyFrame2(0.f, 0);
 
+	// Get position of root bone for base and layer in order to calculate offset of masked bones
+	// (root bone is SHOULDER_CENTER since it exists in both seated and standing modes)
+	TransformKeyFrame baseRootKeyFrame(0.f, 0);
+	TransformKeyFrame layerRootKeyFrame(0.f, 0);
+	baseAnim ->getBoneTrack(SHOULDER_CENTER)->getInterpolatedKeyFrame(time, &baseRootKeyFrame);
+	layerAnim->getBoneTrack(SHOULDER_CENTER)->getInterpolatedKeyFrame(time, &layerRootKeyFrame);
+	const glm::vec3 baseRootPos  = baseRootKeyFrame.getTranslation();
+	const glm::vec3 layerRootPos = layerRootKeyFrame.getTranslation();
+
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
 		// Get this bone's animation track for the base and blend layers
 		baseTrack  = baseAnim->getBoneTrack(boneID);
@@ -101,8 +110,10 @@ void Recording::saveBlendFrame( float time
 				layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
 				layerTrack->getInterpolatedKeyFrame(0.f, &layerKeyFrame2);
 
+				const glm::vec3 boneOffsetPos = layerKeyFrame1.getTranslation() - layerRootPos;
+
 				const glm::vec3 y0(baseKeyFrame.getTranslation());
-				const glm::vec3 xt(layerKeyFrame1.getTranslation());
+				const glm::vec3 xt(baseRootPos + boneOffsetPos);
 				const glm::vec3 x0(layerKeyFrame2.getTranslation());
 
 				const glm::quat yr0 = baseKeyFrame.getRotation();
@@ -140,8 +151,10 @@ void Recording::saveBlendFrame( float time
 				layerTrack->getInterpolatedKeyFrame(time, &layerKeyFrame1);
 				layerTrack->getInterpolatedKeyFrame(0.f, &layerKeyFrame2);
 
+				const glm::vec3 boneOffsetPos = layerKeyFrame1.getTranslation() - layerRootPos;
+
 				const glm::vec3 y0(baseKeyFrame.getTranslation());
-				const glm::vec3 xt(layerKeyFrame1.getTranslation());
+				const glm::vec3 xt(baseRootPos + boneOffsetPos);
 				const glm::vec3 x0(layerKeyFrame2.getTranslation());
 
 				// Y'(t) = Y(t) + K(t)*(X(t) - X0)
