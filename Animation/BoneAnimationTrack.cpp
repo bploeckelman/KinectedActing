@@ -70,7 +70,7 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 		glm::quat q1, q2;
 
 		// interpolate transformations
-		if( mAnim->getKFInterpolationMethod() == KFInterp_Linear )
+		if( mAnim->getKFInterpMethod() == KFInterp_Linear )
 		{
 			v1 = tkf1->getTranslation();
 			v2 = tkf2->getTranslation();
