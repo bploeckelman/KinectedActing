@@ -29,12 +29,24 @@ public:
 	void render();
 
 private:
-	void resetCamera();
+	// Update helpers 
 	void handleEvents();
 	void updateCamera();
 	void updateRecording();
 	void updatePlayback();
 	void updateTextures();
+
+	// Render helpers
+	void renderSetup()        const;
+	void renderGroundPlane()  const;
+	void renderBasisAxes()    const;
+	void renderLiveSkeleton() const;
+	void renderCurrentLayer() const;
+	void renderBlendLayer()   const;
+	void renderLights()       const;
+
+	// Misc helpers
+	void resetCamera();
 	void recordLayer();
 	void loadTextures();
 

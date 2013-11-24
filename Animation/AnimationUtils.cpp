@@ -218,7 +218,7 @@ void exportMotionAsBVH(const Animation *animation, std::ofstream& fout)
 
 	fout << "\nMOTION" << std::endl;
 	fout << "Frames: " << numFrames << std::endl;
-	fout << "Frame Time: " << animation->getFrameRate() << std::endl;
+	fout << "Frame Time: " << '60' << std::endl;
 
 	for (int i = 0; i < numFrames; ++i) {
 		const auto& rootKeyFrame = static_cast<TransformKeyFrame*>(rootTrack->getKeyFrame(i));

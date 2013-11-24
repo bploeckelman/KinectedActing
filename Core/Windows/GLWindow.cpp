@@ -110,7 +110,6 @@ void GLWindow::init()
 	light0.ambientCoefficient = 0.01f;
 }
 
-float dt = 0.f;
 void GLWindow::update()
 {
 	handleEvents();
@@ -121,6 +120,7 @@ void GLWindow::update()
 	updateRecording();
 	updatePlayback();
 
+	static float dt = 0.f;
 	dt += app.getDeltaTime().asSeconds() / 3.f;
 	light0.position = glm::vec3(0);//1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
 
@@ -144,158 +144,20 @@ void GLWindow::update()
 
 void GLWindow::render()
 {
-	window.setActive();
+	renderSetup();
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	renderGroundPlane();
+	renderBasisAxes();
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
-	glDepthRange(0.0f, 1.0f);
+	renderLiveSkeleton();
 
-	glLineWidth(5.f);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderCurrentLayer();
+	renderBlendLayer();
 
-	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
-	//glClearColor(0,0,0,1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Set uniforms
-	GLUtils::defaultProgram->use();
-	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
-	GLUtils::defaultProgram->setUniform("light.position",           light0.position);
-	GLUtils::defaultProgram->setUniform("light.intensities",        light0.intensities);
-	GLUtils::defaultProgram->setUniform("light.attenuation",        light0.attenuation);
-	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
-	GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
-	GLUtils::defaultProgram->setUniform("tex", 0);
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-	glActiveTexture(GL_TEXTURE0);
-
-	// Draw ground plane -------------------------------------------------------
-	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
-	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.2f, 0.f)));
-	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
-	GLUtils::defaultProgram->setUniform("useLighting", 1);
-	Render::plane();
-
-	// Draw an orientation axis at the origin ----------------------------------
-	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0, -1.2f, 0)));
-	GLUtils::defaultProgram->setUniform("useLighting", 0);
-	Render::axis();
-
-	// Draw live skeleton ------------------------------------------------------
-	if (liveSkeletonVisible) {
-		GLUtils::defaultProgram->setUniform("useLighting", 0);
-		GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.6f));
-		app.getKinect().getLiveSkeleton()->render();
-	}
-
-	// Draw current animation layer --------------------------------------------
-	if (!layering && nullptr != currentRecording && currentRecording->getAnimationLength() > 0.f) {
-		if (bonePathsVisible) {
-			const Animation *animation = currentRecording->getAnimation();
-			const float playback_time  = currentRecording->getPlaybackTime();
-
-			std::vector<glm::vec3> positions;
-
-			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
-			// Draw bone paths for joints that are enabled in the bone mask ----
-			GLUtils::defaultProgram->setUniform("useLighting", 0);
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.7f));
-			for (const auto& boneID : boneMask) {
-				animation->getPositions(boneID, positions, currentRecording->getPlaybackTime());
-				Render::pipe(positions);
-			}
-
-			// TODO : highlight on live skeleton when layering
-			// Highlight joints that are enabled in the bone mask --------------
-			GLUtils::simpleProgram->use();
-			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.85f));
-			for (const auto& boneID : boneMask) {
-				TransformKeyFrame kf(playback_time, 0);
-				animation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playback_time, &kf);
-
-				const glm::vec3 scale(0.025f);
-				const glm::vec3 pos = kf.getTranslation();
-				GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), pos), scale * 1.5f));
-
-				glCullFace(GL_FRONT);
-				Render::sphere();
-				glCullFace(GL_BACK);
-			}
-		}
-
-		// Draw the skeleton ---------------------------------------------------
-		GLUtils::defaultProgram->use();
-		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
-		GLUtils::defaultProgram->setUniform("light.position", light0.position);
-		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
-		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
-		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
-		GLUtils::defaultProgram->setUniform("useLighting", 1);
-		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
-		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
-		GLUtils::defaultProgram->setUniform("tex", 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
-		selectedSkeleton->render();
-	}
-
-	// Draw blend layer --------------------------------------------------------
-	if (layering) {
-		GLUtils::defaultProgram->setUniform("useLighting", 0);
-		GLUtils::defaultProgram->setUniform("color", glm::vec4(1,1,0,0.8f));
-		GLUtils::defaultProgram->setUniform("model", glm::mat4());
-		blendSkeleton->render();
-
-		if (bonePathsVisible) {
-			const Animation *animation = recordings["blend"]->getAnimation();
-			const float blend_playback_time = recordings["blend"]->getPlaybackTime();
-
-			std::vector<glm::vec3> positions;
-
-			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
-			// Draw bone paths for joints that are enabled in the bone mask ----
-			GLUtils::defaultProgram->setUniform("useLighting", 0);
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 1.f, 0.f, 0.5f));
-			for (const auto& boneID : boneMask) {
-				animation->getPositions(boneID, positions, blend_playback_time);
-				Render::pipe(positions);
-			}
-
-			animation = recordings["base"]->getAnimation();
-			const float base_playback_time = recordings["base"]->getPlaybackTime();
-			GLUtils::defaultProgram->setUniform("color", glm::vec4(0.f, 0.f, 1.f, 0.5f));
-			for (const auto& boneID : boneMask) {
-				animation->getPositions(boneID, positions, base_playback_time);
-				Render::pipe(positions);
-			}
-		}
-	}
-
-	// Draw light --------------------------------------------------------------
-	GLUtils::simpleProgram->use();
-	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
-	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
-	GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), light0.position), glm::vec3(0.01f)));
-	Render::sphere();
+	renderLights();
 
 	glUseProgram(0);
-
 	window.display();
-}
-
-void GLWindow::resetCamera()
-{
-	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
-	camera.setFieldOfView(66.f);
-	camera.setNearAndFarPlanes(0.1f, 100.f);
-	camera.setPosition(glm::vec3(0, 1, 3));
-	camera.offsetOrientation(33.f - camera.verticalAngle(), -camera.horizontalAngle());
 }
 
 void GLWindow::handleEvents()
@@ -407,31 +269,177 @@ void GLWindow::updatePlayback()
 	}
 }
 
-void GLWindow::recordLayer()
+// ----------------------------------------------------------------------------
+// Render Helper Methods ------------------------------------------------------
+// ----------------------------------------------------------------------------
+void GLWindow::renderSetup() const
 {
-	// Ignore if currently layering or recording
-	if (layering || recording) return;
+	window.setActive();
 
-	// Ignore if there isn't a base animation loaded to layer over
-	auto base = recordings.find("base");
-	if (base == end(recordings) || base->second->getAnimationLength() == 0.f) {
-		return;
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+	glDepthRange(0.0f, 1.0f);
+
+	glLineWidth(5.f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glClearColor(0.53f, 0.81f, 0.92f, 1.f); // sky blue
+	//glClearColor(0,0,0,1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Set uniforms
+	GLUtils::defaultProgram->use();
+	GLUtils::defaultProgram->setUniform("camera", camera.matrix());
+	GLUtils::defaultProgram->setUniform("light.position",           light0.position);
+	GLUtils::defaultProgram->setUniform("light.intensities",        light0.intensities);
+	GLUtils::defaultProgram->setUniform("light.attenuation",        light0.attenuation);
+	GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+	GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
+	GLUtils::defaultProgram->setUniform("tex", 0);
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+	glActiveTexture(GL_TEXTURE0);
+}
+
+void GLWindow::renderGroundPlane() const
+{
+	// Draw ground plane -------------------------------------------------------
+	glBindTexture(GL_TEXTURE_2D, depthTexture->object());//gridTexture->object());
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.2f, 0.f)));
+	//GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
+	GLUtils::defaultProgram->setUniform("useLighting", 1);
+	Render::plane();
+}
+
+void GLWindow::renderBasisAxes() const
+{
+	// Draw an orientation axis at the origin ----------------------------------
+	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0, -1.2f, 0)));
+	GLUtils::defaultProgram->setUniform("useLighting", 0);
+	Render::axis();
+}
+
+void GLWindow::renderLiveSkeleton() const
+{
+	// Draw live skeleton ------------------------------------------------------
+	if (liveSkeletonVisible) {
+		GLUtils::defaultProgram->setUniform("useLighting", 0);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.6f));
+		app.getKinect().getLiveSkeleton()->render();
 	}
+}
 
-	layering = true;
-	// TODO : start countdown timer
-	MessageBoxA(NULL, "Start recording a new layer...", "New Layer", MB_OK);
+void GLWindow::renderCurrentLayer() const
+{
+	// Draw current animation layer --------------------------------------------
+	if (!layering && nullptr != currentRecording && currentRecording->getAnimationLength() > 0.f) {
+		if (bonePathsVisible) {
+			const Animation *animation = currentRecording->getAnimation();
+			const float playback_time  = currentRecording->getPlaybackTime();
 
-	// Create a new animation layer
-	const std::string layerName = "layer " + std::to_string(++layerID);
-	recordings[layerName] = std::unique_ptr<Recording>(new Recording(layerName, app.getKinect()));
-	currentRecording = recordings[layerName].get();
+			std::vector<glm::vec3> positions;
 
-	recordings["blend"]->setPlaybackTime(0.f);
-	recordings["blend"]->startPlayback();
+			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
+			// Draw bone paths for joints that are enabled in the bone mask ----
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.7f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, currentRecording->getPlaybackTime());
+				Render::pipe(positions);
+			}
 
-	// Update ui layer combo box
-	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
+			// TODO : highlight on live skeleton when layering
+			// Highlight joints that are enabled in the bone mask --------------
+			GLUtils::simpleProgram->use();
+			GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+			GLUtils::simpleProgram->setUniform("color", glm::vec4(1.f, 0.843f, 0.f, 0.85f));
+			for (const auto& boneID : boneMask) {
+				TransformKeyFrame kf(playback_time, 0);
+				animation->getBoneTrack(boneID)->getInterpolatedKeyFrame(playback_time, &kf);
+
+				const glm::vec3 scale(0.025f);
+				const glm::vec3 pos = kf.getTranslation();
+				GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), pos), scale * 1.5f));
+
+				glCullFace(GL_FRONT);
+				Render::sphere();
+				glCullFace(GL_BACK);
+			}
+		}
+
+		// Draw the skeleton ---------------------------------------------------
+		GLUtils::defaultProgram->use();
+		GLUtils::defaultProgram->setUniform("camera", camera.matrix());
+		GLUtils::defaultProgram->setUniform("light.position", light0.position);
+		GLUtils::defaultProgram->setUniform("light.intensities", light0.intensities);
+		GLUtils::defaultProgram->setUniform("light.attenuation", light0.attenuation);
+		GLUtils::defaultProgram->setUniform("light.ambientCoefficient", light0.ambientCoefficient);
+		GLUtils::defaultProgram->setUniform("useLighting", 1);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(1));
+		GLUtils::defaultProgram->setUniform("texscale", glm::vec2(1,1));
+		GLUtils::defaultProgram->setUniform("tex", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, redTileTexture->object());
+		selectedSkeleton->render();
+	}
+}
+
+void GLWindow::renderBlendLayer() const
+{
+	// Draw blend layer --------------------------------------------------------
+	if (layering) {
+		GLUtils::defaultProgram->setUniform("useLighting", 0);
+		GLUtils::defaultProgram->setUniform("color", glm::vec4(1,1,0,0.8f));
+		GLUtils::defaultProgram->setUniform("model", glm::mat4());
+		blendSkeleton->render();
+
+		if (bonePathsVisible) {
+			const Animation *animation = recordings.at("blend")->getAnimation();
+			const float blend_playback_time = recordings.at("blend")->getPlaybackTime();
+
+			std::vector<glm::vec3> positions;
+
+			// TODO : extract method for bone paths so that we can superimpose paths from base + layer + blend
+			// Draw bone paths for joints that are enabled in the bone mask ----
+			GLUtils::defaultProgram->setUniform("useLighting", 0);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(1.f, 1.f, 0.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, blend_playback_time);
+				Render::pipe(positions);
+			}
+
+			animation = recordings.at("base")->getAnimation();
+			const float base_playback_time = recordings.at("base")->getPlaybackTime();
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0.f, 0.f, 1.f, 0.5f));
+			for (const auto& boneID : boneMask) {
+				animation->getPositions(boneID, positions, base_playback_time);
+				Render::pipe(positions);
+			}
+		}
+	}
+}
+
+void GLWindow::renderLights() const
+{
+	// Draw light --------------------------------------------------------------
+	GLUtils::simpleProgram->use();
+	GLUtils::simpleProgram->setUniform("camera", camera.matrix());
+	GLUtils::simpleProgram->setUniform("color", glm::vec4(1,0.85f,0,1));
+	GLUtils::simpleProgram->setUniform("model", glm::scale(glm::translate(glm::mat4(), light0.position), glm::vec3(0.01f)));
+	Render::sphere();
+}
+
+void GLWindow::resetCamera()
+{
+	camera.setViewportAspectRatio((float) videoMode.width / (float) videoMode.height);
+	camera.setFieldOfView(66.f);
+	camera.setNearAndFarPlanes(0.1f, 100.f);
+	camera.setPosition(glm::vec3(0, 1, 3));
+	camera.offsetOrientation(33.f - camera.verticalAngle(), -camera.horizontalAngle());
 }
 
 void GLWindow::loadTextures()
@@ -461,6 +469,32 @@ void GLWindow::loadTextures()
 						 , GL_LINEAR, GL_CLAMP_TO_EDGE));
 }
 
+void GLWindow::recordLayer()
+{
+	// Ignore if currently layering or recording
+	if (layering || recording) return;
+
+	// Ignore if there isn't a base animation loaded to layer over
+	auto base = recordings.find("base");
+	if (base == end(recordings) || base->second->getAnimationLength() == 0.f) {
+		return;
+	}
+
+	layering = true;
+	// TODO : start countdown timer
+	MessageBoxA(NULL, "Start recording a new layer...", "New Layer", MB_OK);
+
+	// Create a new animation layer
+	const std::string layerName = "layer " + std::to_string(++layerID);
+	recordings[layerName] = std::unique_ptr<Recording>(new Recording(layerName, app.getKinect()));
+	currentRecording = recordings[layerName].get();
+
+	recordings["blend"]->setPlaybackTime(0.f);
+	recordings["blend"]->startPlayback();
+
+	// Update ui layer combo box
+	msg::gDispatcher.dispatchMessage(msg::AddLayerItemMessage(layerName));
+}
 
 // ----------------------------------------------------------------------------
 // Message processing methods -------------------------------------------------
