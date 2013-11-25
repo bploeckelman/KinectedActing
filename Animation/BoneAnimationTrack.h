@@ -53,16 +53,6 @@ public:
 	~BoneAnimationTrack();
 
 	/**
-	* Gets the animation track class ID.
-	*/
-	//static AnimationTrackClass ClassId() { return AT_Bone; }
-
-	/**
-	* Gets the animation track class ID.
-	*/
-	//AnimationTrackClass getClassId() const { return BoneAnimationTrack::ClassId(); }
-
-	/**
 	* Gets the ID of the bone affected by this track.
 	*/
 	unsigned short getBoneId() const;
