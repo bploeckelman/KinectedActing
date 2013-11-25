@@ -50,6 +50,39 @@ void Recording::apply( Skeleton *skeleton, const BoneMask& boneMask/*=default_bo
 	}
 }
 
+size_t Recording::saveKeyFrame(float now)
+{
+	if (nullptr == animation) return 0;
+
+	// Get the Kinect skeleton data if there is any
+	const auto& skeletonFrame    = kinect.getSkeletonFrame();
+	const auto *skeletonData     = kinect.getFirstTrackedSkeletonData(skeletonFrame);
+	const auto *boneOrientations = kinect.getOrientations();
+	if (nullptr == skeletonData) return 0;
+
+	// Update all bone tracks with a new keyframe
+	BoneAnimationTrack *track   = nullptr;
+	TransformKeyFrame *keyFrame = nullptr;
+	size_t numKeyFrames = 0;
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		track = animation->getBoneTrack(boneID);
+		if (nullptr == track) continue;
+
+		keyFrame = static_cast<TransformKeyFrame*>(track->createKeyFrame(now));
+		if (nullptr == keyFrame) continue;
+
+		const Vector4& p = skeletonData->SkeletonPositions[boneID];
+		const Vector4& q = boneOrientations[boneID].hierarchicalRotation.rotationQuaternion;
+		keyFrame->setTranslation(glm::vec3(p.x, p.y, p.z));
+		keyFrame->setRotation(glm::quat(q.w, q.x, q.y, q.z));
+		keyFrame->setScale(glm::vec3(1,1,1));
+
+		numKeyFrames += track->getNumKeyFrames();
+	}
+
+	return numKeyFrames;
+}
+
 void Recording::saveBlendFrame( float time
                               , const Recording& base
                               , const Recording& layer
@@ -191,40 +224,6 @@ void Recording::updatePlayback( float delta )
 	}
 }
 
-size_t Recording::saveKeyFrame(float now)
-{
-	if (nullptr == animation) return 0;
-
-	// Get the Kinect skeleton data if there is any
-	const auto& skeletonFrame    = kinect.getSkeletonFrame();
-	const auto *skeletonData     = kinect.getFirstTrackedSkeletonData(skeletonFrame);
-	const auto *boneOrientations = kinect.getOrientations();
-	if (nullptr == skeletonData) return 0;
-
-	// Update all bone tracks with a new keyframe
-	BoneAnimationTrack *track   = nullptr;
-	TransformKeyFrame *keyFrame = nullptr;
-	size_t numKeyFrames = 0;
-	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		track = animation->getBoneTrack(boneID);
-		if (nullptr == track) continue;
-
-		keyFrame = static_cast<TransformKeyFrame*>(track->createKeyFrame(now));
-		if (nullptr == keyFrame) continue;
-
-		const Vector4& p = skeletonData->SkeletonPositions[boneID];
-		// TODO : save both absolute rotation and hierarchical rotation
-		const Vector4& q = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
-		keyFrame->setTranslation(glm::vec3(p.x, p.y, p.z));
-		keyFrame->setRotation(glm::quat(q.w, q.x, q.y, q.z));
-		keyFrame->setScale(glm::vec3(1,1,1));
-
-		numKeyFrames += track->getNumKeyFrames();
-	}
-
-	return numKeyFrames;
-}
-
 void Recording::clearRecording()
 {
 	animation->deleteAllBoneTrack();
@@ -260,4 +259,7 @@ void Recording::playbackPreviousFrame() {
 	}
 }
 
-float Recording::getAnimationLength() const { return ((nullptr == animation) ? 0.f : animation->getLength()); }
+float Recording::getAnimationLength() const {
+	if (nullptr != animation) return animation->getLength();
+	else                      return 0.f;
+}
