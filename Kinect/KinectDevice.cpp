@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const DWORD seated_mode_enabled = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT; 
+const DWORD seated_mode_enabled = NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT;
 
 const NUI_TRANSFORM_SMOOTH_PARAMETERS lightSmoothing  = { 0.5f, 0.5f, 0.5f, 0.05f, 0.04f };
 const NUI_TRANSFORM_SMOOTH_PARAMETERS mediumSmoothing = { 0.5f, 0.1f, 0.5f, 0.1f , 0.1f  };
@@ -32,8 +32,8 @@ KinectDevice::KinectDevice()
 	, skeletonFrame()
 	, skeletonData(nullptr)
 	, skeletonSmoothParams(mediumSmoothing)
-	, skeletonTrackingFlags(seated_mode_enabled)
-	, seatedMode(true)
+	, skeletonTrackingFlags(0)
+	, seatedMode(false)
 	, nextColorFrameEvent()
 	, nextDepthFrameEvent()
 	, nextSkeletonFrameEvent()
