@@ -51,6 +51,8 @@ private:
 	void loadTextures();
 
 private:
+	bool renderColorStream;
+	bool renderDepthStream;
 	bool liveSkeletonVisible;
 	bool bonePathsVisible;
 	bool playbackRunning;
@@ -89,6 +91,10 @@ public:
 	void process(const msg::ExportSkeletonBVHMessage  *message);
 	void process(const msg::ShowLiveSkeletonMessage   *message);
 	void process(const msg::HideLiveSkeletonMessage   *message);
+	void process(const msg::ShowColorStreamMessage    *message);
+	void process(const msg::HideColorStreamMessage    *message);
+	void process(const msg::ShowDepthStreamMessage    *message);
+	void process(const msg::HideDepthStreamMessage    *message);
 	void process(const msg::PlaybackFirstFrameMessage *message);
 	void process(const msg::PlaybackLastFrameMessage  *message);
 	void process(const msg::PlaybackPrevFrameMessage  *message);

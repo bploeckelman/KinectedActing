@@ -27,6 +27,10 @@ namespace msg
 		, STOP_KINECT_DEVICE
 		, SHOW_LIVE_SKELETON
 		, HIDE_LIVE_SKELETON
+		, SHOW_COLOR_STREAM
+		, HIDE_COLOR_STREAM
+		, SHOW_DEPTH_STREAM
+		, HIDE_DEPTH_STREAM
 		, TOGGLE_SEATED_MODE
 		// Skeleton recording controls
 		, START_SKELETON_RECORDING
@@ -128,6 +132,26 @@ namespace msg
 	class HideLiveSkeletonMessage : public Message
 	{
 	public: HideLiveSkeletonMessage() : Message(HIDE_LIVE_SKELETON) {}
+	};
+	// ------------------------------------------------------------------------
+	class ShowColorStreamMessage : public Message
+	{
+	public: ShowColorStreamMessage() : Message(SHOW_COLOR_STREAM) {}
+	};
+	// ------------------------------------------------------------------------
+	class HideColorStreamMessage : public Message
+	{
+	public: HideColorStreamMessage() : Message(HIDE_COLOR_STREAM) {}
+	};
+	// ------------------------------------------------------------------------
+	class ShowDepthStreamMessage : public Message
+	{
+	public: ShowDepthStreamMessage() : Message(SHOW_DEPTH_STREAM) {}
+	};
+	// ------------------------------------------------------------------------
+	class HideDepthStreamMessage : public Message
+	{
+	public: HideDepthStreamMessage() : Message(HIDE_DEPTH_STREAM) {}
 	};
 	// ------------------------------------------------------------------------
 	class ToggleSeatedModeMessage : public Message
@@ -285,6 +309,10 @@ namespace msg
 		virtual void process(const SetRecordingLabelMessage *message) {}
 		virtual void process(const ShowLiveSkeletonMessage  *message) {}
 		virtual void process(const HideLiveSkeletonMessage  *message) {}
+		virtual void process(const ShowColorStreamMessage   *message) {}
+		virtual void process(const HideColorStreamMessage   *message) {}
+		virtual void process(const ShowDepthStreamMessage   *message) {}
+		virtual void process(const HideDepthStreamMessage   *message) {}
 		virtual void process(const ToggleSeatedModeMessage  *message) {}
 		virtual void process(const PlaybackFirstFrameMessage *message) {}
 		virtual void process(const PlaybackLastFrameMessage  *message) {}

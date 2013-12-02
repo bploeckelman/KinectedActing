@@ -18,6 +18,7 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -38,6 +39,13 @@ static const int initial_pos_y   = 5;
 
 static glm::vec2 mouse_pos_current;
 
+// For SFML overlays
+sf::Uint8 color_bytes[KinectDevice::color_bytes];
+sf::Sprite colorSprite;
+sf::Sprite depthSprite;
+sf::Texture sfColorTexture;
+sf::Texture sfDepthTexture;
+
 
 struct Light
 {
@@ -51,6 +59,8 @@ static struct Light light0;
 
 GLWindow::GLWindow(const std::string& title, App& app)
 	: Window(title, app)
+	, renderColorStream(false)
+	, renderDepthStream(false)
 	, liveSkeletonVisible(true)
 	, bonePathsVisible(false)
 	, playbackRunning(false)
@@ -108,6 +118,20 @@ void GLWindow::init()
 	light0.intensities = glm::vec3(1,1,1);
 	light0.attenuation = 0.01f;
 	light0.ambientCoefficient = 0.01f;
+
+	sfColorTexture.create(KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+	sfDepthTexture.create(KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+
+	colorSprite.setTexture(sfColorTexture);
+	depthSprite.setTexture(sfDepthTexture);
+
+	colorSprite.setScale(0.5f, 0.5f);
+	depthSprite.setScale(0.5f, 0.5f);
+
+	colorSprite.setPosition(0, 0);
+	const float leftEdge   = (float) sf::VideoMode::getDesktopMode().width - 300;
+	const float leftOffset = KinectDevice::image_stream_width / 2.f;
+	depthSprite.setPosition(leftEdge - leftOffset, 0);
 }
 
 void GLWindow::update()
@@ -157,6 +181,12 @@ void GLWindow::render()
 	renderLights();
 
 	glUseProgram(0);
+
+	window.pushGLStates();
+	if (renderColorStream) window.draw(colorSprite);
+	if (renderDepthStream) window.draw(depthSprite);
+	window.popGLStates();
+
 	window.display();
 }
 
@@ -183,6 +213,9 @@ void GLWindow::handleEvents()
 	glPolygonMode(GL_FRONT_AND_BACK, (space ? GL_LINE : GL_FILL));
 }
 
+// ----------------------------------------------------------------------------
+// Update Helper Methods ------------------------------------------------------
+// ----------------------------------------------------------------------------
 void GLWindow::updateCamera()
 {
 	// Update mouse position and apply mouse movement to camera orientation
@@ -221,6 +254,21 @@ void GLWindow::updateTextures()
 	// Update kinect image stream textures
 	colorTexture->subImage2D(colorData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
 	depthTexture->subImage2D(depthData, KinectDevice::image_stream_width, KinectDevice::image_stream_height);
+
+	if (renderColorStream) {
+		// Reorder Kinect BGRA color data into RGBA for SFML
+		for (int i = 0; i < KinectDevice::color_pixels; ++i) {
+			color_bytes[(i * 4) + 0] = colorData[(i * 4) + 2]; // B <-> R
+			color_bytes[(i * 4) + 1] = colorData[(i * 4) + 1]; // G <-> G
+			color_bytes[(i * 4) + 2] = colorData[(i * 4) + 0]; // R <-> B
+			color_bytes[(i * 4) + 3] = 255;                    // A <-> opaque
+		}
+		sfColorTexture.update(color_bytes);
+	}
+
+	if (renderDepthStream) {
+		sfDepthTexture.update(depthData);
+	}
 }
 
 void GLWindow::updateRecording()
@@ -308,9 +356,9 @@ void GLWindow::renderSetup() const
 void GLWindow::renderGroundPlane() const
 {
 	// Draw ground plane -------------------------------------------------------
-	glBindTexture(GL_TEXTURE_2D, depthTexture->object());//gridTexture->object());
+	glBindTexture(GL_TEXTURE_2D, gridTexture->object());
 	GLUtils::defaultProgram->setUniform("model", glm::translate(glm::mat4(), glm::vec3(0.f, -1.2f, 0.f)));
-	//GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
+	GLUtils::defaultProgram->setUniform("texscale", glm::vec2(20,20));
 	GLUtils::defaultProgram->setUniform("useLighting", 1);
 	Render::plane();
 }
@@ -507,6 +555,10 @@ void GLWindow::registerMessageHandlers()
 	msg::gDispatcher.registerHandler(msg::EXPORT_SKELETON_BVH,      this);
 	msg::gDispatcher.registerHandler(msg::SHOW_LIVE_SKELETON,       this);
 	msg::gDispatcher.registerHandler(msg::HIDE_LIVE_SKELETON,       this);
+	msg::gDispatcher.registerHandler(msg::SHOW_COLOR_STREAM,        this);
+	msg::gDispatcher.registerHandler(msg::HIDE_COLOR_STREAM,        this);
+	msg::gDispatcher.registerHandler(msg::SHOW_DEPTH_STREAM,        this);
+	msg::gDispatcher.registerHandler(msg::HIDE_DEPTH_STREAM,        this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_FIRST_FRAME,     this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_LAST_FRAME,      this);
 	msg::gDispatcher.registerHandler(msg::PLAYBACK_PREV_FRAME,      this);
@@ -573,6 +625,26 @@ void GLWindow::process( const msg::ShowLiveSkeletonMessage *message )
 void GLWindow::process( const msg::HideLiveSkeletonMessage *message )
 {
 	liveSkeletonVisible = false;
+}
+
+void GLWindow::process( const msg::ShowColorStreamMessage *message )
+{
+	renderColorStream = true;
+}
+
+void GLWindow::process( const msg::HideColorStreamMessage *message )
+{
+	renderColorStream = false;
+}
+
+void GLWindow::process( const msg::ShowDepthStreamMessage *message )
+{
+	renderDepthStream = true;
+}
+
+void GLWindow::process( const msg::HideDepthStreamMessage *message )
+{
+	renderDepthStream = false;
 }
 
 void GLWindow::process( const msg::PlaybackFirstFrameMessage *message )
