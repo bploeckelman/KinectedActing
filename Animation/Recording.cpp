@@ -73,8 +73,10 @@ size_t Recording::saveKeyFrame(float now)
 
 		const Vector4& p = skeletonData->SkeletonPositions[boneID];
 		const Vector4& q = boneOrientations[boneID].hierarchicalRotation.rotationQuaternion;
+		const Vector4& a = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
 		keyFrame->setTranslation(glm::vec3(p.x, p.y, p.z));
 		keyFrame->setRotation(glm::quat(q.w, q.x, q.y, q.z));
+		keyFrame->setAbsRotation(glm::quat(a.w, a.x, a.y, a.z));
 		keyFrame->setScale(glm::vec3(1,1,1));
 
 		numKeyFrames += track->getNumKeyFrames();

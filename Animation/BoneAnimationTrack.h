@@ -96,6 +96,7 @@ private:
 
 	mutable CatmullRomSpline<glm::vec3> mTransSpline;
 	mutable CatmullRomSpline<glm::quat> mRotSpline;
+	mutable CatmullRomSpline<glm::quat> mAbsRotSpline;
 	mutable CatmullRomSpline<glm::vec3> mScalSpline;
 
 };

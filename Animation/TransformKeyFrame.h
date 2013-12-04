@@ -39,7 +39,7 @@ public:
 	* Constructor.
 	*/
 	TransformKeyFrame( float time, unsigned int index )
-		: KeyFrame(time, index), mTranslation(), mRotation(), mScale(1,1,1)
+		: KeyFrame(time, index), mTranslation(), mRotation(), mAbsRotation(), mScale(1)
 	{}
 
 	/**
@@ -61,11 +61,13 @@ public:
 	* Gets the rotation component.
 	*/
 	const glm::quat& getRotation() const;
+	const glm::quat& getAbsRotation() const;
 
 	/**
 	* Sets the rotation component.
 	*/
 	void setRotation( const glm::quat& rot );
+	void setAbsRotation( const glm::quat& rot );
 
 	/**
 	* Gets the scale component.
@@ -81,6 +83,7 @@ private:
 
 	glm::vec3 mTranslation;
 	glm::quat mRotation;
+	glm::quat mAbsRotation;
 	glm::vec3 mScale;
 
 };
@@ -88,8 +91,10 @@ private:
 
 inline const glm::vec3& TransformKeyFrame::getTranslation() const { return mTranslation; }
 inline const glm::quat& TransformKeyFrame::getRotation() const { return mRotation; }
+inline const glm::quat& TransformKeyFrame::getAbsRotation() const { return mAbsRotation; }
 inline const glm::vec3& TransformKeyFrame::getScale() const { return mScale; }
 
 inline void TransformKeyFrame::setTranslation( const glm::vec3& trans ) { mTranslation = trans; }
 inline void TransformKeyFrame::setRotation( const glm::quat& rot ) { mRotation = rot; }
+inline void TransformKeyFrame::setAbsRotation( const glm::quat& rot ) { mAbsRotation = rot; }
 inline void TransformKeyFrame::setScale( const glm::vec3& scal ) { mScale = scal; }
