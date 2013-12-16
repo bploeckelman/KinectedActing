@@ -330,7 +330,7 @@ HRESULT KinectDevice::processSkeletonData()
 	return hr;
 }
 
-const NUI_SKELETON_DATA *KinectDevice::getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame)
+const NUI_SKELETON_DATA *KinectDevice::getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame ) const
 {
 	for (int i = 0; i < NUI_SKELETON_COUNT; ++i) {
 		const NUI_SKELETON_DATA *data = &skeletonFrame.SkeletonData[i];

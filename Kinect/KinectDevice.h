@@ -55,7 +55,7 @@ public:
 	bool isInitialized() const;
 	bool isSeatedModeEnabled() const;
 
-	static const NUI_SKELETON_DATA *getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame);
+	const NUI_SKELETON_DATA *getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame) const;
 
 public: // External interface
 	static void initRequest();
