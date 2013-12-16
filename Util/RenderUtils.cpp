@@ -88,7 +88,7 @@ void Render::init()
 
 	axisMesh = std::unique_ptr<AxisMesh>(new AxisMesh("axis"));
 	cubeMesh = std::unique_ptr<CubeMesh>(new CubeMesh("cube"));
-	planeMesh = std::unique_ptr<PlaneMesh>(new PlaneMesh("plane"));
+	planeMesh = std::unique_ptr<PlaneMesh>(new PlaneMesh("plane", 50, 50, 1));
 	sphereMesh = std::unique_ptr<SphereMesh>(new SphereMesh("sphere"));
 	capsuleMesh = std::unique_ptr<CapsuleMesh>(new CapsuleMesh("capsule"));
 	cylinderMesh = std::unique_ptr<CylinderMesh>(new CylinderMesh("cylinder"));
