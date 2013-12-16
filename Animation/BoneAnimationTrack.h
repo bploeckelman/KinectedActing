@@ -22,7 +22,9 @@ SOFTWARE.
 #pragma once
 
 #include "AnimationTrack.h"
-#include "Util/CatmullRomSpline.h"
+#include "Util/zhCatmullRomSpline.h"
+#include "Util/zhQuat.h"
+#include "Util/zhVector3.h"
 #include "Skeleton.h"
 
 #include <glm/glm.hpp>
@@ -94,10 +96,10 @@ private:
 
 	unsigned short mBoneId;
 
-	mutable CatmullRomSpline<glm::vec3> mTransSpline;
-	mutable CatmullRomSpline<glm::quat> mRotSpline;
-	mutable CatmullRomSpline<glm::quat> mAbsRotSpline;
-	mutable CatmullRomSpline<glm::vec3> mScalSpline;
+	mutable zh::CatmullRomSpline<zh::Vector3> mTransSpline;//glm::vec3> mTransSpline;
+	mutable zh::CatmullRomSpline<zh::Quat> mRotSpline;//glm::quat> mRotSpline;
+	mutable zh::CatmullRomSpline<zh::Quat> mAbsRotSpline;//glm::quat> mAbsRotSpline;
+	mutable zh::CatmullRomSpline<zh::Vector3> mScalSpline;//glm::vec3> mScalSpline;
 
 };
 

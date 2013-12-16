@@ -23,6 +23,10 @@ SOFTWARE.
 #include "TransformKeyFrame.h"
 #include "Animation.h"
 #include "Skeleton.h"
+#include "AnimationUtils.h"
+#include "Util/zhQuat.h"
+#include "Util/zhVector3.h"
+#include "Util/zhMathMacros.h"
 
 #include <cassert>
 
@@ -50,18 +54,18 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 	tkf2 = static_cast<TransformKeyFrame*>(kf2);
 
 	// interpolate between them
-	//if( zhEqualf( t, 0 ) )
-	if( fabs(t - 0) < 0.00001f )
+	if( zhEqualf( t, 0 ) )
 	{
 		tkf->setTranslation( tkf1->getTranslation() );
 		tkf->setRotation( tkf1->getRotation() );
+		tkf->setAbsRotation( tkf1->getAbsRotation() );
 		tkf->setScale( tkf1->getScale() );
 	}
-	//else if( zhEqualf( t, 1 ) )
-	else if ( fabs(t - 1) < 0.00001f )
+	else if( zhEqualf( t, 1 ) )
 	{
 		tkf->setTranslation( tkf2->getTranslation() );
 		tkf->setRotation( tkf2->getRotation() );
+		tkf->setAbsRotation( tkf2->getAbsRotation() );
 		tkf->setScale( tkf2->getScale() );
 	}
 	else
@@ -91,9 +95,15 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 				// interpolation splines not built yet, build them now
 				_buildInterpSplines();
 
-			tkf->setTranslation( mTransSpline.getPoint( tkf1->getIndex(), t ) );
-			tkf->setRotation( mRotSpline.getPoint( tkf1->getIndex(), t ) );
-			tkf->setScale( mScalSpline.getPoint( tkf1->getIndex(), t ) );
+			zh::Vector3 tr( mTransSpline.getPoint( tkf1->getIndex(), t) );
+			zh::Quat r( mRotSpline.getPoint( tkf1->getIndex(), t) );
+			zh::Quat a( mAbsRotSpline.getPoint( tkf1->getIndex(), t) );
+			zh::Vector3 s( mScalSpline.getPoint( tkf1->getIndex(), t) );
+
+			tkf->setTranslation( glm::vec3(tr.x, tr.y, tr.z) );//mTransSpline.getPoint( tkf1->getIndex(), t ) );
+			tkf->setRotation( glm::quat(r.w, r.x, r.y, r.z) );//mRotSpline.getPoint( tkf1->getIndex(), t ) );
+			tkf->setAbsRotation( glm::quat(a.w, a.x, a.y, a.z) );
+			tkf->setScale( glm::vec3(s.x, s.y, s.z) );//mScalSpline.getPoint( tkf1->getIndex(), t ) );
 		}
 	}
 }
@@ -110,7 +120,7 @@ void BoneAnimationTrack::apply( Skeleton* skel, float time, float weight, float 
 
 	bone->translation = glm::vec3( tkf.getTranslation() * weight * scale );
 	bone->rotation = glm::slerp( glm::quat(), tkf.getRotation(), weight );
-	bone->scale = ( glm::vec3(1,1,1) + ( glm::vec3(1,1,1) - tkf.getScale() ) * weight * scale );
+	bone->scale = ( glm::vec3(1) + ( glm::vec3(1) - tkf.getScale() ) * weight * scale );
 }
 
 KeyFrame* BoneAnimationTrack::_createKeyFrame( float time )
@@ -125,12 +135,20 @@ void BoneAnimationTrack::_buildInterpSplines() const
 	for( unsigned int kfi = 0; kfi < mKeyFrames.size(); ++kfi )
 	{
 		tkf = static_cast<TransformKeyFrame*>( mKeyFrames[kfi] );
-		mTransSpline.addControlPoint( tkf->getTranslation() );
-		mRotSpline.addControlPoint( tkf->getRotation() );
-		mScalSpline.addControlPoint( tkf->getScale() );
+
+		glm::vec3 t(tkf->getTranslation());
+		glm::quat r(tkf->getRotation());
+		glm::quat a(tkf->getAbsRotation());
+		glm::vec3 s(tkf->getScale());
+
+		mTransSpline.addControlPoint( zh::Vector3(t.x, t.y, t.z) );//tkf->getTranslation() );
+		mRotSpline.addControlPoint( zh::Quat(r.w, r.x, r.y, r.z) );//tkf->getRotation() );
+		mAbsRotSpline.addControlPoint( zh::Quat(a.w, a.x, a.y, a.z) );//tkf->getAbsRotation() );
+		mScalSpline.addControlPoint( zh::Vector3(s.x, s.y, s.z) );//tkf->getScale() );
 	}
 
 	mTransSpline.calcTangents();
 	mRotSpline.calcTangents();
+	mAbsRotSpline.calcTangents();
 	mScalSpline.calcTangents();
 }
