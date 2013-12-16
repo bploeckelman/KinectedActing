@@ -14,6 +14,7 @@ unsigned int Recording::nextAnimationID = 0;
 Recording::Recording( const std::string& name, const KinectDevice& kinect )
 	: animation(new Animation(nextAnimationID++, name))
 	, kinect(kinect)
+	, looping(true)
 	, bonepaths(false)
 	, playback(false)
 	, playbackTime(0)
@@ -75,9 +76,9 @@ size_t Recording::saveKeyFrame(float now)
 		const Vector4& q = boneOrientations[boneID].hierarchicalRotation.rotationQuaternion;
 		const Vector4& a = boneOrientations[boneID].absoluteRotation.rotationQuaternion;
 		keyFrame->setTranslation(glm::vec3(p.x, p.y, p.z));
-		keyFrame->setRotation(glm::quat(q.w, q.x, q.y, q.z));
-		keyFrame->setAbsRotation(glm::quat(a.w, a.x, a.y, a.z));
-		keyFrame->setScale(glm::vec3(1,1,1));
+		keyFrame->setRotation(glm::normalize(glm::quat(q.w, q.x, q.y, q.z)));
+		keyFrame->setAbsRotation(glm::normalize(glm::quat(a.w, a.x, a.y, a.z)));
+		keyFrame->setScale(glm::vec3(1));
 
 		numKeyFrames += track->getNumKeyFrames();
 	}
@@ -103,23 +104,24 @@ void Recording::saveBlendFrame( float time
 	TransformKeyFrame layerKeyFrame2(0.f, 0);
 
 	// Get position of root bone for base and layer in order to calculate offset of masked bones
-	// (root bone is SHOULDER_CENTER since it exists in both seated and standing modes)
 	TransformKeyFrame baseRootKeyFrame(0.f, 0);
 	TransformKeyFrame layerRootKeyFrame(0.f, 0);
-	baseAnim ->getBoneTrack(SHOULDER_CENTER)->getInterpolatedKeyFrame(time, &baseRootKeyFrame);
-	layerAnim->getBoneTrack(SHOULDER_CENTER)->getInterpolatedKeyFrame(time, &layerRootKeyFrame);
+	baseAnim ->getBoneTrack(HIP_CENTER)->getInterpolatedKeyFrame(time, &baseRootKeyFrame);
+	layerAnim->getBoneTrack(HIP_CENTER)->getInterpolatedKeyFrame(time, &layerRootKeyFrame);
 	const glm::vec3 baseRootPos  = baseRootKeyFrame.getTranslation();
 	const glm::vec3 layerRootPos = layerRootKeyFrame.getTranslation();
 
 	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		// Get this bone's animation track for the base and blend layers
+		// Get this bone's animation track for the base, layer, and blend (i.e. this) animations
 		baseTrack  = baseAnim->getBoneTrack(boneID);
+		layerTrack = layerAnim->getBoneTrack(boneID);
 		blendTrack = animation->getBoneTrack(boneID);
-		if (nullptr == baseTrack || nullptr == blendTrack) continue;
+		if (nullptr == baseTrack || nullptr == layerTrack || nullptr == blendTrack) continue;
 
 		// Create a new keyframe in this blended recording
 		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
 		if (nullptr == blendTKF) continue;
+		blendTKF->setScale(glm::vec3(1)); // scale is ignored
 
 		// If this boneID is not in boneMask, save the base keyframe for this bone
 		if (end(boneMask) == boneMask.find((EBoneID) boneID)) {
@@ -127,15 +129,12 @@ void Recording::saveBlendFrame( float time
 			continue;
 		}
 		// Else this boneID is in boneMask, save a blended keyframe using the current mapping mode...
-
-		layerTrack = layerAnim->getBoneTrack(boneID);
-		if (nullptr == layerTrack) continue;
-
 		switch (mappingMode)
 		{
 			case MAP_DIRECT:
 			{
 				layerTrack->getInterpolatedKeyFrame(time, blendTKF);
+				blendTKF->setRotation(glm::normalize(blendTKF->getRotation()));
 			}
 			break;
 
@@ -159,7 +158,6 @@ void Recording::saveBlendFrame( float time
 				blendTKF->setTranslation(glm::vec3(y0 + (xt - x0)));
 				// Yr'(t) = Xr(t) inv(Xr0) Yr0
 				blendTKF->setRotation(xrt * inv_xr0 * yr0);
-				blendTKF->setScale(glm::vec3(1,1,1));
 			}
 			break;
 
@@ -176,7 +174,6 @@ void Recording::saveBlendFrame( float time
 				// Y'(t) = Y(t) + (X(t) - X(t - dt))
 				blendTKF->setTranslation(glm::vec3(yt + (xt - xt_dt)));
 				blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
-				blendTKF->setScale(glm::vec3(1,1,1));
 			}
 			break;
 
@@ -195,7 +192,6 @@ void Recording::saveBlendFrame( float time
 				// Y'(t) = Y(t) + K(t)*(X(t) - X0)
 				blendTKF->setTranslation(glm::vec3(y0 + (xt - x0)));
 				blendTKF->setRotation(glm::quat(baseKeyFrame.getRotation()));
-				blendTKF->setScale(glm::vec3(1,1,1));
 			}
 			break;
 		}
@@ -221,8 +217,10 @@ void Recording::updatePlayback( float delta )
 
 	playbackTime += playbackDelta;
 
-	if (playbackTime > animation->getLength()) {
-		playbackTime = 0.f;
+	const float len = animation->getLength();
+	if (playbackTime > len) {
+		if (looping) playbackTime = 0.f;
+		else         playbackTime = len;
 	}
 }
 
