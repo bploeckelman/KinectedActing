@@ -111,6 +111,8 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	playbackDeltaScale->SetValue(1.f / 60.f);
 	liveSkeletonVisibleCheckButton->SetActive(true);
 	renderPathCheckButton->SetActive(false);
+	renderColorStreamCheckButton->SetActive(true);
+	renderDepthStreamCheckButton->SetActive(true);
 
 	animLayersComboBox->AppendItem("base");
 	animLayersComboBox->AppendItem("blend");
@@ -223,7 +225,7 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
 	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 29, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
-	table->SetRowSpacing(30, 1.f);
+	//table->SetRowSpacing(30, 1.f);
 	table->Attach(renderColorStreamCheckButton, sf::Rect<sf::Uint32>(0, 30, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 	table->Attach(renderDepthStreamCheckButton, sf::Rect<sf::Uint32>(0, 31, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
 
