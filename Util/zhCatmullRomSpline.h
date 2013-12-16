@@ -19,14 +19,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
-#pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#ifndef __zhCatmullRomSpline_h__
+#define __zhCatmullRomSpline_h__
 
-#include <vector>
-#include <cassert>
+#include "zhPrereq.h"
+#include "zhMathMacros.h"
+#include "zhVector.h"
+#include "zhMatrix.h"
+#include "zhVector3.h"
+#include "zhVector2.h"
+#include "zhQuat.h"
 
+namespace zh
+{
 
 /**
 * @brief Generic implementation of a Catmull-Rom spline,
@@ -42,19 +48,32 @@ public:
 	* Constructor.
 	*/
 	CatmullRomSpline()
-		: mCoeffs(glm::mat4())
 	{
-		mCoeffs[0][0] =  2.f; mCoeffs[0][1] = -2.f; mCoeffs[0][2] =  1.f; mCoeffs[0][3] =  1.f;
-		mCoeffs[1][0] = -3.f; mCoeffs[1][1] =  3.f; mCoeffs[1][2] = -2.f; mCoeffs[1][3] = -1.f;
-		mCoeffs[2][0] =  0.f; mCoeffs[2][1] =  0.f; mCoeffs[2][2] =  1.f; mCoeffs[2][3] =  1.f;
-		mCoeffs[3][0] =  1.f; mCoeffs[3][1] =  0.f; mCoeffs[3][2] =  0.f; mCoeffs[3][3] =  0.f;
+		mCoeffs = Matrix(4);
+		mCoeffs.set( 0, 0, 2 );
+		mCoeffs.set( 0, 1, -2 );
+		mCoeffs.set( 0, 2, 1 );
+		mCoeffs.set( 0, 3, 1 );
+		mCoeffs.set( 1, 0, -3 );
+		mCoeffs.set( 1, 1, 3 );
+		mCoeffs.set( 1, 2, -2 );
+		mCoeffs.set( 1, 3, -1 );
+		mCoeffs.set( 2, 0, 0 );
+		mCoeffs.set( 2, 1, 0 );
+		mCoeffs.set( 2, 2, 1 );
+		mCoeffs.set( 2, 3, 0 );
+		mCoeffs.set( 3, 0, 1 );
+		mCoeffs.set( 3, 1, 0 );
+		mCoeffs.set( 3, 2, 0 );
+		mCoeffs.set( 3, 3, 0 );
 	}
 
 	/**
 	* Destructor.
 	*/
 	~CatmullRomSpline()
-	{}
+	{
+	}
 
 	/**
 	* Adds a control point to the spline.
@@ -77,7 +96,7 @@ public:
 	*/
 	const T& getControlPoint( unsigned int index ) const
 	{
-		assert( index < getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
 
 		return mCtrlPoints[index];
 	}
@@ -88,7 +107,7 @@ public:
 	*/
 	void setControlPoint( unsigned int index, const T& pt )
 	{
-		assert( index < getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
 
 		mCtrlPoints[index] = pt;
 	}
@@ -98,8 +117,8 @@ public:
 	*/
 	const T& getTangentAtCPt( unsigned int index ) const
 	{
-		assert( index < getNumControlPoints() );
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		return mTangents[index];
 	}
@@ -125,14 +144,14 @@ public:
 	T getPoint( float t ) const
 	{
 		// compute left-hand control point index
-		float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
-		unsigned int cpi = ( unsigned int )fcpi;
+        float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
+        unsigned int cpi = ( unsigned int )fcpi;
 		if( cpi >= mCtrlPoints.size() ) cpi = mCtrlPoints.size() - 1;
-		
+        
 		// compute interp. param.
-		t = fcpi - ( float )cpi;
+        t = fcpi - ( float )cpi;
 
-		return getPoint( cpi, t );
+        return getPoint( cpi, t );
 	}
 
 	/**
@@ -146,22 +165,23 @@ public:
 	*/
 	T getPoint( unsigned int index, float t ) const
 	{
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		if( index >= mCtrlPoints.size() - 1 )
 			return mCtrlPoints[ mCtrlPoints.size() - 1 ];
 
-		//if( zhEqualf( t, 0 ) )
-		if( fabs(t - 0) < 0.00001f )
+		if( zhEqualf( t, 0 ) )
 			return mCtrlPoints[index];
-		//else if( zhEqualf( t, 1 ) )
-		else if( fabs(t - 1) < 0.00001f )
+		else if( zhEqualf( t, 1 ) )
 			return mCtrlPoints[index+1];
 
 		float t2 = t*t;
-		glm::vec4 tv(t2*t, t2, t, 1);
-		//tv *= mCoeffs;
-		tv = tv * mCoeffs;
+		Vector tv(4);
+		tv.set( 0, t2*t );
+		tv.set( 1, t2 );
+		tv.set( 2, t );
+		tv.set( 3, 1 );
+		tv *= mCoeffs;
 
 		const T& cpt1 = mCtrlPoints[index];
 		const T& cpt2 = mCtrlPoints[index+1];
@@ -169,22 +189,12 @@ public:
 		const T& tan2 = mTangents[index+1];
 		T pt = cpt1;
 
-		//for( unsigned int ei = 0; ei < cpt1.size(); ++ei )
-		//{
-		//	pt.set( ei, tv.get(0) * cpt1.get(ei) +
-		//		tv.get(1) * cpt2.get(ei) +
-		//		tv.get(2) * tan1.get(ei) +
-		//		tv.get(3) * tan2.get(ei) );
-		//}
-		// NOTE: glm::quat has a specialized version of CatmullRomSpline, but glm::vecN doesn't
-		// for now this is using a hardcoded size so that it can handle the translation/scaling 
-		// portions of a TransformKeyFrame object
-		for( unsigned int ei = 0; ei < 3; ++ei )
+		for( unsigned int ei = 0; ei < cpt1.size(); ++ei )
 		{
-			pt[ei] = tv[0] * cpt1[ei]
-				   + tv[1] * cpt2[ei]
-				   + tv[2] * tan1[ei]
-				   + tv[3] * tan2[ei];
+			pt.set( ei, tv.get(0) * cpt1.get(ei) +
+				tv.get(1) * cpt2.get(ei) +
+				tv.get(2) * tan1.get(ei) +
+				tv.get(3) * tan2.get(ei) );
 		}
 
 		return pt;
@@ -203,14 +213,14 @@ public:
 	T getTangent( float t ) const
 	{
 		// compute left-hand control point index
-		float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
-		unsigned int cpi = ( unsigned int )fcpi;
+        float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
+        unsigned int cpi = ( unsigned int )fcpi;
 		if( cpi >= mCtrlPoints.size() ) cpi = mCtrlPoints.size() - 1;
-		
-		// compute interpolation param.
-		t = fcpi - ( float )cpi;
+        
+		// compute interp. param.
+        t = fcpi - ( float )cpi;
 
-		return getTangent( cpi, t );
+        return getTangent( cpi, t );
 	}
 
 	/**
@@ -224,20 +234,22 @@ public:
 	*/
 	T getTangent( unsigned int index, float t) const
 	{
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		if( index >= mCtrlPoints.size() - 1 )
 			return mTangents[ mCtrlPoints.size() - 1 ];
 
-		//if( zhEqualf( t, 0 ) )
-		if( fabs(t - 0) < 0.00001f )
+		if( zhEqualf( t, 0 ) )
 			return mTangents[index];
-		//else if( zhEqualf( t, 1 ) )
-		else if( fabs(t - 1) < 0.00001f )
+		else if( zhEqualf( t, 1 ) )
 			return mTangents[index+1];
 
 		float t2 = t*t;
-		glm::vec4 tv(3.f*t2, 2.f*t, 1.f, 0.f);
+		Vector tv(4);
+		tv.set( 0, 3.f*t2 );
+		tv.set( 1, 2.f*t );
+		tv.set( 2, 1 );
+		tv.set( 3, 0 );
 		tv *= mCoeffs;
 
 		const T& cpt1 = mCtrlPoints[index];
@@ -246,22 +258,12 @@ public:
 		const T& tan2 = mTangents[index+1];
 		T tang = cpt1;
 
-		//for( unsigned int ei = 0; ei < tang.size(); ++ei )
-		//{
-		//	tang.set( ei, tv.get(0) * cpt1.get(ei) +
-		//		tv.get(1) * cpt2.get(ei) +
-		//		tv.get(2) * tan1.get(ei) +
-		//		tv.get(3) * tan2.get(ei) );
-		//}
-		// NOTE: glm::quat has a specialized version of CatmullRomSpline, but glm::vecN doesn't
-		// for now this is using a hardcoded size so that it can handle the translation/scaling 
-		// portions of a TransformKeyFrame object
-		for( unsigned int ei = 0; ei < 3; ++ei )
+		for( unsigned int ei = 0; ei < tang.size(); ++ei )
 		{
-			tang[ei] = tv[0] * cpt1[ei]
-				     + tv[1] * cpt2[ei]
-					 + tv[2] * tan1[ei]
-					 + tv[3] * tan2[ei];
+			tang.set( ei, tv.get(0) * cpt1.get(ei) +
+				tv.get(1) * cpt2.get(ei) +
+				tv.get(2) * tan1.get(ei) +
+				tv.get(3) * tan2.get(ei) );
 		}
 
 		return tang;
@@ -310,7 +312,7 @@ public:
 
 private:
 
-	glm::mat4 mCoeffs;
+	Matrix mCoeffs;
 	std::vector<T> mCtrlPoints;
 	std::vector<T> mTangents;
 
@@ -321,7 +323,7 @@ private:
 * suitable for interpolating between rotations.
 */
 template <>
-class CatmullRomSpline<glm::quat>
+class CatmullRomSpline<Quat>
 {
 
 public:
@@ -330,18 +332,20 @@ public:
 	* Constructor.
 	*/
 	CatmullRomSpline()
-	{}
+	{
+	}
 
 	/**
 	* Destructor.
 	*/
 	~CatmullRomSpline()
-	{}
+	{
+	}
 
 	/**
 	* Adds a control point to the spline.
 	*/
-	void addControlPoint( const glm::quat& pt )
+	void addControlPoint( const Quat& pt )
 	{
 		mCtrlPoints.push_back(pt);
 	}
@@ -357,9 +361,9 @@ public:
 	/**
 	* Gets a control point on the spline.
 	*/
-	const glm::quat& getControlPoint( unsigned int index ) const
+	const Quat& getControlPoint( unsigned int index ) const
 	{
-		assert( index < getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
 
 		return mCtrlPoints[index];
 	}
@@ -368,9 +372,9 @@ public:
 	* Sets a control point on the spline
 	* (remember to call calcTangents afterwards).
 	*/
-	void setControlPoint( unsigned int index, const glm::quat& pt )
+	void setControlPoint( unsigned int index, const Quat& pt )
 	{
-		assert( index < getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
 
 		mCtrlPoints[index] = pt;
 	}
@@ -378,10 +382,10 @@ public:
 	/**
 	* Gets the tangent at the specified control point.
 	*/
-	const glm::quat& getTangentAtCPt( unsigned int index ) const
+	const Quat& getTangentAtCPt( unsigned int index ) const
 	{
-		assert( index < getNumControlPoints() );
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( index < getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		return mTangents[index];
 	}
@@ -404,16 +408,16 @@ public:
 	* @param t Interpolation parameter.
 	* @return Interpolated point.
 	*/
-	glm::quat getPoint( float t ) const
+	Quat getPoint( float t ) const
 	{
 		// compute left-hand control point index
-		float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
-		unsigned int cpi = ( unsigned int )fcpi;
-		
+        float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
+        unsigned int cpi = ( unsigned int )fcpi;
+        
 		// compute interp. param.
-		t = fcpi - ( float )cpi;
+        t = fcpi - ( float )cpi;
 
-		return getPoint( cpi, t );
+        return getPoint( cpi, t );
 	}
 
 	/**
@@ -425,31 +429,24 @@ public:
 	* @param t Interpolation parameter.
 	* @return Interpolated point.
 	*/
-	glm::quat getPoint( unsigned int index, float t) const
+	Quat getPoint( unsigned int index, float t) const
 	{
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		if( index >= mCtrlPoints.size() - 1 )
 			return mCtrlPoints[ mCtrlPoints.size() - 1 ];
 
-		//if( zhEqualf( t, 0 ) )
-		if( fabs(t - 0) < 0.00001f )
+		if( zhEqualf( t, 0 ) )
 			return mCtrlPoints[index];
-		//else if( zhEqualf( t, 1 ) )
-		else if( fabs(t - 1) < 0.00001f )
+		else if( zhEqualf( t, 1 ) )
 			return mCtrlPoints[index+1];
 
-		const glm::quat& cpt1 = mCtrlPoints[index];
-		const glm::quat& cpt2 = mCtrlPoints[index+1];
-		const glm::quat& tan1 = mTangents[index];
-		const glm::quat& tan2 = mTangents[index+1];
+		const Quat& cpt1 = mCtrlPoints[index];
+		const Quat& cpt2 = mCtrlPoints[index+1];
+		const Quat& tan1 = mTangents[index];
+		const Quat& tan2 = mTangents[index+1];
 
-		//return cpt1.squad( tan1, tan2, cpt2, t );
-		// TODO : write glm adapter for Quat Quat::squad(const Quat& qa, const Quat& qb, const Quat& q, float t) const
-		float t0 = 2.f * t - (1.f - t);
-		glm::quat qi1 = glm::slerp(cpt1, cpt2, t);
-		glm::quat qi2 = glm::slerp(tan1, tan2, t);
-		return glm::slerp(qi1, qi2, t0);
+		return cpt1.squad( tan1, tan2, cpt2, t );
 	}
 
 	/**
@@ -462,16 +459,16 @@ public:
 	* @param t Interpolation parameter.
 	* @return Interpolated tangent.
 	*/
-	glm::quat getTangent( float t ) const
+	Quat getTangent( float t ) const
 	{
 		// compute left-hand control point index
-		float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
-		unsigned int cpi = ( unsigned int )fcpi;
-		
+        float fcpi = t * ( float )( mCtrlPoints.size() - 1 );
+        unsigned int cpi = ( unsigned int )fcpi;
+        
 		// compute interp. param.
-		t = fcpi - ( float )cpi;
+        t = fcpi - ( float )cpi;
 
-		return getTangent( cpi, t );
+        return getTangent( cpi, t );
 	}
 
 	/**
@@ -483,12 +480,12 @@ public:
 	* @param t Interpolation parameter.
 	* @return Interpolated tangent.
 	*/
-	glm::quat getTangent( unsigned int index, float t) const
+	Quat getTangent( unsigned int index, float t) const
 	{
-		assert( mTangents.size() == getNumControlPoints() );
+		zhAssert( mTangents.size() == getNumControlPoints() );
 
 		// TODO: how to implement this? (who needs this, anyway?)
-		return glm::quat();
+		return Quat();
 	}
 
 	/**
@@ -509,22 +506,22 @@ public:
 
 		mTangents.resize(ncpts);
 
-		glm::quat inv_cp, qlog1, qlog2, qlog;
+		Quat inv_cp, qlog1, qlog2, qlog;
 		for( unsigned int cpi = 0; cpi < ncpts; ++cpi )
 		{
-			inv_cp = glm::inverse(mCtrlPoints[cpi]);
+			inv_cp = mCtrlPoints[cpi].getInverse();
 
 			if( cpi == 0 )
 			{
 				qlog1 = inv_cp * mCtrlPoints[cpi+1];
-				qlog1 = quat_log(qlog1);
+				qlog1 = qlog1.log();
 
 				if(closed)
 					qlog2 = inv_cp * mCtrlPoints[ncpts-2];
 				else
 					qlog2 = inv_cp * mCtrlPoints[cpi];
 
-				qlog2 = quat_log(qlog2);
+				qlog2 = qlog2.log();
 			}
 			else if( cpi == ncpts - 1 )
 			{
@@ -533,71 +530,32 @@ public:
 				else
 					qlog1 = inv_cp * mCtrlPoints[cpi];
 
-				qlog1 = quat_log(qlog1);
+				qlog1 = qlog1.log();
 				
 				qlog2 = inv_cp * mCtrlPoints[cpi-1];
-				qlog2 = quat_log(qlog2);
+				qlog2 = qlog2.log();
 			}
 			else
 			{
 				qlog1 = inv_cp * mCtrlPoints[cpi+1];
-				qlog1 = quat_log(qlog1);
+				qlog1 = qlog1.log();
 
 				qlog2 = inv_cp * mCtrlPoints[cpi-1];
-				qlog2 = quat_log(qlog2);
+				qlog2 = qlog2.log();
 			}
 
 			qlog = ( qlog1 + qlog2 ) * -0.25f;
-			mTangents[cpi] = mCtrlPoints[cpi] * quat_exp(qlog);
+			mTangents[cpi] = mCtrlPoints[cpi] * qlog.exp();
 		}
-	}
-
-	glm::quat quat_log(const glm::quat& q)
-	{
-		glm::quat qout(q);
-
-		if( fabs(qout.w) < 1.f )
-		{
-			float a = glm::acos(qout.w);
-			float sin_a = glm::sin(a);
-
-			if( fabs(sin_a) >= 0.005f )
-			{
-				float c = a / sin_a;
-				qout.x *= c;
-				qout.y *= c;
-				qout.z *= c;
-			}
-		}
-
-		qout.w = 0;
-
-		return qout;
-	}
-
-	glm::quat quat_exp(const glm::quat& q)
-	{
-		glm::quat qout(q);
-
-		float a = glm::sqrt(qout.x*qout.x + qout.y*qout.y + qout.z*qout.z);
-		float sin_a = glm::sin(a);
-
-		if( fabs(sin_a) >= 0.005f )
-		{
-			float c = sin_a / a;
-			qout.x *= c;
-			qout.y *= c;
-			qout.z *= c;
-		}
-
-		qout.w = glm::cos(a);
-
-		return qout;
 	}
 
 private:
 
-	std::vector<glm::quat> mCtrlPoints;
-	std::vector<glm::quat> mTangents;
+	std::vector<Quat> mCtrlPoints;
+	std::vector<Quat> mTangents;
 
 };
+
+}
+
+#endif // __zhCatmullRomSpline_h__

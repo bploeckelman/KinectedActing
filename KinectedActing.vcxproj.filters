@@ -123,6 +123,24 @@
     <ClCompile Include="Animation\AnimationTypes.cpp">
       <Filter>Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Util\zhMatrix.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\zhMatrix4.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\zhQuat.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\zhVector.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\zhVector2.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\zhVector3.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\GLWindow.h">
@@ -176,9 +194,6 @@
     <ClInclude Include="Animation\BoneAnimationTrack.h">
       <Filter>Animation</Filter>
     </ClInclude>
-    <ClInclude Include="Util\CatmullRomSpline.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="Animation\Animation.h">
       <Filter>Animation</Filter>
     </ClInclude>
@@ -217,6 +232,36 @@
     </ClInclude>
     <ClInclude Include="Animation\AnimationTypes.h">
       <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhCatmullRomSpline.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhMathMacros.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhMatrix.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhMatrix4.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhPrereq.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhQuat.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhString.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhVector.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhVector2.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\zhVector3.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
