@@ -25,6 +25,7 @@ SOFTWARE.
 
 class KeyFrame;
 class Animation;
+class Skeleton;
 
 
 /**
@@ -55,14 +56,6 @@ public:
 	* Gets a pointer to the owning animation.
 	*/
 	virtual Animation* getAnimation() const;
-
-	/**
-	* Gets the AnimationTrack class ID.
-	*
-	* This pure virtual function should be implemented in concrete
-	* animation track classes.
-	*/
-	//virtual AnimationTrackClass getClassId() const = 0;
 
 	/**
 	* Creates a new animation key-frame.
@@ -147,7 +140,7 @@ public:
 	* should be applied.
 	* @param scale Scaling factor applied to this animation track.
 	*/
-	//virtual void apply( Skeleton* skeleton, float time, float weight = 1.f, float scale = 1.f ) const = 0;
+	virtual void apply( Skeleton* skeleton, float time, float weight = 1.f, float scale = 1.f ) const = 0;
 
 protected:
 

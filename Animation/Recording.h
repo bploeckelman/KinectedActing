@@ -28,6 +28,8 @@ public:
 	void showBonePaths();
 	void hideBonePaths();
 
+	void startLooping();
+	void stopLooping();
 	void startPlayback();
 	void stopPlayback();
 
@@ -59,6 +61,7 @@ private:
 	std::unique_ptr<Animation> animation;
 
 	bool bonepaths;
+	bool looping;
 
 	bool  playback;
 	float playbackTime;
@@ -70,6 +73,8 @@ private:
 
 };
 
+inline void Recording::startLooping()   { looping   = false; }
+inline void Recording::stopLooping()    { looping   = false; }
 inline void Recording::showBonePaths()  { bonepaths = true;  }
 inline void Recording::hideBonePaths()  { bonepaths = false; }
 inline void Recording::startPlayback()  { playback  = true;  }

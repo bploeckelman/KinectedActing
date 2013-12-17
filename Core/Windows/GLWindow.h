@@ -29,16 +29,30 @@ public:
 	void render();
 
 private:
-	void resetCamera();
+	// Update helpers 
 	void handleEvents();
 	void updateCamera();
 	void updateRecording();
 	void updatePlayback();
 	void updateTextures();
+
+	// Render helpers
+	void renderSetup()        const;
+	void renderGroundPlane()  const;
+	void renderBasisAxes()    const;
+	void renderLiveSkeleton() const;
+	void renderCurrentLayer() const;
+	void renderBlendLayer()   const;
+	void renderLights()       const;
+
+	// Misc helpers
+	void resetCamera();
 	void recordLayer();
 	void loadTextures();
 
 private:
+	bool renderColorStream;
+	bool renderDepthStream;
 	bool liveSkeletonVisible;
 	bool bonePathsVisible;
 	bool playbackRunning;
@@ -77,6 +91,10 @@ public:
 	void process(const msg::ExportSkeletonBVHMessage  *message);
 	void process(const msg::ShowLiveSkeletonMessage   *message);
 	void process(const msg::HideLiveSkeletonMessage   *message);
+	void process(const msg::ShowColorStreamMessage    *message);
+	void process(const msg::HideColorStreamMessage    *message);
+	void process(const msg::ShowDepthStreamMessage    *message);
+	void process(const msg::HideDepthStreamMessage    *message);
 	void process(const msg::PlaybackFirstFrameMessage *message);
 	void process(const msg::PlaybackLastFrameMessage  *message);
 	void process(const msg::PlaybackPrevFrameMessage  *message);

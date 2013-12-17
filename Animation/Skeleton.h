@@ -11,14 +11,17 @@
 class Bone
 {
 public:
-	Bone(EBoneID boneId, const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale)
+	Bone(EBoneID boneId, EBoneID parentId, const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale)
 		: boneId(boneId)
+		, parentId(parentId)
 		, translation(translation)
 		, rotation(rotation)
 		, scale(scale)
 	{}
 
 	const EBoneID boneId;
+	const EBoneID parentId;
+
 	glm::vec3 translation;
 	glm::quat rotation;
 	glm::vec3 scale;

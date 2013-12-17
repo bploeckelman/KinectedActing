@@ -9,7 +9,7 @@
 #include <string>
 
 // TODO : make the c'tor params once a Mesh caching structure is in place
-static const unsigned short num_sides = 20;
+static const unsigned short num_sides = 10;
 static const float height = 1.f;
 
 /************************************************************************/

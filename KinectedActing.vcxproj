@@ -120,6 +120,12 @@
     <ClCompile Include="Shaders\Program.cpp" />
     <ClCompile Include="Util\GLUtils.cpp" />
     <ClCompile Include="Util\RenderUtils.cpp" />
+    <ClCompile Include="Util\zhMatrix.cpp" />
+    <ClCompile Include="Util\zhMatrix4.cpp" />
+    <ClCompile Include="Util\zhQuat.cpp" />
+    <ClCompile Include="Util\zhVector.cpp" />
+    <ClCompile Include="Util\zhVector2.cpp" />
+    <ClCompile Include="Util\zhVector3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation\Animation.h" />
@@ -150,9 +156,18 @@
     <ClInclude Include="Scene\Meshes\SphereMesh.h" />
     <ClInclude Include="Shaders\Shader.h" />
     <ClInclude Include="Shaders\Program.h" />
-    <ClInclude Include="Util\CatmullRomSpline.h" />
     <ClInclude Include="Util\GLUtils.h" />
     <ClInclude Include="Util\RenderUtils.h" />
+    <ClInclude Include="Util\zhCatmullRomSpline.h" />
+    <ClInclude Include="Util\zhMathMacros.h" />
+    <ClInclude Include="Util\zhMatrix.h" />
+    <ClInclude Include="Util\zhMatrix4.h" />
+    <ClInclude Include="Util\zhPrereq.h" />
+    <ClInclude Include="Util\zhQuat.h" />
+    <ClInclude Include="Util\zhString.h" />
+    <ClInclude Include="Util\zhVector.h" />
+    <ClInclude Include="Util\zhVector2.h" />
+    <ClInclude Include="Util\zhVector3.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

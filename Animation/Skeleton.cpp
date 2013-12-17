@@ -108,8 +108,20 @@ void Skeleton::renderOrientations() const
 	std::for_each(begin(bones), end(bones), [&](const std::pair<EBoneID, Bone>& pair) {
 		const Bone& bone = pair.second;
 		if (bone.translation != zero) {
+			// Calculate global rotation for this bone
+			glm::quat globalRotation = bone.rotation;
+			EBoneID boneID = bone.boneId;
+			EBoneID parentID = bone.parentId;
+			while (parentID != COUNT) {
+				// accumulate parent's rotation
+				globalRotation = bones.at(parentID).rotation * globalRotation;
+				// move up the hierarchy
+				boneID = parentID;
+				parentID = bones.at(boneID).parentId;
+			}
+
 			model = glm::translate(glm::mat4(), bone.translation);
-			model = model * glm::mat4_cast(bone.rotation);
+			model = model * glm::mat4_cast(globalRotation);
 			model = glm::scale(model, glm::vec3(0.1));
 			GLUtils::defaultProgram->setUniform("model", model);
 
@@ -120,8 +132,35 @@ void Skeleton::renderOrientations() const
 
 void Skeleton::initBones() 
 {
-	for(int bone = EBoneID::HIP_CENTER; bone != EBoneID::COUNT; ++bone) {
-		EBoneID boneID = static_cast<EBoneID>(bone);
-		bones.insert(std::make_pair(boneID, Bone(boneID, glm::vec3(), glm::quat(), glm::vec3(1,1,1))));
+	for(int bone_id = EBoneID::HIP_CENTER; bone_id != EBoneID::COUNT; ++bone_id) {
+		EBoneID boneID = static_cast<EBoneID>(bone_id);
+
+		EBoneID parentID = HIP_CENTER;
+		switch (boneID) {
+			case HIP_CENTER:      parentID = COUNT;           break;
+			case SPINE:           parentID = HIP_CENTER;      break;
+			case SHOULDER_CENTER: parentID = SPINE;           break;
+			case HEAD:            parentID = SHOULDER_CENTER; break;
+			case SHOULDER_LEFT:   parentID = SHOULDER_CENTER; break;
+			case ELBOW_LEFT:      parentID = SHOULDER_LEFT;   break;
+			case WRIST_LEFT:      parentID = ELBOW_LEFT;      break;
+			case HAND_LEFT:       parentID = WRIST_LEFT;      break;
+			case SHOULDER_RIGHT:  parentID = SHOULDER_CENTER; break;
+			case ELBOW_RIGHT:     parentID = SHOULDER_RIGHT;  break;
+			case WRIST_RIGHT:     parentID = ELBOW_RIGHT;     break;
+			case HAND_RIGHT:      parentID = WRIST_RIGHT;     break;
+			case HIP_LEFT:        parentID = HIP_CENTER;      break;
+			case KNEE_LEFT:       parentID = HIP_LEFT;        break;
+			case ANKLE_LEFT:      parentID = KNEE_LEFT;       break;
+			case FOOT_LEFT:       parentID = ANKLE_LEFT;      break;
+			case HIP_RIGHT:       parentID = HIP_CENTER;      break;
+			case KNEE_RIGHT:      parentID = HIP_RIGHT;       break;
+			case ANKLE_RIGHT:     parentID = KNEE_RIGHT;      break;
+			case FOOT_RIGHT:      parentID = ANKLE_RIGHT;     break;
+			default:              parentID = COUNT;
+		}
+
+		Bone bone(boneID, parentID, glm::vec3(), glm::quat(), glm::vec3(1));
+		bones.insert(std::make_pair(boneID, bone));
 	}
 }

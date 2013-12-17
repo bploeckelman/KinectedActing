@@ -39,6 +39,8 @@ private:
 	void onRecordExportButtonClick();
 	void onSeatedModeEnabledButtonClick();
 	void onLiveSkeletonVisibleCheckButtonClick();
+	void onRenderColorStreamCheckButtonClick();
+	void onRenderDepthStreamCheckButtonClick();
 	void onPlaybackProgressBarClick();
 	void onPlaybackFirstButtonClick();
 	void onPlaybackPreviousButtonClick();
@@ -71,6 +73,8 @@ private:
 
 	sfg::Button::Ptr seatedModeEnabledButton;
 	sfg::CheckButton::Ptr liveSkeletonVisibleCheckButton;
+	sfg::CheckButton::Ptr renderColorStreamCheckButton;
+	sfg::CheckButton::Ptr renderDepthStreamCheckButton;
 
 	sfg::Label::Ptr  recordingLabel;
 	sfg::Button::Ptr recordStartButton;

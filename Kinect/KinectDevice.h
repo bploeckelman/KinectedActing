@@ -25,6 +25,8 @@ public:
 	static const int image_stream_width  = 640;
 	static const int image_stream_height = 480;
 	static const int bytes_per_pixel     = 4;
+	static const int color_pixels        = image_stream_width * image_stream_height;
+	static const int color_bytes         = color_pixels * bytes_per_pixel;
 
 public:
 	KinectDevice();
@@ -53,7 +55,7 @@ public:
 	bool isInitialized() const;
 	bool isSeatedModeEnabled() const;
 
-	static const NUI_SKELETON_DATA *getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame);
+	const NUI_SKELETON_DATA *getFirstTrackedSkeletonData(const NUI_SKELETON_FRAME& skeletonFrame) const;
 
 public: // External interface
 	static void initRequest();

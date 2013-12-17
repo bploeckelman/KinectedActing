@@ -6,12 +6,14 @@
 
 #include <algorithm>
 
+bool hasBoneTrack( const Animation& animation, unsigned short boneId )
+{
+	return animation.getBoneTracks().find(boneId) != end(animation.getBoneTracks());
+}
 
-Animation::Animation( unsigned short id, const std::string& name /*, AnimationSetPtr animSet*/ )
+Animation::Animation( unsigned short id, const std::string& name )
 	: mId(id)
 	, mName(name)
-	, mFrameRate(60)
-	//, mAnimSet(animSet)
 	, mInterpMethod(KFInterp_Linear)
 {}
 
@@ -20,13 +22,35 @@ Animation::~Animation()
 	deleteAllBoneTrack();
 }
 
+void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const BoneMask& boneMask/*=default_bone_mask*/ ) const
+{
+	assert(nullptr != skel);
+
+	// apply bone tracks
+	std::for_each(begin(boneMask), end(boneMask), [&](const EBoneID& boneID) {
+		const BoneAnimationTrack& bt = *mBoneTracks.at(boneID);
+		bt.apply(skel, time, weight, scale);
+	});
+}
+
+void Animation::getPositions( unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime/*=-1.f*/ ) const
+{
+	const auto& track = mBoneTracks.at(boneId);
+	positions.clear();
+	positions.resize(track->getNumKeyFrames());
+
+	unsigned int i = 0;
+	for (const auto& keyframe : track->getKeyFrames()) {
+		if (lastTime == -1.f || keyframe->getTime() < lastTime) {
+			positions[i++] = static_cast<const TransformKeyFrame*>(keyframe)->getTranslation();
+		}
+	}
+}
+
 BoneAnimationTrack* Animation::createBoneTrack( unsigned short boneId )
 {
-	assert(!hasBoneTrack(boneId));
-
 	BoneAnimationTrack* bat = new BoneAnimationTrack(boneId, this);
 	mBoneTracks.insert(std::make_pair(bat->getBoneId(), bat));
-
 	return bat;
 }
 
@@ -50,47 +74,12 @@ void Animation::deleteAllBoneTrack()
 	mBoneTracks.clear();
 }
 
-bool Animation::hasBoneTrack( unsigned short boneId ) const
-{
-	return mBoneTracks.find(boneId) != end(mBoneTracks);
-}
-
 BoneAnimationTrack* Animation::getBoneTrack(unsigned short boneId) const
 {
-	if( !hasBoneTrack(boneId) )
-		return nullptr;
-
-	return mBoneTracks.at(boneId);
+	return (hasBoneTrack(*this, boneId) ? mBoneTracks.at(boneId) : nullptr);
 }
 
-Animation::BoneTrackIterator Animation::getBoneTrackIterator()
-{
-	return begin(mBoneTracks);
-}
-
-Animation::BoneTrackConstIterator Animation::getBoneTrackConstIterator() const
-{
-	return begin(mBoneTracks);
-}
-
-void Animation::getPositions( unsigned short boneId, std::vector<glm::vec3>& positions, float lastTime/*=-1.f*/ ) const
-{
-	if ( !hasBoneTrack(boneId) )
-		return;
-
-	const auto& track = mBoneTracks.at(boneId);
-	positions.clear();
-	positions.resize(track->getNumKeyFrames());
-
-	unsigned int i = 0;
-	for (const auto& keyframe : track->getKeyFrames()) {
-		if (lastTime == -1.f || keyframe->getTime() < lastTime) {
-			positions[i++] = static_cast<const TransformKeyFrame*>(keyframe)->getTranslation();
-		}
-	}
-}
-
-void Animation::setKFInterpolationMethod(KFInterpolationMethod interpMethod)
+void Animation::setKFInterpMethod(KFInterpMethod interpMethod)
 {
 	mInterpMethod = interpMethod;
 	if( mInterpMethod == KFInterp_Spline )
@@ -118,22 +107,6 @@ float Animation::getLength() const
 	return length;
 }
 
-void Animation::apply( Skeleton* skel, float time, float weight/*=1.f*/, float scale/*=1.f*/, const BoneMask& boneMask/*=default_bone_mask*/ ) const
-{
-	assert(nullptr != skel);
-
-	// apply bone tracks
-	std::for_each(begin(boneMask), end(boneMask), [&](const EBoneID& boneID) {
-		const BoneAnimationTrack& bt = *mBoneTracks.at(boneID);
-		bt.apply(skel, time, weight, scale);
-	});
-}
-
-void Animation::computeAnimationBounds( float& minX, float& maxX, float& minY, float& maxY, float& minZ, float& maxZ ) const
-{
-	// TODO ...
-}
-
 size_t Animation::_calcMemoryUsage() const
 {
 	size_t mem_usage = 0;
@@ -147,9 +120,4 @@ size_t Animation::_calcMemoryUsage() const
 	}
 
 	return mem_usage;
-}
-
-void Animation::_clone( Animation* clonePtr ) const
-{
-	// TODO ...
 }
