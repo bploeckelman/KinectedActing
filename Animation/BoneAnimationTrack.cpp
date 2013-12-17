@@ -82,7 +82,7 @@ void BoneAnimationTrack::getInterpolatedKeyFrame( float time, KeyFrame* kf ) con
 
 			q1 = tkf1->getRotation();
 			q2 = tkf2->getRotation();
-			tkf->setRotation( glm::lerp(q1, q2, t) );
+			tkf->setRotation( glm::slerp(q1, q2, t) );
 
 			v1 = tkf1->getScale();
 			v2 = tkf2->getScale();
