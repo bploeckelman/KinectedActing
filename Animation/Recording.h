@@ -73,7 +73,7 @@ private:
 
 };
 
-inline void Recording::startLooping()   { looping   = false; }
+inline void Recording::startLooping()   { looping   = true;  }
 inline void Recording::stopLooping()    { looping   = false; }
 inline void Recording::showBonePaths()  { bonepaths = true;  }
 inline void Recording::hideBonePaths()  { bonepaths = false; }
