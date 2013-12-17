@@ -23,7 +23,7 @@ public:
 	                   , const Recording& base
 	                   , const Recording& layer
 	                   , const BoneMask& boneMask=default_bone_mask
-	                   , const ELayerMappingMode& mappingMode=ELayerMappingMode::MAP_ADDITIVE );
+	                   , const ELayerMappingMode& mappingMode=ELayerMappingMode::MAP_DIRECT );
 
 	void showBonePaths();
 	void hideBonePaths();

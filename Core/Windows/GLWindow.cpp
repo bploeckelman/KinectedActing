@@ -80,7 +80,7 @@ GLWindow::GLWindow(const std::string& title, App& app)
 	, currentRecording(nullptr)
 	, recordings()
 	, boneMask(default_bone_mask)
-	, mappingMode(ELayerMappingMode::MAP_ADDITIVE)
+	, mappingMode(ELayerMappingMode::MAP_DIRECT)
 {
 	const sf::Uint32 style = sf::Style::Default;
 	const sf::ContextSettings contextSettings(depth_bits, stencil_bits, antialias_level, gl_major_version, gl_minor_version);

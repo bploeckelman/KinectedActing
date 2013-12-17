@@ -119,10 +119,10 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	animLayersComboBox->SelectItem(0);
 
 	mappingModesComboBox->AppendItem("Direct");
-	mappingModesComboBox->AppendItem("Absolute");
-	mappingModesComboBox->AppendItem("Additive");
-	mappingModesComboBox->AppendItem("Trajectory Relative");
-	mappingModesComboBox->SelectItem(2);
+	//mappingModesComboBox->AppendItem("Absolute");
+	//mappingModesComboBox->AppendItem("Additive");
+	//mappingModesComboBox->AppendItem("Trajectory Relative");
+	mappingModesComboBox->SelectItem(0);
 
 	filterLevelsComboBox->AppendItem("Light");
 	filterLevelsComboBox->AppendItem("Medium");
