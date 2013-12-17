@@ -44,6 +44,8 @@ GUI::GUI()
 	, infoLabel(sfg::Label::Create(""))
 	, seatedModeEnabledButton(sfg::Button::Create("Seated Mode"))
 	, liveSkeletonVisibleCheckButton(sfg::CheckButton::Create("Show Live Skeleton"))
+	, renderColorStreamCheckButton(sfg::CheckButton::Create("Show Color Stream"))
+	, renderDepthStreamCheckButton(sfg::CheckButton::Create("Show Depth Stream"))
 	, renderPathCheckButton(sfg::CheckButton::Create("Draw bone path"))
 	, headToggleButton(sfg::ToggleButton::Create("head"))
 	, shoulderCenterToggleButton(sfg::ToggleButton::Create("shoulder"))
@@ -109,6 +111,8 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	playbackDeltaScale->SetValue(1.f / 60.f);
 	liveSkeletonVisibleCheckButton->SetActive(true);
 	renderPathCheckButton->SetActive(false);
+	renderColorStreamCheckButton->SetActive(true);
+	renderDepthStreamCheckButton->SetActive(true);
 
 	animLayersComboBox->AppendItem("base");
 	animLayersComboBox->AppendItem("blend");
@@ -221,6 +225,10 @@ void GUI::layoutWidgets( sf::RenderWindow& parentWindow )
 	infoLabel->SetAlignment(sf::Vector2f(0.f, 0.5f));
 	table->Attach(infoLabel, sf::Rect<sf::Uint32>(0, 29, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 10.f));
 
+	//table->SetRowSpacing(30, 1.f);
+	table->Attach(renderColorStreamCheckButton, sf::Rect<sf::Uint32>(0, 30, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+	table->Attach(renderDepthStreamCheckButton, sf::Rect<sf::Uint32>(0, 31, colspan, 1), sfg::Table::FILL, sfg::Table::FILL, sf::Vector2f(0.f, 8.f));
+
 	window->SetTitle("Kinected Acting");
 	window->SetRequisition(winsize);
 	window->Add(table);
@@ -242,6 +250,8 @@ void GUI::connectSignals()
 
 	seatedModeEnabledButton       ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onSeatedModeEnabledButtonClick, this);
 	liveSkeletonVisibleCheckButton->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onLiveSkeletonVisibleCheckButtonClick, this);
+	renderColorStreamCheckButton  ->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onRenderColorStreamCheckButtonClick,   this);
+	renderDepthStreamCheckButton  ->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onRenderDepthStreamCheckButtonClick,   this);
 	renderPathCheckButton         ->GetSignal(sfg::CheckButton::OnLeftClick).Connect(&GUI::onRenderPathCheckButtonClick,          this);
 
 	playbackProgressBar   ->GetSignal(sfg::Button::OnLeftClick).Connect(&GUI::onPlaybackProgressBarClick,    this);
@@ -359,6 +369,26 @@ void GUI::onLiveSkeletonVisibleCheckButtonClick()
 		msg::gDispatcher.dispatchMessage(msg::ShowLiveSkeletonMessage());
 	} else {
 		msg::gDispatcher.dispatchMessage(msg::HideLiveSkeletonMessage());
+	}
+}
+
+void GUI::onRenderColorStreamCheckButtonClick()
+{
+	const bool active = renderColorStreamCheckButton->IsActive();
+	if (active) {
+		msg::gDispatcher.dispatchMessage(msg::ShowColorStreamMessage());
+	} else {
+		msg::gDispatcher.dispatchMessage(msg::HideColorStreamMessage());
+	}
+}
+
+void GUI::onRenderDepthStreamCheckButtonClick()
+{
+	const bool active = renderDepthStreamCheckButton->IsActive();
+	if (active) {
+		msg::gDispatcher.dispatchMessage(msg::ShowDepthStreamMessage());
+	} else {
+		msg::gDispatcher.dispatchMessage(msg::HideDepthStreamMessage());
 	}
 }
 
