@@ -212,6 +212,7 @@ std::string eulerOrderFileString(zh::EulerRotOrder eulerOrder)
 		case zh::EulerRotOrder::EulerRotOrder_YZX: return "yzx";
 		case zh::EulerRotOrder::EulerRotOrder_ZXY: return "zxy";
 		case zh::EulerRotOrder::EulerRotOrder_ZYX: return "zyx";
+		default: return "xyz";
 	}
 }
 
@@ -225,6 +226,7 @@ std::string eulerOrderBVHString(zh::EulerRotOrder eulerOrder)
 		case zh::EulerRotOrder::EulerRotOrder_YZX: return "Yrotation Zrotation Xrotation";
 		case zh::EulerRotOrder::EulerRotOrder_ZXY: return "Zrotation Xrotation Yrotation";
 		case zh::EulerRotOrder::EulerRotOrder_ZYX: return "Zrotation Yrotation Xrotation";
+		default: return "Xrotation Yrotation Zrotation";
 	}
 }
 

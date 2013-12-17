@@ -99,6 +99,110 @@ void Recording::saveBlendFrame( float time
 	BoneAnimationTrack *layerTrack = nullptr;
 	BoneAnimationTrack *blendTrack = nullptr;
 
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		// Get this bone's animation track for the base, layer, and blend (i.e. this) animations
+		baseTrack  = baseAnim->getBoneTrack(boneID);
+		layerTrack = layerAnim->getBoneTrack(boneID);
+		blendTrack = animation->getBoneTrack(boneID);
+		if (nullptr == baseTrack || nullptr == layerTrack || nullptr == blendTrack) continue;
+
+		// Create a new keyframe in this blended recording
+		TransformKeyFrame *blendTKF = static_cast<TransformKeyFrame*>(blendTrack->createKeyFrame(time));
+		if (nullptr == blendTKF) continue;
+
+		// If this boneID is not in boneMask, save the base keyframe for this bone
+		if (end(boneMask) == boneMask.find((EBoneID) boneID)) {
+			baseTrack->getInterpolatedKeyFrame(time, blendTKF);
+			continue;
+		}
+		// else this boneID is in boneMask, so save a blended keyframe
+		layerTrack->getInterpolatedKeyFrame(time, blendTKF);
+		blendTKF->setRotation(glm::normalize(blendTKF->getRotation()));
+		blendTKF->setScale(glm::vec3(1)); // scale is ignored
+	}
+}
+
+void Recording::updateRecording( float delta )
+{
+	if (!recording) return;
+
+	// Update animation timer for this new keyframe
+	recordingTime += recordingDelta;
+	saveKeyFrame(recordingTime);
+
+	// Update gui label text
+	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(
+		"Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n" ));
+}
+
+void Recording::updatePlayback( float delta )
+{
+	if (!playback) return;
+
+	playbackTime += playbackDelta;
+
+	const float len = animation->getLength();
+	if (playbackTime > len) {
+		if (looping) playbackTime = 0.f;
+		else         playbackTime = len;
+	}
+}
+
+void Recording::clearRecording()
+{
+	animation->deleteAllBoneTrack();
+
+	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
+		animation->createBoneTrack(boneID);
+	}
+
+	playback  = false;
+	recording = false;
+
+	playbackTime  = 0.f;
+	recordingTime = 0.f;
+}
+
+void Recording::setPlaybackTime( float t )
+{
+	playbackTime = glm::clamp<float>(t, 0.f, animation->getLength());
+}
+
+void Recording::playbackNextFrame() {
+	const float length = animation->getLength();
+	playbackTime += playbackDelta;
+	if (playbackTime > length) {
+		playbackTime = length;
+	}
+}
+
+void Recording::playbackPreviousFrame() {
+	playbackTime -= playbackDelta;
+	if (playbackTime < 0.f) {
+		playbackTime = 0.f;
+	}
+}
+
+float Recording::getAnimationLength() const {
+	if (nullptr != animation) return animation->getLength();
+	else                      return 0.f;
+}
+
+
+/*------------------------------------------------------------------------------
+void Recording::saveBlendFrame( float time
+                              , const Recording& base
+                              , const Recording& layer
+                              , const BoneMask& boneMask//=default_bone_mask 
+                              , const ELayerMappingMode& mappingMode//=ELayerMappingMode::MAP_DIRECT )
+{
+	const Animation *baseAnim  = base.getAnimation();
+	const Animation *layerAnim = layer.getAnimation();
+
+	BoneAnimationTrack *baseTrack  = nullptr;
+	BoneAnimationTrack *layerTrack = nullptr;
+	BoneAnimationTrack *blendTrack = nullptr;
+
 	TransformKeyFrame baseKeyFrame(0.f, 0);
 	TransformKeyFrame layerKeyFrame1(0.f, 0);
 	TransformKeyFrame layerKeyFrame2(0.f, 0);
@@ -128,6 +232,9 @@ void Recording::saveBlendFrame( float time
 			baseTrack->getInterpolatedKeyFrame(time, blendTKF);
 			continue;
 		}
+		//NOTE : Alternative mappings don't work correctly at this time, 
+		//       Need to calculate world transforms, extract positions, 
+		//	   and use those for position transformations
 		// Else this boneID is in boneMask, save a blended keyframe using the current mapping mode...
 		switch (mappingMode)
 		{
@@ -197,69 +304,4 @@ void Recording::saveBlendFrame( float time
 		}
 	}
 }
-
-void Recording::updateRecording( float delta )
-{
-	if (!recording) return;
-
-	// Update animation timer for this new keyframe
-	recordingTime += recordingDelta;
-	saveKeyFrame(recordingTime);
-
-	// Update gui label text
-	msg::gDispatcher.dispatchMessage(msg::SetRecordingLabelMessage(
-		"Mem usage: " + std::to_string(animation->_calcMemoryUsage()) + " bytes\n" ));
-}
-
-void Recording::updatePlayback( float delta )
-{
-	if (!playback) return;
-
-	playbackTime += playbackDelta;
-
-	const float len = animation->getLength();
-	if (playbackTime > len) {
-		if (looping) playbackTime = 0.f;
-		else         playbackTime = len;
-	}
-}
-
-void Recording::clearRecording()
-{
-	animation->deleteAllBoneTrack();
-
-	for (auto boneID = 0; boneID < EBoneID::COUNT; ++boneID) {
-		animation->createBoneTrack(boneID);
-	}
-
-	playback  = false;
-	recording = false;
-
-	playbackTime  = 0.f;
-	recordingTime = 0.f;
-}
-
-void Recording::setPlaybackTime( float t )
-{
-	playbackTime = glm::clamp<float>(t, 0.f, animation->getLength());
-}
-
-void Recording::playbackNextFrame() {
-	const float length = animation->getLength();
-	playbackTime += playbackDelta;
-	if (playbackTime > length) {
-		playbackTime = length;
-	}
-}
-
-void Recording::playbackPreviousFrame() {
-	playbackTime -= playbackDelta;
-	if (playbackTime < 0.f) {
-		playbackTime = 0.f;
-	}
-}
-
-float Recording::getAnimationLength() const {
-	if (nullptr != animation) return animation->getLength();
-	else                      return 0.f;
-}
+*/

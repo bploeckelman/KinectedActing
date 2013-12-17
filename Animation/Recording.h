@@ -23,7 +23,7 @@ public:
 	                   , const Recording& base
 	                   , const Recording& layer
 	                   , const BoneMask& boneMask=default_bone_mask
-	                   , const ELayerMappingMode& mappingMode=ELayerMappingMode::MAP_ADDITIVE );
+	                   , const ELayerMappingMode& mappingMode=ELayerMappingMode::MAP_DIRECT );
 
 	void showBonePaths();
 	void hideBonePaths();
@@ -73,7 +73,7 @@ private:
 
 };
 
-inline void Recording::startLooping()   { looping   = false; }
+inline void Recording::startLooping()   { looping   = true;  }
 inline void Recording::stopLooping()    { looping   = false; }
 inline void Recording::showBonePaths()  { bonepaths = true;  }
 inline void Recording::hideBonePaths()  { bonepaths = false; }
