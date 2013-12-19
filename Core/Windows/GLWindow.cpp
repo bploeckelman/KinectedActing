@@ -146,7 +146,6 @@ void GLWindow::update()
 
 	static float dt = 0.f;
 	dt += app.getDeltaTime().asSeconds() / 3.f;
-	light0.position = glm::vec3(0);//1.f * glm::cos(dt), 0.5f, 2.25f * glm::sin(dt));
 
 	// Update current recording
 	if (nullptr == currentRecording) return;
@@ -245,6 +244,8 @@ void GLWindow::updateCamera()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) camera.offsetPosition(camera.right() *  dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) camera.offsetPosition(world_up       * -dist);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) camera.offsetPosition(world_up       *  dist);
+
+	light0.position = camera.position();
 }
 
 void GLWindow::updateTextures()
@@ -499,6 +500,8 @@ void GLWindow::resetCamera()
 	camera.setNearAndFarPlanes(0.1f, 100.f);
 	camera.setPosition(glm::vec3(0, 1, 3));
 	camera.offsetOrientation(33.f - camera.verticalAngle(), -camera.horizontalAngle());
+
+	light0.position = camera.position();
 }
 
 void GLWindow::loadTextures()
