@@ -80,8 +80,9 @@ void Skeleton::renderBones() const
 
 			// Calculate the model matrix for this cylinder using the orientation and position
 			model = glm::rotate(glm::translate(glm::mat4(), bone1.translation), angle, axis);
-			model = glm::scale(model, glm::vec3(s,dist,s));
+			model = glm::scale(model, glm::vec3(0.01f,dist,0.01f));
 			GLUtils::defaultProgram->setUniform("model", model);
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0,1,0,0.5f));
 
 			Render::cylinder();
 		}
@@ -94,6 +95,7 @@ void Skeleton::renderJoints() const
 		const Bone& bone = pair.second;
 
 		if (bone.translation != zero) {
+			GLUtils::defaultProgram->setUniform("color", glm::vec4(0.5f,1,0.5f,1));
 			GLUtils::defaultProgram->setUniform("model",
 				glm::scale(glm::translate(glm::mat4(), bone.translation), scale));
 			Render::sphere();
