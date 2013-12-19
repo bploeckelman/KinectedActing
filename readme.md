@@ -1,8 +1,8 @@
 KinectedActing 
 ==============
 
-Layered Acting for Character Animation (Dontcheva, et al. SIG 2003) using the Microsoft Kinect
-----------------------------------------------------------------------------------------------
+Layering of skeletal animation clips using the Microsoft Kinect
+---------------------------------------------------------------
 
 Requires the following dependencies and associated environment variables to be set:
 <ul>
@@ -16,4 +16,5 @@ Requires the following dependencies and associated environment variables to be s
 Uses code from:
 <ul>
 	<li><a href="http://tomdalling.com/">Tom Dalling's Modern OpenGL Tutorials</a></li>
+	<li><a href="https://github.com/tpejsa/ZombieHorse">Tomislav Pejsa's Zombie Horse Animation System</a></li>
 </ul>
